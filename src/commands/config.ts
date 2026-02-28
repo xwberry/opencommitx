@@ -28,7 +28,27 @@ export enum CONFIG_KEYS {
   OCO_API_CUSTOM_HEADERS = 'OCO_API_CUSTOM_HEADERS',
   OCO_OMIT_SCOPE = 'OCO_OMIT_SCOPE',
   OCO_GITPUSH = 'OCO_GITPUSH', // todo: deprecate
-  OCO_HOOK_AUTO_UNCOMMENT = 'OCO_HOOK_AUTO_UNCOMMENT'
+  OCO_HOOK_AUTO_UNCOMMENT = 'OCO_HOOK_AUTO_UNCOMMENT',
+  // Cache keys (Phase 2)
+  OCO_CACHE_ENABLED = 'OCO_CACHE_ENABLED',
+  OCO_CACHE_TTL_SECONDS = 'OCO_CACHE_TTL_SECONDS',
+  // Diff routing keys (Phase 4)
+  OCO_PER_FILE_THRESHOLD_LINES = 'OCO_PER_FILE_THRESHOLD_LINES',
+  OCO_PER_FILE_COMMIT_MODE = 'OCO_PER_FILE_COMMIT_MODE',
+  OCO_PYTHON_DOCSTRING_THRESHOLD = 'OCO_PYTHON_DOCSTRING_THRESHOLD',
+  OCO_PYTHON_DOCSTRING_MODE = 'OCO_PYTHON_DOCSTRING_MODE',
+  // Multi-commit strategy (Phase 5)
+  OCO_MULTI_COMMIT_STRATEGY = 'OCO_MULTI_COMMIT_STRATEGY',
+  // Per-provider API keys (Phase 6)
+  OCO_OPENAI_KEY = 'OCO_OPENAI_KEY',
+  OCO_ANTHROPIC_KEY = 'OCO_ANTHROPIC_KEY',
+  OCO_OPENROUTER_KEY = 'OCO_OPENROUTER_KEY',
+  OCO_GEMINI_KEY = 'OCO_GEMINI_KEY',
+  OCO_GROQ_KEY = 'OCO_GROQ_KEY',
+  OCO_MISTRAL_KEY = 'OCO_MISTRAL_KEY',
+  OCO_DEEPSEEK_KEY = 'OCO_DEEPSEEK_KEY',
+  OCO_AIMLAPI_KEY = 'OCO_AIMLAPI_KEY',
+  OCO_AZURE_KEY = 'OCO_AZURE_KEY'
 }
 
 export enum CONFIG_MODES {
@@ -828,6 +848,114 @@ export const configValidators = {
       typeof value === 'boolean',
       'Must be true or false'
     );
+  },
+
+  [CONFIG_KEYS.OCO_CACHE_ENABLED](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_CACHE_ENABLED,
+      typeof value === 'boolean',
+      'Must be true or false'
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_CACHE_TTL_SECONDS](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_CACHE_TTL_SECONDS,
+      !isNaN(value) && Number(value) > 0,
+      'Must be a positive number (seconds)'
+    );
+    return Number(value);
+  },
+
+  [CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES,
+      !isNaN(value) && Number(value) > 0,
+      'Must be a positive number'
+    );
+    return Number(value);
+  },
+
+  [CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE,
+      ['auto', 'always', 'never'].includes(value),
+      "Must be 'auto', 'always', or 'never'"
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD,
+      !isNaN(value) && Number(value) > 0,
+      'Must be a positive number'
+    );
+    return Number(value);
+  },
+
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE,
+      ['auto', 'always', 'never'].includes(value),
+      "Must be 'auto', 'always', or 'never'"
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY,
+      ['single', 'sequential'].includes(value),
+      "Must be 'single' or 'sequential'"
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_OPENAI_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_OPENAI_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_ANTHROPIC_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_ANTHROPIC_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_OPENROUTER_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_OPENROUTER_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_GEMINI_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_GEMINI_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_GROQ_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_GROQ_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_MISTRAL_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_MISTRAL_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_DEEPSEEK_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_DEEPSEEK_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_AIMLAPI_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_AIMLAPI_KEY, typeof value === 'string', 'Must be a string');
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_AZURE_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_AZURE_KEY, typeof value === 'string', 'Must be a string');
+    return value;
   }
 };
 
@@ -893,6 +1021,26 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_OMIT_SCOPE]: boolean;
   [CONFIG_KEYS.OCO_TEST_MOCK_TYPE]: string;
   [CONFIG_KEYS.OCO_HOOK_AUTO_UNCOMMENT]: boolean;
+  // Cache
+  [CONFIG_KEYS.OCO_CACHE_ENABLED]: boolean;
+  [CONFIG_KEYS.OCO_CACHE_TTL_SECONDS]: number;
+  // Diff routing
+  [CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES]: number;
+  [CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE]: string;
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD]: number;
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE]: string;
+  // Multi-commit
+  [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY]: string;
+  // Per-provider keys
+  [CONFIG_KEYS.OCO_OPENAI_KEY]?: string;
+  [CONFIG_KEYS.OCO_ANTHROPIC_KEY]?: string;
+  [CONFIG_KEYS.OCO_OPENROUTER_KEY]?: string;
+  [CONFIG_KEYS.OCO_GEMINI_KEY]?: string;
+  [CONFIG_KEYS.OCO_GROQ_KEY]?: string;
+  [CONFIG_KEYS.OCO_MISTRAL_KEY]?: string;
+  [CONFIG_KEYS.OCO_DEEPSEEK_KEY]?: string;
+  [CONFIG_KEYS.OCO_AIMLAPI_KEY]?: string;
+  [CONFIG_KEYS.OCO_AZURE_KEY]?: string;
 };
 
 export const defaultConfigPath = pathJoin(homedir(), '.opencommit');
@@ -941,7 +1089,17 @@ export const DEFAULT_CONFIG = {
   OCO_WHY: false,
   OCO_OMIT_SCOPE: false,
   OCO_GITPUSH: true, // todo: deprecate
-  OCO_HOOK_AUTO_UNCOMMENT: false
+  OCO_HOOK_AUTO_UNCOMMENT: false,
+  // Cache defaults
+  OCO_CACHE_ENABLED: true,
+  OCO_CACHE_TTL_SECONDS: 3600,
+  // Diff routing defaults
+  OCO_PER_FILE_THRESHOLD_LINES: 300,
+  OCO_PER_FILE_COMMIT_MODE: 'auto',
+  OCO_PYTHON_DOCSTRING_THRESHOLD: 500,
+  OCO_PYTHON_DOCSTRING_MODE: 'auto',
+  // Multi-commit default
+  OCO_MULTI_COMMIT_STRATEGY: 'single'
 };
 
 const initGlobalConfig = (configPath: string = defaultConfigPath) => {
@@ -982,7 +1140,27 @@ const getEnvConfig = (envPath: string) => {
     OCO_TEST_MOCK_TYPE: process.env.OCO_TEST_MOCK_TYPE,
     OCO_OMIT_SCOPE: parseConfigVarValue(process.env.OCO_OMIT_SCOPE),
 
-    OCO_GITPUSH: parseConfigVarValue(process.env.OCO_GITPUSH) // todo: deprecate
+    OCO_GITPUSH: parseConfigVarValue(process.env.OCO_GITPUSH), // todo: deprecate
+    // Cache
+    OCO_CACHE_ENABLED: parseConfigVarValue(process.env.OCO_CACHE_ENABLED),
+    OCO_CACHE_TTL_SECONDS: parseConfigVarValue(process.env.OCO_CACHE_TTL_SECONDS),
+    // Diff routing
+    OCO_PER_FILE_THRESHOLD_LINES: parseConfigVarValue(process.env.OCO_PER_FILE_THRESHOLD_LINES),
+    OCO_PER_FILE_COMMIT_MODE: process.env.OCO_PER_FILE_COMMIT_MODE,
+    OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(process.env.OCO_PYTHON_DOCSTRING_THRESHOLD),
+    OCO_PYTHON_DOCSTRING_MODE: process.env.OCO_PYTHON_DOCSTRING_MODE,
+    // Multi-commit
+    OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
+    // Per-provider keys
+    OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
+    OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
+    OCO_OPENROUTER_KEY: process.env.OCO_OPENROUTER_KEY,
+    OCO_GEMINI_KEY: process.env.OCO_GEMINI_KEY,
+    OCO_GROQ_KEY: process.env.OCO_GROQ_KEY,
+    OCO_MISTRAL_KEY: process.env.OCO_MISTRAL_KEY,
+    OCO_DEEPSEEK_KEY: process.env.OCO_DEEPSEEK_KEY,
+    OCO_AIMLAPI_KEY: process.env.OCO_AIMLAPI_KEY,
+    OCO_AZURE_KEY: process.env.OCO_AZURE_KEY
   };
 };
 
@@ -1080,7 +1258,7 @@ export const setConfig = (
     if (!configValidators.hasOwnProperty(key)) {
       const supportedKeys = Object.keys(configValidators).join('\n');
       throw new Error(
-        `Unsupported config key: ${key}. Expected keys are:\n\n${supportedKeys}.\n\nFor more help refer to our docs: https://github.com/di-sukharev/opencommit`
+        `Unsupported config key: ${key}. Expected keys are:\n\n${supportedKeys}.\n\nFor more help refer to our docs: https://github.com/XanderBerry/opencommitx`
       );
     }
 
@@ -1198,6 +1376,59 @@ function getConfigKeyDetails(key) {
         description: 'Automatically uncomment the commit message in the hook',
         values: ['true', 'false']
       };
+    case CONFIG_KEYS.OCO_CACHE_ENABLED:
+      return {
+        description: 'Cache LLM commit message results to avoid re-generating on pre-commit hook failures',
+        values: ['true', 'false']
+      };
+    case CONFIG_KEYS.OCO_CACHE_TTL_SECONDS:
+      return {
+        description: 'How long (in seconds) to keep cached commit messages before expiring',
+        values: ['Any positive integer (default: 3600)']
+      };
+    case CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES:
+      return {
+        description: 'Line change threshold above which a file gets its own separate commit message',
+        values: ['Any positive integer (default: 300)']
+      };
+    case CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE:
+      return {
+        description: 'Controls whether files are committed individually or aggregated',
+        values: ['auto (smart routing)', 'always (always per-file)', 'never (always aggregate)']
+      };
+    case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD:
+      return {
+        description: 'For Python files: line change count above which only docstrings are extracted instead of full diff',
+        values: ['Any positive integer (default: 500)']
+      };
+    case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE:
+      return {
+        description: 'Controls docstring-only extraction for large Python files',
+        values: ['auto', 'always', 'never']
+      };
+    case CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY:
+      return {
+        description: 'When multiple commit messages are generated, controls how they are committed',
+        values: ['single (join all into one commit)', 'sequential (one commit per message)']
+      };
+    case CONFIG_KEYS.OCO_OPENAI_KEY:
+      return { description: 'API key for OpenAI (overrides OCO_API_KEY when provider is openai)', values: ['sk-...'] };
+    case CONFIG_KEYS.OCO_ANTHROPIC_KEY:
+      return { description: 'API key for Anthropic (overrides OCO_API_KEY when provider is anthropic)', values: ['sk-ant-...'] };
+    case CONFIG_KEYS.OCO_OPENROUTER_KEY:
+      return { description: 'API key for OpenRouter (overrides OCO_API_KEY when provider is openrouter)', values: ['sk-or-...'] };
+    case CONFIG_KEYS.OCO_GEMINI_KEY:
+      return { description: 'API key for Google Gemini (overrides OCO_API_KEY when provider is gemini)', values: ['String'] };
+    case CONFIG_KEYS.OCO_GROQ_KEY:
+      return { description: 'API key for Groq (overrides OCO_API_KEY when provider is groq)', values: ['gsk_...'] };
+    case CONFIG_KEYS.OCO_MISTRAL_KEY:
+      return { description: 'API key for Mistral AI (overrides OCO_API_KEY when provider is mistral)', values: ['String'] };
+    case CONFIG_KEYS.OCO_DEEPSEEK_KEY:
+      return { description: 'API key for DeepSeek (overrides OCO_API_KEY when provider is deepseek)', values: ['String'] };
+    case CONFIG_KEYS.OCO_AIMLAPI_KEY:
+      return { description: 'API key for AI/ML API (overrides OCO_API_KEY when provider is aimlapi)', values: ['String'] };
+    case CONFIG_KEYS.OCO_AZURE_KEY:
+      return { description: 'API key for Azure OpenAI (overrides OCO_API_KEY when provider is azure)', values: ['String'] };
     default:
       return {
         description: 'String value',
@@ -1213,6 +1444,7 @@ function printConfigKeyHelp(param) {
   }
 
   const details = getConfigKeyDetails(param as CONFIG_KEYS);
+  const currentConfig = getGlobalConfig();
 
   let desc = details.description;
   let defaultValue = undefined;
@@ -1220,15 +1452,19 @@ function printConfigKeyHelp(param) {
     defaultValue = DEFAULT_CONFIG[param];
   }
 
+  const currentValue = currentConfig[param as keyof typeof currentConfig];
+
   console.log(chalk.bold(`\n${param}:`));
   console.log(chalk.gray(`  Description: ${desc}`));
   if (defaultValue !== undefined) {
-    // Print booleans and numbers as-is, strings without quotes
-    if (typeof defaultValue === 'string') {
-      console.log(chalk.gray(`  Default: ${defaultValue}`));
-    } else {
-      console.log(chalk.gray(`  Default: ${defaultValue}`));
-    }
+    console.log(chalk.gray(`  Default: ${defaultValue}`));
+  }
+
+  if (currentValue !== undefined && currentValue !== null) {
+    const source = getIsGlobalConfigFileExist() ? '~/.opencommit' : '.env';
+    console.log(chalk.cyan(`  Current: ${currentValue}`) + chalk.dim(` (from ${source})`));
+  } else {
+    console.log(chalk.dim('  Current: (not set)'));
   }
 
   if (Array.isArray(details.values)) {
@@ -1248,28 +1484,33 @@ function printConfigKeyHelp(param) {
 }
 
 function printAllConfigHelp() {
+  const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {} as any;
+  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommit' : '(no config file)';
+
   console.log(chalk.bold('Available config parameters:'));
+  console.log(chalk.dim(`  Current values loaded from: ${configFileSource}\n`));
+
   for (const key of Object.values(CONFIG_KEYS).sort()) {
     const details = getConfigKeyDetails(key);
-    // Try to get the default value from DEFAULT_CONFIG
     let defaultValue = undefined;
     if (key in DEFAULT_CONFIG) {
       defaultValue = DEFAULT_CONFIG[key];
     }
 
+    const currentValue = currentConfig[key as keyof typeof currentConfig];
+
     console.log(chalk.bold(`\n${key}:`));
     console.log(chalk.gray(`  Description: ${details.description}`));
     if (defaultValue !== undefined) {
-      if (typeof defaultValue === 'string') {
-        console.log(chalk.gray(`  Default: ${defaultValue}`));
-      } else {
-        console.log(chalk.gray(`  Default: ${defaultValue}`));
-      }
+      console.log(chalk.gray(`  Default: ${defaultValue}`));
+    }
+    if (currentValue !== undefined && currentValue !== null) {
+      console.log(chalk.cyan(`  Current: ${currentValue}`));
     }
   }
   console.log(
     chalk.yellow(
-      '\nUse "oco config describe [PARAMETER]" to see accepted values and more details for a specific config parameter.'
+      '\nUse "ocox config describe [PARAMETER]" to see accepted values and more details for a specific config parameter.'
     )
   );
 }
@@ -1281,10 +1522,10 @@ export const configCommand = command(
     help: {
       description: 'Configure opencommit settings',
       examples: [
-        'Describe all config parameters: oco config describe',
-        'Describe a specific parameter: oco config describe OCO_MODEL',
-        'Get a config value: oco config get OCO_MODEL',
-        'Set a config value: oco config set OCO_MODEL=gpt-4'
+        'Describe all config parameters: ocox config describe',
+        'Describe a specific parameter: ocox config describe OCO_MODEL',
+        'Get a config value: ocox config get OCO_MODEL',
+        'Set a config value: ocox config set OCO_MODEL=gpt-4'
       ]
     }
   },

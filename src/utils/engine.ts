@@ -36,18 +36,43 @@ export function parseCustomHeaders(headers: any): Record<string, string> {
   return parsedHeaders;
 }
 
+/**
+ * Returns the API key for the given provider, preferring the provider-specific
+ * key (OCO_<PROVIDER>_KEY) over the generic OCO_API_KEY.
+ */
+export function getProviderApiKey(
+  config: ReturnType<typeof getConfig>,
+  provider: string
+): string {
+  const providerKeyMap: Record<string, string | undefined> = {
+    openai: config.OCO_OPENAI_KEY,
+    anthropic: config.OCO_ANTHROPIC_KEY,
+    openrouter: config.OCO_OPENROUTER_KEY,
+    gemini: config.OCO_GEMINI_KEY,
+    groq: config.OCO_GROQ_KEY,
+    mistral: config.OCO_MISTRAL_KEY,
+    deepseek: config.OCO_DEEPSEEK_KEY,
+    aimlapi: config.OCO_AIMLAPI_KEY,
+    azure: config.OCO_AZURE_KEY
+  };
+
+  return providerKeyMap[provider] || config.OCO_API_KEY || '';
+}
+
 export function getEngine(): AiEngine {
   const config = getConfig();
   const provider = config.OCO_AI_PROVIDER;
 
   const customHeaders = parseCustomHeaders(config.OCO_API_CUSTOM_HEADERS);
 
+  const apiKey = getProviderApiKey(config, provider);
+
   const DEFAULT_CONFIG = {
     model: config.OCO_MODEL!,
     maxTokensOutput: config.OCO_TOKENS_MAX_OUTPUT!,
     maxTokensInput: config.OCO_TOKENS_MAX_INPUT!,
     baseURL: config.OCO_API_URL!,
-    apiKey: config.OCO_API_KEY!,
+    apiKey,
     customHeaders
   };
 

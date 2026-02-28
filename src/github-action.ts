@@ -1,3 +1,8 @@
+// NOTE (opencommitx fork): This file handles the GitHub Actions integration.
+// It references the repository owner/repo from the GitHub Actions context at runtime,
+// so it will work with this fork's repository automatically when the workflow is triggered.
+// No changes to upstream references are required in this file.
+// The force-push at the end rewrites history in the CURRENT repository (not upstream).
 import core from '@actions/core';
 import exec from '@actions/exec';
 import github from '@actions/github';

@@ -1,0 +1,58 @@
+---
+description: Frontend coding standards for Next.js, Vue, and TypeScript
+globs: ["**/*.ts", "**/*.tsx", "**/*.vue", "**/*.js", "**/*.jsx"]
+alwaysApply: false
+---
+
+# Frontend Standards
+
+## TypeScript
+- Use TypeScript strict mode. Never use `any` — prefer `unknown` with type narrowing, or define proper interfaces.
+- Define API response shapes as TypeScript interfaces or Zod schemas, not ad-hoc inline types.
+- Use `as const` for literal objects and `satisfies` for type-safe assignments without widening.
+- Prefer discriminated unions over optional properties for state variants (e.g. `{ status: 'loading' } | { status: 'error'; message: string }`).
+- Use `Record<string, T>` over `{ [key: string]: T }`. Prefer `Map` for runtime dynamic keys.
+
+## React / Next.js
+- Use functional components with hooks. Never use class components.
+- Prefer Server Components by default (Next.js App Router). Only add `"use client"` when you need interactivity, browser APIs, or hooks.
+- Colocate components: `components/FeatureName/FeatureName.tsx` + `FeatureName.test.tsx`.
+- Use `next/image` for all images, `next/link` for navigation. Never use raw `<a>` or `<img>` tags.
+- Data fetching: use Server Components with `fetch()` or server actions. Avoid `useEffect` for data loading — use `useSWR` or `@tanstack/react-query` for client-side needs.
+- State: local state with `useState`, cross-component with `useContext` or Zustand. Avoid prop drilling beyond 2 levels.
+- Form handling: use `react-hook-form` with Zod validation. Never manually manage form state with `useState` per field.
+
+## Vue
+- Use Composition API with `<script setup>` syntax exclusively. Never use Options API in new code.
+- Use `defineProps` with TypeScript generics: `defineProps<{ title: string }>()`. Never use runtime props validation.
+- Use `defineEmits` with typed events. Prefer emits over direct parent method calls.
+- State management: use Pinia stores with the setup syntax (`defineStore` with a function). Never use Vuex.
+- Use `computed()` for derived state, `watch()` sparingly and only for side effects.
+- Use `v-model` with `defineModel()` for two-way binding in custom components.
+- Prefer `<template>` conditional rendering (`v-if` / `v-show`) over JS-side ternaries.
+
+## Styling
+- Use Tailwind CSS utility classes as the primary styling method.
+- Extract repeated class sets into components, not `@apply` directives.
+- Use CSS variables for theme values (colors, spacing scales) defined in `tailwind.config`.
+- Never use inline `style=` attributes except for truly dynamic values (e.g. computed positions).
+- Responsive design: mobile-first with Tailwind breakpoint prefixes (`sm:`, `md:`, `lg:`).
+
+## Security (Frontend-Specific)
+- Never trust client-side validation alone — always validate on the server.
+- Never expose API keys, secrets, or internal URLs in client-side code or `.env` files without `NEXT_PUBLIC_` / `VITE_` prefix awareness.
+- Sanitize any user-generated content rendered as HTML (use `DOMPurify` if `dangerouslySetInnerHTML` / `v-html` is unavoidable).
+- Use CSRF tokens for state-changing requests. Set `SameSite=Strict` on auth cookies.
+- Configure `Content-Security-Policy` headers in production.
+
+## API Integration
+- Define a typed API client layer (e.g. `lib/api/`) — never scatter raw `fetch()` calls across components.
+- Use Zod to validate API responses at the boundary: `const data = ResponseSchema.parse(await res.json())`.
+- Handle loading, error, and empty states explicitly in every data-fetching component.
+- Use `AbortController` for cancellable requests in `useEffect` cleanup or on component unmount.
+
+## Performance
+- Lazy-load heavy components with `React.lazy()` / `next/dynamic` or Vue's `defineAsyncComponent`.
+- Use `useMemo` / `useCallback` only when profiling shows re-renders are a problem — don't premature-optimize.
+- Debounce search inputs and other rapid-fire user events.
+- For lists > 100 items, use virtual scrolling (`@tanstack/react-virtual` or `vue-virtual-scroller`).

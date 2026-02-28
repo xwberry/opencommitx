@@ -23,7 +23,7 @@ const extraArgs = process.argv.slice(2);
 cli(
   {
     version: packageJSON.version,
-    name: 'opencommit',
+    name: 'opencommitx',
     commands: [configCommand, hookCommand, commitlintConfigCommand, setupCommand, modelsCommand],
     flags: {
       fgm: {
@@ -42,12 +42,24 @@ cli(
         alias: 'y',
         description: 'Skip commit confirmation prompt',
         default: false
+      },
+      dryRun: {
+        type: Boolean,
+        alias: 'd',
+        description: 'Dry run: generate and display commit message without committing',
+        default: false
       }
     },
     ignoreArgv: (type) => type === 'unknown-flag' || type === 'argument',
     help: { description: packageJSON.description }
   },
   async ({ flags }) => {
+    // Dry run: override provider to test mock for this invocation only
+    if (flags.dryRun) {
+      process.env.OCO_AI_PROVIDER = 'test';
+      process.env.OCO_TEST_MOCK_TYPE = 'commit-message';
+    }
+
     await runMigrations();
     await checkIsLatestVersion();
 
@@ -55,20 +67,22 @@ cli(
       prepareCommitMessageHook();
     } else {
       // Check for first run and trigger setup wizard
-      if (isFirstRun()) {
+      if (!flags.dryRun && isFirstRun()) {
         const setupComplete = await runSetup();
         if (!setupComplete) {
           process.exit(1);
         }
       }
 
-      // Check for missing API key and prompt if needed
-      const hasApiKey = await promptForMissingApiKey();
-      if (!hasApiKey) {
-        process.exit(1);
+      // Check for missing API key and prompt if needed (skip for dry run)
+      if (!flags.dryRun) {
+        const hasApiKey = await promptForMissingApiKey();
+        if (!hasApiKey) {
+          process.exit(1);
+        }
       }
 
-      commit(extraArgs, flags.context, false, flags.fgm, flags.yes);
+      commit(extraArgs, flags.context, false, flags.fgm, flags.yes || flags.dryRun);
     }
   },
   extraArgs

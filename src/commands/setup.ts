@@ -19,6 +19,7 @@ import {
   fetchOllamaModels,
   getCacheInfo
 } from '../utils/modelCache';
+import { getProviderApiKey } from '../utils/engine';
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   [OCO_AI_PROVIDER_ENUM.OPENAI]: 'OpenAI (GPT-4o, GPT-4)',
@@ -329,7 +330,7 @@ async function setupOllama(): Promise<{
 }
 
 export async function runSetup(): Promise<boolean> {
-  intro(chalk.bgCyan(' Welcome to OpenCommit! '));
+  intro(chalk.bgCyan(' Welcome to OpenCommitX! '));
 
   // Select provider
   const provider = await selectProvider();
@@ -389,9 +390,12 @@ export async function runSetup(): Promise<boolean> {
       return false;
     }
 
+    // Save the API key to both the provider-specific key and the generic key
+    const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY` as keyof typeof config;
     config = {
       OCO_AI_PROVIDER: provider,
       OCO_API_KEY: apiKey,
+      [providerKeyName]: apiKey,
       OCO_MODEL: model
     };
   }
@@ -409,7 +413,7 @@ export async function runSetup(): Promise<boolean> {
   setGlobalConfig(newConfig as any);
 
   outro(
-    `${chalk.green('✔')} Configuration saved to ~/.opencommit\n\n  Run ${chalk.cyan('oco')} to generate commit messages!`
+    `${chalk.green('✔')} Configuration saved to ~/.opencommit\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
   );
 
   return true;
@@ -442,7 +446,9 @@ export async function promptForMissingApiKey(): Promise<boolean> {
     return true; // No API key needed
   }
 
-  if (config.OCO_API_KEY) {
+  // Check provider-specific key first, then fall back to generic key
+  const resolvedKey = getProviderApiKey(config, provider);
+  if (resolvedKey) {
     return true; // Already has key
   }
 
@@ -467,14 +473,182 @@ export async function promptForMissingApiKey(): Promise<boolean> {
   return true;
 }
 
+async function runFullSetup(): Promise<void> {
+  intro(chalk.bgCyan(' OpenCommitX Full Setup '));
+  console.log(chalk.dim('  Walk through all configuration keys. Press Enter to keep the current/default value.\n'));
+
+  const currentConfig = getIsGlobalConfigFileExist()
+    ? getGlobalConfig()
+    : { ...DEFAULT_CONFIG };
+
+  const updates: Record<string, any> = {};
+
+  // Provider + model (delegate to main setup flow)
+  console.log(chalk.bold('\n── Provider & Model ──'));
+  const provider = await selectProvider();
+  if (!isCancel(provider)) {
+    updates.OCO_AI_PROVIDER = provider;
+    if (
+      provider !== OCO_AI_PROVIDER_ENUM.OLLAMA &&
+      provider !== OCO_AI_PROVIDER_ENUM.MLX
+    ) {
+      const apiKey = await getApiKey(provider as string);
+      if (!isCancel(apiKey)) {
+        updates.OCO_API_KEY = apiKey;
+        const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY`;
+        updates[providerKeyName] = apiKey;
+      }
+      const model = await selectModel(provider as string, updates.OCO_API_KEY as string);
+      if (!isCancel(model)) updates.OCO_MODEL = model;
+    }
+  }
+
+  // Token limits
+  console.log(chalk.bold('\n── Token Limits ──'));
+  const maxInput = await text({
+    message: `Max input tokens (current: ${currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096}):`,
+    placeholder: '4096',
+    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096)
+  });
+  if (!isCancel(maxInput) && maxInput) updates.OCO_TOKENS_MAX_INPUT = Number(maxInput);
+
+  const maxOutput = await text({
+    message: `Max output tokens (current: ${currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500}):`,
+    placeholder: '500',
+    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500)
+  });
+  if (!isCancel(maxOutput) && maxOutput) updates.OCO_TOKENS_MAX_OUTPUT = Number(maxOutput);
+
+  // Commit format
+  console.log(chalk.bold('\n── Commit Format ──'));
+
+  const promptModule = await select({
+    message: `Prompt module (current: ${currentConfig[CONFIG_KEYS.OCO_PROMPT_MODULE] ?? 'conventional-commit'}):`,
+    options: [
+      { value: 'conventional-commit', label: 'conventional-commit (default)' },
+      { value: '@commitlint', label: '@commitlint (use project commitlint config)' }
+    ]
+  });
+  if (!isCancel(promptModule)) updates.OCO_PROMPT_MODULE = promptModule;
+
+  const emojiEnabled = await select({
+    message: `Enable GitMoji emoji prefix (current: ${currentConfig[CONFIG_KEYS.OCO_EMOJI] ?? false}):`,
+    options: [
+      { value: false, label: 'false (no emoji)' },
+      { value: true, label: 'true (GitMoji prefix)' }
+    ]
+  });
+  if (!isCancel(emojiEnabled)) updates.OCO_EMOJI = emojiEnabled;
+
+  const oneLineCommit = await select({
+    message: `One-line commit mode (current: ${currentConfig[CONFIG_KEYS.OCO_ONE_LINE_COMMIT] ?? false}):`,
+    options: [
+      { value: false, label: 'false (multi-line allowed)' },
+      { value: true, label: 'true (force single line)' }
+    ]
+  });
+  if (!isCancel(oneLineCommit)) updates.OCO_ONE_LINE_COMMIT = oneLineCommit;
+
+  const description = await select({
+    message: `Include description body (current: ${currentConfig[CONFIG_KEYS.OCO_DESCRIPTION] ?? false}):`,
+    options: [
+      { value: false, label: 'false' },
+      { value: true, label: 'true (add 3-sentence body)' }
+    ]
+  });
+  if (!isCancel(description)) updates.OCO_DESCRIPTION = description;
+
+  const omitScope = await select({
+    message: `Omit scope from commit message (current: ${currentConfig[CONFIG_KEYS.OCO_OMIT_SCOPE] ?? false}):`,
+    options: [
+      { value: false, label: 'false (include scope)' },
+      { value: true, label: 'true (omit scope)' }
+    ]
+  });
+  if (!isCancel(omitScope)) updates.OCO_OMIT_SCOPE = omitScope;
+
+  const language = await text({
+    message: `Output language (current: ${currentConfig[CONFIG_KEYS.OCO_LANGUAGE] ?? 'en'}):`,
+    placeholder: 'en',
+    defaultValue: currentConfig[CONFIG_KEYS.OCO_LANGUAGE] ?? 'en'
+  });
+  if (!isCancel(language) && language) updates.OCO_LANGUAGE = language;
+
+  // Cache
+  console.log(chalk.bold('\n── Commit Message Cache ──'));
+  const cacheEnabled = await select({
+    message: `Enable LLM result cache (current: ${currentConfig[CONFIG_KEYS.OCO_CACHE_ENABLED] ?? true}):`,
+    options: [
+      { value: true, label: 'true (cache results to survive pre-commit failures)' },
+      { value: false, label: 'false (always regenerate)' }
+    ]
+  });
+  if (!isCancel(cacheEnabled)) updates.OCO_CACHE_ENABLED = cacheEnabled;
+
+  const cacheTtl = await text({
+    message: `Cache TTL in seconds (current: ${currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600}):`,
+    placeholder: '3600',
+    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600)
+  });
+  if (!isCancel(cacheTtl) && cacheTtl) updates.OCO_CACHE_TTL_SECONDS = Number(cacheTtl);
+
+  // Diff routing
+  console.log(chalk.bold('\n── Smart Diff Routing ──'));
+  const perFileMode = await select({
+    message: `Per-file commit mode (current: ${currentConfig[CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE] ?? 'auto'}):`,
+    options: [
+      { value: 'auto', label: 'auto (smart routing by line threshold)' },
+      { value: 'always', label: 'always (always generate per-file messages)' },
+      { value: 'never', label: 'never (always aggregate into one message)' }
+    ]
+  });
+  if (!isCancel(perFileMode)) updates.OCO_PER_FILE_COMMIT_MODE = perFileMode;
+
+  const perFileThreshold = await text({
+    message: `Per-file line threshold (current: ${currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300}):`,
+    placeholder: '300',
+    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300)
+  });
+  if (!isCancel(perFileThreshold) && perFileThreshold) {
+    updates.OCO_PER_FILE_THRESHOLD_LINES = Number(perFileThreshold);
+  }
+
+  const multiCommitStrategy = await select({
+    message: `Multi-commit strategy (current: ${currentConfig[CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY] ?? 'single'}):`,
+    options: [
+      { value: 'single', label: 'single (join all messages into one commit)' },
+      { value: 'sequential', label: 'sequential (one commit per file group)' }
+    ]
+  });
+  if (!isCancel(multiCommitStrategy)) updates.OCO_MULTI_COMMIT_STRATEGY = multiCommitStrategy;
+
+  // Save
+  const newConfig = { ...currentConfig, ...updates };
+  setGlobalConfig(newConfig as any);
+
+  outro(
+    `${chalk.green('✔')} Full configuration saved to ~/.opencommit\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
+  );
+}
+
 export const setupCommand = command(
   {
     name: COMMANDS.setup,
+    parameters: ['[mode]'],
     help: {
-      description: 'Interactive setup wizard for OpenCommit'
+      description: 'Interactive setup wizard for OpenCommitX',
+      examples: [
+        'Quick provider/model setup: ocox setup',
+        'Full walkthrough of all settings: ocox setup full'
+      ]
     }
   },
-  async () => {
-    await runSetup();
+  async (argv) => {
+    const mode = argv._.mode;
+    if (mode === 'full' || mode === 'all' || mode === 'detailed') {
+      await runFullSetup();
+    } else {
+      await runSetup();
+    }
   }
 );
