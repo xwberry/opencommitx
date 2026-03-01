@@ -2,7 +2,7 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 
-const CACHE_FILE = pathJoin(homedir(), '.opencommit-cache.json');
+const CACHE_FILE = pathJoin(homedir(), '.opencommitx-cache.json');
 
 import {
   hashDiff,

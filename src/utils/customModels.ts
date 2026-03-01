@@ -16,7 +16,14 @@ function readCustomModels(): CustomModelStore {
 }
 
 function writeCustomModels(store: CustomModelStore): void {
-  writeFileSync(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), 'utf-8');
+  try {
+    writeFileSync(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600
+    });
+  } catch {
+    // Best-effort persistence; keep CLI operations functional.
+  }
 }
 
 export function getCustomModels(provider: string): string[] {
@@ -57,11 +64,8 @@ export function mergeWithCustomModels(
   const merged = { ...builtIn };
   for (const [provider, models] of Object.entries(custom)) {
     if (!merged[provider]) merged[provider] = [];
-    for (const model of models) {
-      if (!merged[provider].includes(model)) {
-        merged[provider] = [model, ...merged[provider]];
-      }
-    }
+    const toPrepend = models.filter((model) => !merged[provider].includes(model));
+    merged[provider] = [...toPrepend, ...merged[provider]];
   }
   return merged;
 }

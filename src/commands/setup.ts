@@ -58,7 +58,7 @@ const NO_API_KEY_PROVIDERS = [
 ];
 
 async function selectProvider(): Promise<string | symbol> {
-  const primaryOptions = PRIMARY_PROVIDERS.map((provider) => ({
+  const primaryOptions: { value: string; label: string }[] = PRIMARY_PROVIDERS.map((provider) => ({
     value: provider,
     label: PROVIDER_DISPLAY_NAMES[provider] || provider
   }));
@@ -413,7 +413,7 @@ export async function runSetup(): Promise<boolean> {
   setGlobalConfig(newConfig as any);
 
   outro(
-    `${chalk.green('✔')} Configuration saved to ~/.opencommit\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
+    `${chalk.green('✔')} Configuration saved to ~/.opencommitx\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
   );
 
   return true;
@@ -434,8 +434,8 @@ export function isFirstRun(): boolean {
     return !config.OCO_MODEL;
   }
 
-  // For other providers, check if API key is set
-  return !config.OCO_API_KEY;
+  // For other providers, check if provider-specific or generic API key is set
+  return !getProviderApiKey(config, provider);
 }
 
 export async function promptForMissingApiKey(): Promise<boolean> {
@@ -464,13 +464,23 @@ export async function promptForMissingApiKey(): Promise<boolean> {
   }
 
   const existingConfig = getGlobalConfig();
+  const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY`;
   setGlobalConfig({
     ...existingConfig,
-    OCO_API_KEY: apiKey as string
+    OCO_API_KEY: apiKey as string,
+    [providerKeyName]: apiKey as string
   } as any);
 
   console.log(chalk.green('✔') + ' API key saved\n');
   return true;
+}
+
+function toPositiveNumber(raw: string, key: string): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`Invalid value for ${key}: "${raw}" — must be a positive number`);
+  }
+  return n;
 }
 
 async function runFullSetup(): Promise<void> {
@@ -498,9 +508,9 @@ async function runFullSetup(): Promise<void> {
         const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY`;
         updates[providerKeyName] = apiKey;
       }
-      const model = await selectModel(provider as string, updates.OCO_API_KEY as string);
-      if (!isCancel(model)) updates.OCO_MODEL = model;
     }
+    const model = await selectModel(provider as string, updates.OCO_API_KEY as string | undefined);
+    if (!isCancel(model)) updates.OCO_MODEL = model;
   }
 
   // Token limits
@@ -510,14 +520,18 @@ async function runFullSetup(): Promise<void> {
     placeholder: '4096',
     defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096)
   });
-  if (!isCancel(maxInput) && maxInput) updates.OCO_TOKENS_MAX_INPUT = Number(maxInput);
+  if (!isCancel(maxInput) && maxInput) {
+    try { updates.OCO_TOKENS_MAX_INPUT = toPositiveNumber(maxInput as string, 'OCO_TOKENS_MAX_INPUT'); } catch { /* keep default */ }
+  }
 
   const maxOutput = await text({
     message: `Max output tokens (current: ${currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500}):`,
     placeholder: '500',
     defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500)
   });
-  if (!isCancel(maxOutput) && maxOutput) updates.OCO_TOKENS_MAX_OUTPUT = Number(maxOutput);
+  if (!isCancel(maxOutput) && maxOutput) {
+    try { updates.OCO_TOKENS_MAX_OUTPUT = toPositiveNumber(maxOutput as string, 'OCO_TOKENS_MAX_OUTPUT'); } catch { /* keep default */ }
+  }
 
   // Commit format
   console.log(chalk.bold('\n── Commit Format ──'));
@@ -590,7 +604,9 @@ async function runFullSetup(): Promise<void> {
     placeholder: '3600',
     defaultValue: String(currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600)
   });
-  if (!isCancel(cacheTtl) && cacheTtl) updates.OCO_CACHE_TTL_SECONDS = Number(cacheTtl);
+  if (!isCancel(cacheTtl) && cacheTtl) {
+    try { updates.OCO_CACHE_TTL_SECONDS = toPositiveNumber(cacheTtl as string, 'OCO_CACHE_TTL_SECONDS'); } catch { /* keep default */ }
+  }
 
   // Diff routing
   console.log(chalk.bold('\n── Smart Diff Routing ──'));
@@ -610,7 +626,7 @@ async function runFullSetup(): Promise<void> {
     defaultValue: String(currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300)
   });
   if (!isCancel(perFileThreshold) && perFileThreshold) {
-    updates.OCO_PER_FILE_THRESHOLD_LINES = Number(perFileThreshold);
+    try { updates.OCO_PER_FILE_THRESHOLD_LINES = toPositiveNumber(perFileThreshold as string, 'OCO_PER_FILE_THRESHOLD_LINES'); } catch { /* keep default */ }
   }
 
   const multiCommitStrategy = await select({
@@ -627,7 +643,7 @@ async function runFullSetup(): Promise<void> {
   setGlobalConfig(newConfig as any);
 
   outro(
-    `${chalk.green('✔')} Full configuration saved to ~/.opencommit\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
+    `${chalk.green('✔')} Full configuration saved to ~/.opencommitx\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
   );
 }
 

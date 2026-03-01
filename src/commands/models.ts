@@ -7,6 +7,7 @@ import {
   OCO_AI_PROVIDER_ENUM,
   getConfig
 } from './config';
+import { getProviderApiKey } from '../utils/engine';
 import {
   fetchModelsForProvider,
   clearModelCache,
@@ -35,7 +36,7 @@ function formatCacheAge(timestamp: number | null): string {
 
 async function listModels(provider: string, useCache: boolean = true): Promise<void> {
   const config = getConfig();
-  const apiKey = config.OCO_API_KEY;
+  const apiKey = getProviderApiKey(config, provider);
   const currentModel = config.OCO_MODEL;
 
   let models: string[] = [];
@@ -82,7 +83,7 @@ async function listModels(provider: string, useCache: boolean = true): Promise<v
 
 async function refreshModels(provider: string): Promise<void> {
   const config = getConfig();
-  const apiKey = config.OCO_API_KEY;
+  const apiKey = getProviderApiKey(config, provider);
 
   const loadingSpinner = spinner();
   loadingSpinner.start(`Fetching models from ${provider}...`);

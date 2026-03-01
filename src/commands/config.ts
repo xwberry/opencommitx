@@ -849,6 +849,7 @@ export const configValidators = {
       typeof value === 'boolean',
       'Must be true or false'
     );
+    return value;
   },
 
   [CONFIG_KEYS.OCO_CACHE_ENABLED](value: any) {
@@ -1164,6 +1165,9 @@ const getEnvConfig = (envPath: string) => {
     OCO_PER_FILE_COMMIT_MODE: process.env.OCO_PER_FILE_COMMIT_MODE,
     OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(process.env.OCO_PYTHON_DOCSTRING_THRESHOLD),
     OCO_PYTHON_DOCSTRING_MODE: process.env.OCO_PYTHON_DOCSTRING_MODE,
+    OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: parseConfigVarValue(
+      process.env.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO
+    ),
     // Multi-commit
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Per-provider keys
@@ -1420,6 +1424,12 @@ function getConfigKeyDetails(key) {
       return {
         description: 'Controls docstring-only extraction for large Python files',
         values: ['auto', 'always', 'never']
+      };
+    case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO:
+      return {
+        description:
+          'For Python docstring mode: minimum changed-lines/file-lines ratio required in auto mode to activate docstring extraction',
+        values: ['Number between 0 and 1 (default: 0.9)']
       };
     case CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY:
       return {

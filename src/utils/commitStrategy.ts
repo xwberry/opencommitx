@@ -14,6 +14,11 @@ export function buildCommitPlan(
   fileGroups: Array<{ files: string[] }>,
   messages: string[]
 ): CommitGroupPlan[] {
+  if (fileGroups.length !== messages.length) {
+    throw new RangeError(
+      `buildCommitPlan: fileGroups.length (${fileGroups.length}) !== messages.length (${messages.length})`
+    );
+  }
   return fileGroups.map((group, i) => ({
     files: group.files,
     message: messages[i]

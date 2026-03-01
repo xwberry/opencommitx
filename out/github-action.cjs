@@ -92866,6 +92866,7 @@ var configValidators = {
       typeof value === "boolean",
       "Must be true or false"
     );
+    return value;
   },
   ["OCO_CACHE_ENABLED" /* OCO_CACHE_ENABLED */](value) {
     validateConfig(
@@ -93074,6 +93075,9 @@ var getEnvConfig = (envPath) => {
     OCO_PER_FILE_COMMIT_MODE: process.env.OCO_PER_FILE_COMMIT_MODE,
     OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(process.env.OCO_PYTHON_DOCSTRING_THRESHOLD),
     OCO_PYTHON_DOCSTRING_MODE: process.env.OCO_PYTHON_DOCSTRING_MODE,
+    OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: parseConfigVarValue(
+      process.env.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO
+    ),
     // Multi-commit
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Per-provider keys
@@ -93286,6 +93290,11 @@ function getConfigKeyDetails(key) {
       return {
         description: "Controls docstring-only extraction for large Python files",
         values: ["auto", "always", "never"]
+      };
+    case "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */:
+      return {
+        description: "For Python docstring mode: minimum changed-lines/file-lines ratio required in auto mode to activate docstring extraction",
+        values: ["Number between 0 and 1 (default: 0.9)"]
       };
     case "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */:
       return {
@@ -114648,7 +114657,7 @@ var AimlApiEngine = class {
       headers: {
         Authorization: `Bearer ${config5.apiKey}`,
         "HTTP-Referer": "https://github.com/xwberry/opencommitx",
-        "X-Title": "opencommit",
+        "X-Title": "opencommitx",
         "Content-Type": "application/json",
         ...config5.customHeaders
       }
@@ -115255,7 +115264,7 @@ function mergeDiffs(arr, maxStringLength) {
 }
 
 // src/generateCommitMessageFromGitDiff.ts
-var generateCommitMessageChatCompletionPrompt = async (diff, fullGitMojiSpec, context4) => {
+var generateCommitMessageChatCompletionPrompt = async (diff, fullGitMojiSpec, context4 = "") => {
   const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
     fullGitMojiSpec,
     context4
@@ -115525,6 +115534,8 @@ async function improveMessagesInChunks(diffsAndSHAs) {
     (commit) => generateCommitMessageByDiff(commit.diff, false)
   );
   let improvedMessagesAndSHAs = [];
+  const MAX_RETRIES_PER_CHUNK = 3;
+  const retryCount = /* @__PURE__ */ new Map();
   for (let step = 0; step < improvePromises.length; step += chunkSize) {
     const chunkOfPromises = improvePromises.slice(step, step + chunkSize);
     try {
@@ -115537,15 +115548,22 @@ async function improveMessagesInChunks(diffsAndSHAs) {
         }
       );
       improvedMessagesAndSHAs.push(...chunkOfImprovedMessagesBySha);
+      retryCount.delete(step);
       const sleepFor = 1e3 * randomIntFromInterval(1, 5) + 100 * randomIntFromInterval(1, 5);
       Se(
         `Improved ${chunkOfPromises.length} messages. Sleeping for ${sleepFor}`
       );
       await sleep3(sleepFor);
     } catch (error) {
+      const currentRetries = retryCount.get(step) || 0;
+      if (currentRetries >= MAX_RETRIES_PER_CHUNK) {
+        Se(`Max retries (${MAX_RETRIES_PER_CHUNK}) reached for chunk at step ${step}. Skipping.`);
+        continue;
+      }
+      retryCount.set(step, currentRetries + 1);
       Se(error);
       const sleepFor = 6e4 + 1e3 * randomIntFromInterval(1, 5);
-      Se(`Retrying after sleeping for ${sleepFor}`);
+      Se(`Retrying (attempt ${currentRetries + 1}/${MAX_RETRIES_PER_CHUNK}) after sleeping for ${sleepFor}`);
       await sleep3(sleepFor);
       step -= chunkSize;
     }
@@ -115583,41 +115601,52 @@ async function improveCommitMessages(commitsToImprove) {
     console.log("No changes in commit messages detected, skipping rebase");
     return;
   }
-  const createCommitMessageFile = (message, index) => (0, import_fs3.writeFileSync)(`./commit-${index}.txt`, message);
-  improvedMessagesWithSHAs.forEach(
-    ({ msg }, i3) => createCommitMessageFile(msg, i3)
-  );
-  (0, import_fs3.writeFileSync)(`./count.txt`, "0");
-  (0, import_fs3.writeFileSync)(
-    "./rebase-exec.sh",
-    `#!/bin/bash
+  const tempFiles = [];
+  try {
+    improvedMessagesWithSHAs.forEach(({ msg }, i3) => {
+      const filename = `./commit-${i3}.txt`;
+      (0, import_fs3.writeFileSync)(filename, msg);
+      tempFiles.push(filename);
+    });
+    const countFile = "./count.txt";
+    (0, import_fs3.writeFileSync)(countFile, "0");
+    tempFiles.push(countFile);
+    const rebaseScript = "./rebase-exec.sh";
+    (0, import_fs3.writeFileSync)(
+      rebaseScript,
+      `#!/bin/bash
     count=$(cat count.txt)
     git commit --amend -F commit-$count.txt
     echo $(( count + 1 )) > count.txt`
-  );
-  await import_exec.default.exec(`chmod +x ./rebase-exec.sh`);
-  await import_exec.default.exec(
-    "git",
-    ["rebase", `${commitsToImprove[0].id}^`, "--exec", "./rebase-exec.sh"],
-    {
-      env: {
-        GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
-        GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR,
-        GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`
+    );
+    tempFiles.push(rebaseScript);
+    await import_exec.default.exec(`chmod +x ./rebase-exec.sh`);
+    await import_exec.default.exec(
+      "git",
+      ["rebase", `${commitsToImprove[0].id}^`, "--exec", "./rebase-exec.sh"],
+      {
+        env: {
+          GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
+          GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR,
+          GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`
+        }
       }
-    }
-  );
-  const deleteCommitMessageFile = (index) => (0, import_fs3.unlinkSync)(`./commit-${index}.txt`);
-  commitsToImprove.forEach((_commit, i3) => deleteCommitMessageFile(i3));
-  (0, import_fs3.unlinkSync)("./count.txt");
-  (0, import_fs3.unlinkSync)("./rebase-exec.sh");
+    );
+  } finally {
+    tempFiles.forEach((file) => {
+      try {
+        if ((0, import_fs3.existsSync)(file)) (0, import_fs3.unlinkSync)(file);
+      } catch {
+      }
+    });
+  }
   Se("Force pushing non-interactively rebased commits into remote.");
   await import_exec.default.exec("git", ["status"]);
   await import_exec.default.exec("git", ["push", `--force`]);
   Se("Done \u{1F9D9}");
 }
 async function run() {
-  Ie("OpenCommit \u2014 improving lame commit messages");
+  Ie("OpenCommitX \u2014 improving lame commit messages");
   try {
     if (import_github.default.context.eventName === "push") {
       Se(`Processing commits in a Push event`);

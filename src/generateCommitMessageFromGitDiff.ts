@@ -25,7 +25,7 @@ import { tokenCount } from './utils/tokenCount';
 const generateCommitMessageChatCompletionPrompt = async (
   diff: string,
   fullGitMojiSpec: boolean,
-  context: string
+  context: string = ''
 ): Promise<Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>> => {
   const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
     fullGitMojiSpec,

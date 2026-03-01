@@ -241,7 +241,9 @@ const generateCommitMessageFromGitDiff = async ({
         await generateCommitMessageFromGitDiff({
           diff,
           extraArgs,
-          fullGitMojiSpec
+          context,
+          fullGitMojiSpec,
+          skipCommitConfirmation
         });
       }
     }
@@ -280,8 +282,8 @@ async function generatePerFileCommits(
   try {
     rawMessages = await Promise.all(
       fileGroups.map(async (group) => {
-        const groupDiff = await getDiffForFiles(group.files);
-        return generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context);
+        const payload = group.docstringOverride ?? (await getDiffForFiles(group.files));
+        return generateCommitMessageByDiff(payload, fullGitMojiSpec, context);
       })
     );
     genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
@@ -302,8 +304,15 @@ async function generatePerFileCommits(
     return;
   }
 
-  // Sequential strategy: unstage everything, then stage and commit per-group.
-  // This ensures group[i].files are committed with group[i].message — not all staged files.
+  // Sequential strategy: unstage only plan files, then stage and commit per-group.
+  // This ensures group[i].files are committed with group[i].message and unrelated staged files are not dropped.
+  const groupedFiles = new Set(commitPlan.flatMap((c) => c.files));
+  const omittedFiles = stagedFiles.filter((f) => !groupedFiles.has(f));
+  if (omittedFiles.length > 0) {
+    throw new Error(
+      `Sequential strategy would omit staged files: ${omittedFiles.join(', ')}`
+    );
+  }
   await execa('git', ['reset', 'HEAD', '--']);
 
   let acceptAll = false;
@@ -422,7 +431,7 @@ export async function commit(
     if (isCancel(isStageAllAndCommitConfirmedByUser)) process.exit(1);
 
     if (isStageAllAndCommitConfirmedByUser) {
-      await commit(extraArgs, context, true, fullGitMojiSpec);
+      await commit(extraArgs, context, true, fullGitMojiSpec, skipCommitConfirmation);
       process.exit(0);
     }
 
@@ -440,7 +449,7 @@ export async function commit(
       await gitAdd({ files });
     }
 
-    await commit(extraArgs, context, false, fullGitMojiSpec);
+    await commit(extraArgs, context, false, fullGitMojiSpec, skipCommitConfirmation);
     process.exit(0);
   }
 
@@ -469,7 +478,7 @@ export async function commit(
     }
   }
 
-  if (usePerFileMode && fileGroups.length > 1) {
+  if (usePerFileMode && fileGroups.length > 0) {
     const [, generateCommitError] = await trytm(
       generatePerFileCommits(
         stagedFiles,

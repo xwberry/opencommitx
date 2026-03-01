@@ -65139,6 +65139,7 @@ var configValidators = {
       typeof value === "boolean",
       "Must be true or false"
     );
+    return value;
   },
   ["OCO_CACHE_ENABLED" /* OCO_CACHE_ENABLED */](value) {
     validateConfig(
@@ -65362,6 +65363,9 @@ var getEnvConfig = (envPath) => {
     OCO_PER_FILE_COMMIT_MODE: process.env.OCO_PER_FILE_COMMIT_MODE,
     OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(process.env.OCO_PYTHON_DOCSTRING_THRESHOLD),
     OCO_PYTHON_DOCSTRING_MODE: process.env.OCO_PYTHON_DOCSTRING_MODE,
+    OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: parseConfigVarValue(
+      process.env.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO
+    ),
     // Multi-commit
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Per-provider keys
@@ -65574,6 +65578,11 @@ function getConfigKeyDetails(key) {
       return {
         description: "Controls docstring-only extraction for large Python files",
         values: ["auto", "always", "never"]
+      };
+    case "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */:
+      return {
+        description: "For Python docstring mode: minimum changed-lines/file-lines ratio required in auto mode to activate docstring extraction",
+        values: ["Number between 0 and 1 (default: 0.9)"]
       };
     case "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */:
       return {
@@ -87129,7 +87138,7 @@ var AimlApiEngine = class {
       headers: {
         Authorization: `Bearer ${config6.apiKey}`,
         "HTTP-Referer": "https://github.com/xwberry/opencommitx",
-        "X-Title": "opencommit",
+        "X-Title": "opencommitx",
         "Content-Type": "application/json",
         ...config6.customHeaders
       }
@@ -87736,7 +87745,7 @@ function mergeDiffs(arr, maxStringLength) {
 }
 
 // src/generateCommitMessageFromGitDiff.ts
-var generateCommitMessageChatCompletionPrompt = async (diff, fullGitMojiSpec, context3) => {
+var generateCommitMessageChatCompletionPrompt = async (diff, fullGitMojiSpec, context3 = "") => {
   const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
     fullGitMojiSpec,
     context3
@@ -87971,6 +87980,11 @@ function delay3(ms) {
 
 // src/utils/commitStrategy.ts
 function buildCommitPlan(fileGroups, messages) {
+  if (fileGroups.length !== messages.length) {
+    throw new RangeError(
+      `buildCommitPlan: fileGroups.length (${fileGroups.length}) !== messages.length (${messages.length})`
+    );
+  }
   return fileGroups.map((group, i3) => ({
     files: group.files,
     message: messages[i3]
@@ -88115,7 +88129,13 @@ function readCache() {
   }
 }
 function writeCache(store) {
-  (0, import_fs4.writeFileSync)(CACHE_FILE, JSON.stringify(store, null, 2), "utf-8");
+  try {
+    (0, import_fs4.writeFileSync)(CACHE_FILE, JSON.stringify(store, null, 2), {
+      encoding: "utf-8",
+      mode: 384
+    });
+  } catch {
+  }
 }
 function getCachedCommitMessage(diff) {
   const config6 = getConfig();
@@ -88227,9 +88247,9 @@ var BINARY_OR_GENERATED_EXTENSIONS = /* @__PURE__ */ new Set([
   ".min.css"
 ]);
 function isBinaryOrGenerated(file) {
-  return BINARY_OR_GENERATED_EXTENSIONS.has(
-    "." + file.split(".").pop()?.toLowerCase() || ""
-  ) || file.endsWith("-lock.json") || file.endsWith(".lock");
+  const lower = file.toLowerCase();
+  const ext = `.${lower.split(".").pop() || ""}`;
+  return BINARY_OR_GENERATED_EXTENSIONS.has(ext) || lower.endsWith(".min.js") || lower.endsWith(".min.css") || lower.endsWith("-lock.json") || lower.endsWith(".lock");
 }
 function routeDiff(stats, config6, _shouldUse = shouldUseDocstringMode, _extract = extractPythonDocstrings) {
   const mode = config6.OCO_PER_FILE_COMMIT_MODE || "auto";
@@ -88458,7 +88478,9 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
         await generateCommitMessageFromGitDiff({
           diff,
           extraArgs: extraArgs2,
-          fullGitMojiSpec
+          context: context3,
+          fullGitMojiSpec,
+          skipCommitConfirmation
         });
       }
     }
@@ -88482,8 +88504,8 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
   try {
     rawMessages = await Promise.all(
       fileGroups.map(async (group) => {
-        const groupDiff = await getDiffForFiles(group.files);
-        return generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context3);
+        const payload = group.docstringOverride ?? await getDiffForFiles(group.files);
+        return generateCommitMessageByDiff(payload, fullGitMojiSpec, context3);
       })
     );
     genSpinner.stop(`\u{1F4DD} Generated ${rawMessages.length} commit message(s)`);
@@ -88499,6 +88521,13 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
     const committed = await performCommit(combinedMessage, extraArgs2, skipCommitConfirmation);
     if (committed) await handleGitPush();
     return;
+  }
+  const groupedFiles = new Set(commitPlan.flatMap((c3) => c3.files));
+  const omittedFiles = stagedFiles.filter((f2) => !groupedFiles.has(f2));
+  if (omittedFiles.length > 0) {
+    throw new Error(
+      `Sequential strategy would omit staged files: ${omittedFiles.join(", ")}`
+    );
   }
   await execa("git", ["reset", "HEAD", "--"]);
   let acceptAll = false;
@@ -88588,7 +88617,7 @@ async function commit(extraArgs2 = [], context3 = "", isStageAllFlag = false, fu
     });
     if (pD2(isStageAllAndCommitConfirmedByUser)) process.exit(1);
     if (isStageAllAndCommitConfirmedByUser) {
-      await commit(extraArgs2, context3, true, fullGitMojiSpec);
+      await commit(extraArgs2, context3, true, fullGitMojiSpec, skipCommitConfirmation);
       process.exit(0);
     }
     if (stagedFiles.length === 0 && changedFiles.length > 0) {
@@ -88602,7 +88631,7 @@ async function commit(extraArgs2 = [], context3 = "", isStageAllFlag = false, fu
       if (pD2(files)) process.exit(0);
       await gitAdd({ files });
     }
-    await commit(extraArgs2, context3, false, fullGitMojiSpec);
+    await commit(extraArgs2, context3, false, fullGitMojiSpec, skipCommitConfirmation);
     process.exit(0);
   }
   stagedFilesSpinner.stop(
@@ -88623,7 +88652,7 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
       usePerFileMode = false;
     }
   }
-  if (usePerFileMode && fileGroups.length > 1) {
+  if (usePerFileMode && fileGroups.length > 0) {
     const [, generateCommitError] = await trytm(
       generatePerFileCommits(
         stagedFiles,
@@ -88786,13 +88815,13 @@ var prepareCommitMessageHook = async (isStageAllFlag = false) => {
       const changedFiles = await getChangedFiles();
       if (changedFiles) await gitAdd({ files: changedFiles });
       else {
-        Se("No changes detected, write some code and run `oco` again");
+        Se("No changes detected, write some code and run `ocox` again");
         process.exit(1);
       }
     }
     const staged = await getStagedFiles();
     if (!staged) return;
-    Ie("opencommit");
+    Ie("opencommitx");
     const config6 = getConfig();
     if (!config6.OCO_API_KEY) {
       Se(
@@ -89379,7 +89408,7 @@ async function runSetup() {
   };
   setGlobalConfig(newConfig);
   Se(
-    `${source_default.green("\u2714")} Configuration saved to ~/.opencommit
+    `${source_default.green("\u2714")} Configuration saved to ~/.opencommitx
 
   Run ${source_default.cyan("ocox")} to generate commit messages!`
   );
@@ -89394,7 +89423,7 @@ function isFirstRun() {
   if (NO_API_KEY_PROVIDERS.includes(provider)) {
     return !config6.OCO_MODEL;
   }
-  return !config6.OCO_API_KEY;
+  return !getProviderApiKey(config6, provider);
 }
 async function promptForMissingApiKey() {
   const config6 = getConfig();
@@ -89418,12 +89447,21 @@ API key missing for ${provider}. Let's set it up.
     return false;
   }
   const existingConfig = getGlobalConfig();
+  const providerKeyName = `OCO_${provider.toUpperCase()}_KEY`;
   setGlobalConfig({
     ...existingConfig,
-    OCO_API_KEY: apiKey
+    OCO_API_KEY: apiKey,
+    [providerKeyName]: apiKey
   });
   console.log(source_default.green("\u2714") + " API key saved\n");
   return true;
+}
+function toPositiveNumber(raw, key) {
+  const n2 = Number(raw);
+  if (!Number.isFinite(n2) || n2 <= 0) {
+    throw new Error(`Invalid value for ${key}: "${raw}" \u2014 must be a positive number`);
+  }
+  return n2;
 }
 async function runFullSetup() {
   Ie(source_default.bgCyan(" OpenCommitX Full Setup "));
@@ -89441,9 +89479,9 @@ async function runFullSetup() {
         const providerKeyName = `OCO_${provider.toUpperCase()}_KEY`;
         updates[providerKeyName] = apiKey;
       }
-      const model = await selectModel(provider, updates.OCO_API_KEY);
-      if (!pD2(model)) updates.OCO_MODEL = model;
     }
+    const model = await selectModel(provider, updates.OCO_API_KEY);
+    if (!pD2(model)) updates.OCO_MODEL = model;
   }
   console.log(source_default.bold("\n\u2500\u2500 Token Limits \u2500\u2500"));
   const maxInput = await he({
@@ -89451,13 +89489,23 @@ async function runFullSetup() {
     placeholder: "4096",
     defaultValue: String(currentConfig["OCO_TOKENS_MAX_INPUT" /* OCO_TOKENS_MAX_INPUT */] ?? 4096)
   });
-  if (!pD2(maxInput) && maxInput) updates.OCO_TOKENS_MAX_INPUT = Number(maxInput);
+  if (!pD2(maxInput) && maxInput) {
+    try {
+      updates.OCO_TOKENS_MAX_INPUT = toPositiveNumber(maxInput, "OCO_TOKENS_MAX_INPUT");
+    } catch {
+    }
+  }
   const maxOutput = await he({
     message: `Max output tokens (current: ${currentConfig["OCO_TOKENS_MAX_OUTPUT" /* OCO_TOKENS_MAX_OUTPUT */] ?? 500}):`,
     placeholder: "500",
     defaultValue: String(currentConfig["OCO_TOKENS_MAX_OUTPUT" /* OCO_TOKENS_MAX_OUTPUT */] ?? 500)
   });
-  if (!pD2(maxOutput) && maxOutput) updates.OCO_TOKENS_MAX_OUTPUT = Number(maxOutput);
+  if (!pD2(maxOutput) && maxOutput) {
+    try {
+      updates.OCO_TOKENS_MAX_OUTPUT = toPositiveNumber(maxOutput, "OCO_TOKENS_MAX_OUTPUT");
+    } catch {
+    }
+  }
   console.log(source_default.bold("\n\u2500\u2500 Commit Format \u2500\u2500"));
   const promptModule = await ve({
     message: `Prompt module (current: ${currentConfig["OCO_PROMPT_MODULE" /* OCO_PROMPT_MODULE */] ?? "conventional-commit"}):`,
@@ -89519,7 +89567,12 @@ async function runFullSetup() {
     placeholder: "3600",
     defaultValue: String(currentConfig["OCO_CACHE_TTL_SECONDS" /* OCO_CACHE_TTL_SECONDS */] ?? 3600)
   });
-  if (!pD2(cacheTtl) && cacheTtl) updates.OCO_CACHE_TTL_SECONDS = Number(cacheTtl);
+  if (!pD2(cacheTtl) && cacheTtl) {
+    try {
+      updates.OCO_CACHE_TTL_SECONDS = toPositiveNumber(cacheTtl, "OCO_CACHE_TTL_SECONDS");
+    } catch {
+    }
+  }
   console.log(source_default.bold("\n\u2500\u2500 Smart Diff Routing \u2500\u2500"));
   const perFileMode = await ve({
     message: `Per-file commit mode (current: ${currentConfig["OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */] ?? "auto"}):`,
@@ -89536,7 +89589,10 @@ async function runFullSetup() {
     defaultValue: String(currentConfig["OCO_PER_FILE_THRESHOLD_LINES" /* OCO_PER_FILE_THRESHOLD_LINES */] ?? 300)
   });
   if (!pD2(perFileThreshold) && perFileThreshold) {
-    updates.OCO_PER_FILE_THRESHOLD_LINES = Number(perFileThreshold);
+    try {
+      updates.OCO_PER_FILE_THRESHOLD_LINES = toPositiveNumber(perFileThreshold, "OCO_PER_FILE_THRESHOLD_LINES");
+    } catch {
+    }
   }
   const multiCommitStrategy = await ve({
     message: `Multi-commit strategy (current: ${currentConfig["OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */] ?? "single"}):`,
@@ -89549,7 +89605,7 @@ async function runFullSetup() {
   const newConfig = { ...currentConfig, ...updates };
   setGlobalConfig(newConfig);
   Se(
-    `${source_default.green("\u2714")} Full configuration saved to ~/.opencommit
+    `${source_default.green("\u2714")} Full configuration saved to ~/.opencommitx
 
   Run ${source_default.cyan("ocox")} to generate commit messages!`
   );
@@ -89593,7 +89649,13 @@ function readCustomModels() {
   }
 }
 function writeCustomModels(store) {
-  (0, import_fs8.writeFileSync)(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), "utf-8");
+  try {
+    (0, import_fs8.writeFileSync)(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), {
+      encoding: "utf-8",
+      mode: 384
+    });
+  } catch {
+  }
 }
 function getCustomModels(provider) {
   const store = readCustomModels();
@@ -89637,7 +89699,7 @@ function formatCacheAge3(timestamp) {
 }
 async function listModels(provider, useCache = true) {
   const config6 = getConfig();
-  const apiKey = config6.OCO_API_KEY;
+  const apiKey = getProviderApiKey(config6, provider);
   const currentModel = config6.OCO_MODEL;
   let models = [];
   if (useCache) {
@@ -89677,7 +89739,7 @@ ${source_default.bold("Available models for")} ${source_default.cyan(provider)}:
 }
 async function refreshModels(provider) {
   const config6 = getConfig();
-  const apiKey = config6.OCO_API_KEY;
+  const apiKey = getProviderApiKey(config6, provider);
   const loadingSpinner = Y3();
   loadingSpinner.start(`Fetching models from ${provider}...`);
   clearModelCache();

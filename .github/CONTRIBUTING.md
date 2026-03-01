@@ -9,7 +9,7 @@ Thanks for considering contributing to OpenCommitX.
 3. Create a new branch for your changes.
 4. Make your changes and commit them with descriptive commit messages.
 5. Push your changes to your forked repository.
-6. Create a pull request from your branch to the `main` branch.
+6. Create a pull request from your branch to the `master` branch.
 
 ## Getting started
 

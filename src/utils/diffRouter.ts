@@ -23,9 +23,15 @@ const BINARY_OR_GENERATED_EXTENSIONS = new Set([
 ]);
 
 function isBinaryOrGenerated(file: string): boolean {
-  return BINARY_OR_GENERATED_EXTENSIONS.has(
-    '.' + file.split('.').pop()?.toLowerCase() || ''
-  ) || file.endsWith('-lock.json') || file.endsWith('.lock');
+  const lower = file.toLowerCase();
+  const ext = `.${lower.split('.').pop() || ''}`;
+  return (
+    BINARY_OR_GENERATED_EXTENSIONS.has(ext) ||
+    lower.endsWith('.min.js') ||
+    lower.endsWith('.min.css') ||
+    lower.endsWith('-lock.json') ||
+    lower.endsWith('.lock')
+  );
 }
 
 /**

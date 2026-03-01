@@ -30,7 +30,14 @@ function readCache(): CacheStore {
 }
 
 function writeCache(store: CacheStore): void {
-  writeFileSync(CACHE_FILE, JSON.stringify(store, null, 2), 'utf-8');
+  try {
+    writeFileSync(CACHE_FILE, JSON.stringify(store, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600
+    });
+  } catch {
+    // Cache is best-effort; ignore write failures.
+  }
 }
 
 export function getCachedCommitMessage(

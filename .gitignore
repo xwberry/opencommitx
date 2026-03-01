@@ -12,6 +12,8 @@ src/*.json
 .idea
 test.ts
 notes.md
-.nvmrc# pixi environments
+.nvmrc
+
+# pixi environments
 .pixi/*
 !.pixi/config.toml

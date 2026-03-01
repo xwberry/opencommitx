@@ -32,6 +32,28 @@
 - [x] Changed `defaultConfigPath` from `~/.opencommit` to `~/.opencommitx` to avoid config file collision when both packages are installed
 - [x] Added `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` config key (default 0.9): `shouldUseDocstringMode` now checks `changedLines / fileLines >= ratio` in auto mode, preventing docstring extraction on partial refactors — updated tests with temp-file ratio scenarios
 
+## PR Review Fixes (PR #1 CodeRabbit recommendations)
+
+- [x] `action.yml`: Updated `node16` → `node24` runtime; fixed extra `)` typo in description; removed non-standard `repo` field
+- [x] `.gitignore`: Fixed malformed `.nvmrc# pixi environments` concatenation
+- [x] `pixi.toml`: Added `linux-64`, `osx-64`, `osx-arm64` platforms for cross-platform CI support
+- [x] `src/utils/commitCache.ts`: Made `writeCache` best-effort (try/catch) with `0o600` file permissions
+- [x] `src/utils/customModels.ts`: Made `writeCustomModels` best-effort with `0o600` perms; fixed custom model ordering (was reversing array, now preserves insertion order)
+- [x] `src/utils/diffRouter.ts`: Fixed `isBinaryOrGenerated` — `.min.js`/`.min.css` were never matched because `.split('.').pop()` returned `js`/`css`; now uses explicit `endsWith` checks
+- [x] `src/utils/commitStrategy.ts`: Added `RangeError` guard when `fileGroups.length !== messages.length`
+- [x] `src/commands/commit.ts`: Fixed `docstringOverride` never being used in per-file message generation; added guard against sequential mode silently dropping staged files; fixed `fileGroups.length > 1` → `> 0` so single-group per-file mode works; propagated `context` + `skipCommitConfirmation` through regeneration and recursive `commit()` calls
+- [x] `src/commands/config.ts`: Added `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` to env config parsing; added `describe` metadata for that key; fixed `OCO_HOOK_AUTO_UNCOMMENT` validator missing `return value`
+- [x] `src/commands/setup.ts`: Fixed `isFirstRun` to use `getProviderApiKey` instead of only `OCO_API_KEY`; `promptForMissingApiKey` now saves provider-specific key alongside generic key; `runFullSetup` now calls `selectModel` for local providers (Ollama/MLX) too; added `toPositiveNumber` guard for numeric inputs to prevent `NaN` in config; fixed both success messages showing `~/.opencommit` → `~/.opencommitx`
+- [x] `src/commands/models.ts`: `listModels` and `refreshModels` now use `getProviderApiKey(config, provider)` instead of always `config.OCO_API_KEY`
+- [x] `src/generateCommitMessageFromGitDiff.ts`: Added `context: string = ''` default parameter to `generateCommitMessageChatCompletionPrompt`
+- [x] `src/github-action.ts`: Added `MAX_RETRIES_PER_CHUNK = 3` guard to prevent infinite retry loop on persistent failures; wrapped temp file operations in `try/finally` for guaranteed cleanup; updated branding `OpenCommit` → `OpenCommitX`
+- [x] `src/commands/prepare-commit-msg-hook.ts`: Updated `oco` → `ocox` and `opencommit` → `opencommitx` in user-facing messages
+- [x] `src/engine/aimlapi.ts`: Updated `X-Title` header `opencommit` → `opencommitx`
+- [x] `.github/CONTRIBUTING.md`: Updated target branch `main` → `master`
+- [x] `test/e2e/dryRun.test.ts`: Replaced `render('echo', [...])` with `fs.writeFileSync` for reliable file creation; fixed `['add dryrun.ts']` → `['add', 'dryrun.ts']` argument splitting
+- [x] `test/unit/commitCache.test.ts`: Fixed `CACHE_FILE` path from `.opencommit-cache.json` → `.opencommitx-cache.json`
+- [x] `xdocs/todo.md`: Fixed typo `many` → `may`
+
 ## Backlog
 
 - [ ] Context window sharing strategy for multi-chunk requests (configurable: shared vs separate contexts)

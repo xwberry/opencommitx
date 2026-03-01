@@ -14,7 +14,7 @@ export class AimlApiEngine implements AiEngine {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
-        'X-Title': 'opencommit',
+        'X-Title': 'opencommitx',
         'Content-Type': 'application/json',
         ...config.customHeaders
       }

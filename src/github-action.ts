@@ -8,7 +8,7 @@ import exec from '@actions/exec';
 import github from '@actions/github';
 import { intro, outro } from '@clack/prompts';
 import { PushEvent } from '@octokit/webhooks-types';
-import { unlinkSync, writeFileSync } from 'fs';
+import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff';
 import { randomIntFromInterval } from './utils/randomIntFromInterval';
 import { sleep } from './utils/sleep';
@@ -61,12 +61,15 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
   );
 
   let improvedMessagesAndSHAs: MsgAndSHA[] = [];
+  const MAX_RETRIES_PER_CHUNK = 3;
+  const retryCount = new Map<number, number>();
+
   for (let step = 0; step < improvePromises.length; step += chunkSize) {
     const chunkOfPromises = improvePromises.slice(step, step + chunkSize);
 
     try {
       const chunkOfImprovedMessages = await Promise.all(chunkOfPromises);
-
+      
       const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map(
         (improvedMsg, i) => {
           const index = improvedMessagesAndSHAs.length;
@@ -77,6 +80,7 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
       );
 
       improvedMessagesAndSHAs.push(...chunkOfImprovedMessagesBySha);
+      retryCount.delete(step);
 
       // sometimes openAI errors with 429 code (too many requests),
       // so lets sleep a bit
@@ -89,12 +93,19 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
 
       await sleep(sleepFor);
     } catch (error) {
+      const currentRetries = retryCount.get(step) || 0;
+      if (currentRetries >= MAX_RETRIES_PER_CHUNK) {
+        outro(`Max retries (${MAX_RETRIES_PER_CHUNK}) reached for chunk at step ${step}. Skipping.`);
+        continue;
+      }
+      retryCount.set(step, currentRetries + 1);
+
       outro(error as string);
 
       // if sleeping in try block still fails with 429,
       // openAI wants at least 1 minute before next request
       const sleepFor = 60000 + 1000 * randomIntFromInterval(1, 5);
-      outro(`Retrying after sleeping for ${sleepFor}`);
+      outro(`Retrying (attempt ${currentRetries + 1}/${MAX_RETRIES_PER_CHUNK}) after sleeping for ${sleepFor}`);
       await sleep(sleepFor);
 
       // go to previous step
@@ -148,42 +159,51 @@ async function improveCommitMessages(
     return;
   }
 
-  const createCommitMessageFile = (message: string, index: number) =>
-    writeFileSync(`./commit-${index}.txt`, message);
-  improvedMessagesWithSHAs.forEach(({ msg }, i) =>
-    createCommitMessageFile(msg, i)
-  );
+  const tempFiles: string[] = [];
 
-  writeFileSync(`./count.txt`, '0');
+  try {
+    improvedMessagesWithSHAs.forEach(({ msg }, i) => {
+      const filename = `./commit-${i}.txt`;
+      writeFileSync(filename, msg);
+      tempFiles.push(filename);
+    });
 
-  writeFileSync(
-    './rebase-exec.sh',
-    `#!/bin/bash
+    const countFile = './count.txt';
+    writeFileSync(countFile, '0');
+    tempFiles.push(countFile);
+
+    const rebaseScript = './rebase-exec.sh';
+    writeFileSync(
+      rebaseScript,
+      `#!/bin/bash
     count=$(cat count.txt)
     git commit --amend -F commit-$count.txt
     echo $(( count + 1 )) > count.txt`
-  );
+    );
+    tempFiles.push(rebaseScript);
 
-  await exec.exec(`chmod +x ./rebase-exec.sh`);
+    await exec.exec(`chmod +x ./rebase-exec.sh`);
 
-  await exec.exec(
-    'git',
-    ['rebase', `${commitsToImprove[0].id}^`, '--exec', './rebase-exec.sh'],
-    {
-      env: {
-        GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
-        GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR!,
-        GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`
+    await exec.exec(
+      'git',
+      ['rebase', `${commitsToImprove[0].id}^`, '--exec', './rebase-exec.sh'],
+      {
+        env: {
+          GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
+          GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR!,
+          GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`
+        }
       }
-    }
-  );
-
-  const deleteCommitMessageFile = (index: number) =>
-    unlinkSync(`./commit-${index}.txt`);
-  commitsToImprove.forEach((_commit, i) => deleteCommitMessageFile(i));
-
-  unlinkSync('./count.txt');
-  unlinkSync('./rebase-exec.sh');
+    );
+  } finally {
+    tempFiles.forEach((file) => {
+      try {
+        if (existsSync(file)) unlinkSync(file);
+      } catch {
+        // best-effort cleanup
+      }
+    });
+  }
 
   outro('Force pushing non-interactively rebased commits into remote.');
 
@@ -196,7 +216,7 @@ async function improveCommitMessages(
 }
 
 async function run() {
-  intro('OpenCommit — improving lame commit messages');
+  intro('OpenCommitX — improving lame commit messages');
 
   try {
     if (github.context.eventName === 'push') {

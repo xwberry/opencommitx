@@ -26,7 +26,7 @@ export const prepareCommitMessageHook = async (
 
       if (changedFiles) await gitAdd({ files: changedFiles });
       else {
-        outro('No changes detected, write some code and run `oco` again');
+        outro('No changes detected, write some code and run `ocox` again');
         process.exit(1);
       }
     }
@@ -35,7 +35,7 @@ export const prepareCommitMessageHook = async (
 
     if (!staged) return;
 
-    intro('opencommit');
+    intro('opencommitx');
 
     const config = getConfig();
 

@@ -66,6 +66,33 @@ npm run watch
 
 ## Testing
 
+### Prerequisites for running tests locally
+
+Two things must be set up before running tests, otherwise you'll see ESM parse failures or skipped Python tests:
+
+**1. Node experimental VM modules** — required for ts-jest's ESM mode (chalk v5+ is pure ESM).
+
+`npm test` and `npm run test:unit` set this automatically via `cross-env`. If you invoke jest directly (e.g. `node_modules\.bin\jest.cmd`), set it first:
+
+```powershell
+# PowerShell
+$env:NODE_OPTIONS = "--experimental-vm-modules"
+```
+```bash
+# bash/zsh
+export NODE_OPTIONS=--experimental-vm-modules
+```
+
+**2. Pixi Python environment** — required for the `pythonDocstringExtractor` integration tests. Without it, 3 tests in that suite will be skipped (gracefully) and Python-dependent behaviour won't be verified.
+
+```powershell
+pixi shell   # activates the Python >=3.11 environment defined in pixi.toml
+```
+
+Run this once per terminal session before executing tests. You can verify it worked with `python --version`.
+
+---
+
 ### Unit tests
 
 ```powershell
@@ -224,7 +251,11 @@ Clear the commit message cache:
 
 ```powershell
 # Delete manually
-Remove-Item "$env:USERPROFILE\.opencommit-cache.json"
+Remove-Item "$env:USERPROFILE\.opencommitx-cache.json"
+```
+```bash
+# Linux/macOS
+rm ~/.opencommitx-cache.json
 ```
 
 Or from within the tool:
