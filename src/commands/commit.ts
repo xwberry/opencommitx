@@ -276,20 +276,29 @@ async function generatePerFileCommits(
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || 'single';
 
   const genSpinner = spinner();
+
+  const sigintHandler = () => {
+    genSpinner.stop('Cancelled');
+    process.exit(1);
+  };
+  process.once('SIGINT', sigintHandler);
+
   genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
 
   let rawMessages: string[];
   try {
-    rawMessages = await Promise.all(
-      fileGroups.map(async (group) => {
-        const payload = group.docstringOverride ?? (await getDiffForFiles(group.files));
-        return generateCommitMessageByDiff(payload, fullGitMojiSpec, context);
-      })
-    );
+    rawMessages = [];
+    for (const group of fileGroups) {
+      const payload = group.docstringOverride ?? (await getDiffForFiles(group.files));
+      const msg = await generateCommitMessageByDiff(payload, fullGitMojiSpec, context);
+      rawMessages.push(msg);
+    }
     genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
   } catch (error) {
     genSpinner.stop(`${chalk.red('✖')} Failed to generate commit messages`);
     throw error;
+  } finally {
+    process.removeListener('SIGINT', sigintHandler);
   }
 
   // buildCommitPlan enforces the index-aligned file↔message contract

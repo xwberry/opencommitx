@@ -17,6 +17,7 @@ export class OpenRouterEngine implements AiEngine {
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: 'https://openrouter.ai/api/v1',
+      timeout: 60_000,
       defaultHeaders: {
         'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
         'X-Title': 'OpenCommitX',

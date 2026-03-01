@@ -1,5 +1,4 @@
 - [ ] add dynamic provider utility to route specific requests to different APIs
     - [ ] maybe a failover in case an api rate limit is hit; could also check api key limits before sending prompts and have anything that's expected to surpass the rate limit route to a different model.
     - [ ] not sure if this requires some additional aggregation logic but maybe if the multi-commit feature works it won't matter?
-- [x] For the long python files, if the diff length is the same as the length of the file (maybe have a buffer for empty or skipped lines) then use the docstring script. otherwise this will just read docstrings on comprehensive refactors. — Implemented via `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9): docstring extraction only activates when `changedLines / totalFileLines >= ratio`.
 - [ ] consider changing home directory file operations to a dedicated .opencommitx directory rather than individual files, since this version may save multiple files.

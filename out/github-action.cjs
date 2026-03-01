@@ -115542,8 +115542,7 @@ async function improveMessagesInChunks(diffsAndSHAs) {
       const chunkOfImprovedMessages = await Promise.all(chunkOfPromises);
       const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map(
         (improvedMsg, i3) => {
-          const index = improvedMessagesAndSHAs.length;
-          const sha = diffsAndSHAs[index + i3].sha;
+          const sha = diffsAndSHAs[step + i3].sha;
           return { sha, msg: improvedMsg };
         }
       );
@@ -115557,8 +115556,9 @@ async function improveMessagesInChunks(diffsAndSHAs) {
     } catch (error) {
       const currentRetries = retryCount.get(step) || 0;
       if (currentRetries >= MAX_RETRIES_PER_CHUNK) {
-        Se(`Max retries (${MAX_RETRIES_PER_CHUNK}) reached for chunk at step ${step}. Skipping.`);
-        continue;
+        throw new Error(
+          `Failed to process chunk at step ${step} after ${MAX_RETRIES_PER_CHUNK} retries. Aborting to avoid partial rebase.`
+        );
       }
       retryCount.set(step, currentRetries + 1);
       Se(error);
@@ -115661,7 +115661,7 @@ async function run() {
     } else {
       Se("Wrong action.");
       import_core30.default.error(
-        `OpenCommit was called on ${import_github.default.context.payload.action}. OpenCommit is supposed to be used on "push" action.`
+        `OpenCommitX was called on ${import_github.default.context.payload.action}. OpenCommitX is supposed to be used on "push" action.`
       );
     }
   } catch (error) {

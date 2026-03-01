@@ -31,6 +31,7 @@
 - [x] Fixed `commitStrategy.test.ts` env var tests — removed incorrect `JSON.parse` on bare strings; plain `process.env` read matches `parseConfigVarValue` fallback behaviour
 - [x] Changed `defaultConfigPath` from `~/.opencommit` to `~/.opencommitx` to avoid config file collision when both packages are installed
 - [x] Added `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` config key (default 0.9): `shouldUseDocstringMode` now checks `changedLines / fileLines >= ratio` in auto mode, preventing docstring extraction on partial refactors — updated tests with temp-file ratio scenarios
+- [x] For the long python files, if the diff length is the same as the length of the file (maybe have a buffer for empty or skipped lines) then use the docstring script. otherwise this will just read docstrings on comprehensive refactors. — Implemented via `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9): docstring extraction only activates when `changedLines / totalFileLines >= ratio`.
 
 ## PR Review Fixes (PR #1 CodeRabbit recommendations)
 
@@ -53,6 +54,13 @@
 - [x] `test/e2e/dryRun.test.ts`: Replaced `render('echo', [...])` with `fs.writeFileSync` for reliable file creation; fixed `['add dryrun.ts']` → `['add', 'dryrun.ts']` argument splitting
 - [x] `test/unit/commitCache.test.ts`: Fixed `CACHE_FILE` path from `.opencommit-cache.json` → `.opencommitx-cache.json`
 - [x] `xdocs/todo.md`: Fixed typo `many` → `may`
+
+## Beginning Phase 2
+- [x] Fix incorrect version check warning (was querying `opencommit` npm package instead of `opencommitx`).
+- [x] Fix hang during multi-commit generation: switched `Promise.all` to sequential `for...of` in `generatePerFileCommits` to avoid concurrent `@clack/prompts` spinner + git subprocess + WASM conflicts.
+- [x] Fix Ctrl+C not working during generation: added `SIGINT` handler around spinner that stops the spinner and exits cleanly.
+- [x] Add 60s timeout to OpenRouter engine as a defensive measure against silent API hangs.
+- [x] Bump version to 1.0.1.
 
 ## Backlog
 

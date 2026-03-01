@@ -1,6 +1,6 @@
 {
   "name": "opencommitx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered commit message generator with smart diff routing, caching, and per-provider API keys. Fork of opencommit.",
   "keywords": [
     "git",
