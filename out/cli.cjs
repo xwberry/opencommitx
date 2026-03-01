@@ -48534,7 +48534,7 @@ var package_default = {
     oco: "out/cli.cjs"
   },
   repository: {
-    url: "git+https://github.com/XanderBerry/opencommitx.git"
+    url: "git+https://github.com/xwberry/opencommitx.git"
   },
   type: "module",
   author: "https://github.com/di-sukharev",
@@ -48555,9 +48555,9 @@ var package_default = {
   scripts: {
     watch: "npm run -S build -- --sourcemap --watch",
     start: "node ./out/cli.cjs",
-    "ollama:start": "OCO_AI_PROVIDER='ollama' node ./out/cli.cjs",
+    "ollama:start": "cross-env OCO_AI_PROVIDER=ollama node ./out/cli.cjs",
     dev: "ts-node ./src/cli.ts",
-    "dev:gemini": "OCO_AI_PROVIDER='gemini' ts-node ./src/cli.ts",
+    "dev:gemini": "cross-env OCO_AI_PROVIDER=gemini ts-node ./src/cli.ts",
     build: "npx rimraf out && node esbuild.config.js",
     "local:build-push": "npm run build && git add . && git commit -m 'build' && git push",
     deploy: "npm publish --tag latest",
@@ -48566,15 +48566,15 @@ var package_default = {
     lint: "eslint src --ext ts && tsc --noEmit",
     format: "prettier --write src",
     "format:check": "prettier --check src",
-    test: "node --no-warnings --experimental-vm-modules $( [ -f ./node_modules/.bin/jest ] && echo ./node_modules/.bin/jest || which jest ) test/unit",
+    test: "cross-env NODE_OPTIONS=--experimental-vm-modules jest test/unit",
     "test:all": "npm run test:unit:docker && npm run test:e2e:docker",
     "test:docker-build": "docker build -t oco-test -f test/Dockerfile .",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest test/unit",
-    "test:unit:docker": "npm run test:docker-build && DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:unit",
-    "test:e2e": "npm run test:e2e:setup && jest test/e2e",
+    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest test/unit",
+    "test:unit:docker": "npm run test:docker-build && cross-env DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:unit",
+    "test:e2e": "npm run test:e2e:setup && cross-env NODE_OPTIONS=--experimental-vm-modules jest test/e2e",
     "test:e2e:setup": "sh test/e2e/setup.sh",
-    "test:e2e:docker": "npm run test:docker-build && DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:e2e",
-    "mlx:start": "OCO_AI_PROVIDER='mlx' node ./out/cli.cjs"
+    "test:e2e:docker": "npm run test:docker-build && cross-env DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:e2e",
+    "mlx:start": "cross-env OCO_AI_PROVIDER=mlx node ./out/cli.cjs"
   },
   devDependencies: {
     "@commitlint/types": "^17.4.4",
@@ -48585,6 +48585,7 @@ var package_default = {
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "cli-testing-library": "^2.0.2",
+    "cross-env": "^10.1.0",
     dotenv: "^16.0.3",
     esbuild: "^0.25.5",
     eslint: "^9.24.0",
@@ -50566,6 +50567,7 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PER_FILE_COMMIT_MODE"] = "OCO_PER_FILE_COMMIT_MODE";
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_THRESHOLD"] = "OCO_PYTHON_DOCSTRING_THRESHOLD";
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_MODE"] = "OCO_PYTHON_DOCSTRING_MODE";
+  CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
   CONFIG_KEYS2["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
   CONFIG_KEYS2["OCO_ANTHROPIC_KEY"] = "OCO_ANTHROPIC_KEY";
@@ -51143,7 +51145,7 @@ var validateConfig = (key, condition, validationMessage) => {
   if (!condition) {
     ce(`${source_default.red("\u2716")} wrong value for ${key}: ${validationMessage}.`);
     ce(
-      "For more help refer to docs https://github.com/di-sukharev/opencommit"
+      "For more help refer to docs https://github.com/xwberry/opencommitx"
     );
     process.exit(1);
   }
@@ -51377,6 +51379,15 @@ var configValidators = {
     );
     return value;
   },
+  ["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */,
+      !isNaN(n2) && n2 >= 0 && n2 <= 1,
+      "Must be a number between 0 and 1 (e.g. 0.9)"
+    );
+    return n2;
+  },
   ["OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */](value) {
     validateConfig(
       "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */,
@@ -51463,7 +51474,7 @@ var RECOMMENDED_MODELS = {
   ["openrouter" /* OPENROUTER */]: "openai/gpt-4o-mini",
   ["aimlapi" /* AIMLAPI */]: "gpt-4o-mini"
 };
-var defaultConfigPath = (0, import_path.join)((0, import_os.homedir)(), ".opencommit");
+var defaultConfigPath = (0, import_path.join)((0, import_os.homedir)(), ".opencommitx");
 var defaultEnvPath = (0, import_path.resolve)(process.cwd(), ".env");
 var OCO_PROMPT_MODULE_ENUM = /* @__PURE__ */ ((OCO_PROMPT_MODULE_ENUM2) => {
   OCO_PROMPT_MODULE_ENUM2["CONVENTIONAL_COMMIT"] = "conventional-commit";
@@ -51495,6 +51506,9 @@ var DEFAULT_CONFIG = {
   OCO_PER_FILE_COMMIT_MODE: "auto",
   OCO_PYTHON_DOCSTRING_THRESHOLD: 500,
   OCO_PYTHON_DOCSTRING_MODE: "auto",
+  // Only use docstrings when diff covers at least this fraction of the file.
+  // Prevents extracting docstrings on partial refactors (use the real diff instead).
+  OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: 0.9,
   // Multi-commit default
   OCO_MULTI_COMMIT_STRATEGY: "single"
 };
@@ -51616,7 +51630,7 @@ var setConfig = (keyValues, globalConfigPath = defaultConfigPath) => {
 
 ${supportedKeys}.
 
-For more help refer to our docs: https://github.com/XanderBerry/opencommitx`
+For more help refer to our docs: https://github.com/xwberry/opencommitx`
       );
     }
     let parsedConfigValue;
@@ -51802,7 +51816,7 @@ ${param}:`));
     console.log(source_default.gray(`  Default: ${defaultValue}`));
   }
   if (currentValue !== void 0 && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? "~/.opencommit" : ".env";
+    const source = getIsGlobalConfigFileExist() ? "~/.opencommitx" : ".env";
     console.log(source_default.cyan(`  Current: ${currentValue}`) + source_default.dim(` (from ${source})`));
   } else {
     console.log(source_default.dim("  Current: (not set)"));
@@ -51824,7 +51838,7 @@ ${param}:`));
 }
 function printAllConfigHelp() {
   const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {};
-  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommit" : "(no config file)";
+  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommitx" : "(no config file)";
   console.log(source_default.bold("Available config parameters:"));
   console.log(source_default.dim(`  Current values loaded from: ${configFileSource}
 `));
@@ -51910,6 +51924,22 @@ init_dist2();
 
 // src/modules/commitlint/config.ts
 init_dist2();
+
+// src/utils/providerKeys.ts
+function getProviderApiKey(config6, provider) {
+  const providerKeyMap = {
+    openai: config6.OCO_OPENAI_KEY,
+    anthropic: config6.OCO_ANTHROPIC_KEY,
+    openrouter: config6.OCO_OPENROUTER_KEY,
+    gemini: config6.OCO_GEMINI_KEY,
+    groq: config6.OCO_GROQ_KEY,
+    mistral: config6.OCO_MISTRAL_KEY,
+    deepseek: config6.OCO_DEEPSEEK_KEY,
+    aimlapi: config6.OCO_AIMLAPI_KEY,
+    azure: config6.OCO_AZURE_KEY
+  };
+  return providerKeyMap[provider] || config6.OCO_API_KEY || "";
+}
 
 // node_modules/@anthropic-ai/sdk/version.mjs
 var VERSION = "0.19.2";
@@ -67529,7 +67559,7 @@ var AimlApiEngine = class {
       baseURL: config6.baseURL || "https://api.aimlapi.com/v1/chat/completions",
       headers: {
         Authorization: `Bearer ${config6.apiKey}`,
-        "HTTP-Referer": "https://github.com/di-sukharev/opencommit",
+        "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "opencommit",
         "Content-Type": "application/json",
         ...config6.customHeaders
@@ -67561,7 +67591,7 @@ var OpenRouterEngine = class {
       apiKey: config6.apiKey,
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
-        "HTTP-Referer": "https://github.com/XanderBerry/opencommitx",
+        "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "OpenCommitX",
         ...config6.customHeaders || {}
       }
@@ -67587,20 +67617,6 @@ function parseCustomHeaders(headers) {
     );
   }
   return parsedHeaders;
-}
-function getProviderApiKey(config6, provider) {
-  const providerKeyMap = {
-    openai: config6.OCO_OPENAI_KEY,
-    anthropic: config6.OCO_ANTHROPIC_KEY,
-    openrouter: config6.OCO_OPENROUTER_KEY,
-    gemini: config6.OCO_GEMINI_KEY,
-    groq: config6.OCO_GROQ_KEY,
-    mistral: config6.OCO_MISTRAL_KEY,
-    deepseek: config6.OCO_DEEPSEEK_KEY,
-    aimlapi: config6.OCO_AIMLAPI_KEY,
-    azure: config6.OCO_AZURE_KEY
-  };
-  return providerKeyMap[provider] || config6.OCO_API_KEY || "";
 }
 function getEngine() {
   const config6 = getConfig();
@@ -68384,6 +68400,17 @@ function delay3(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// src/utils/commitStrategy.ts
+function buildCommitPlan(fileGroups, messages) {
+  return fileGroups.map((group, i3) => ({
+    files: group.files,
+    message: messages[i3]
+  }));
+}
+function combineCommitMessages(messages) {
+  return messages.join("\n\n");
+}
+
 // src/utils/git.ts
 var import_fs3 = require("fs");
 var import_ignore = __toESM(require_ignore(), 1);
@@ -68566,11 +68593,11 @@ var import_path6 = require("path");
 var SCRIPT_NAME = "extract_docstrings.py";
 function findScriptPath() {
   const candidates = [
-    // Installed: out/ -> package root/scripts/
-    (0, import_path6.join)(__dirname, "..", "scripts", SCRIPT_NAME),
-    // Development: project root/scripts/
     (0, import_path6.join)(process.cwd(), "scripts", SCRIPT_NAME)
   ];
+  if (typeof __dirname !== "undefined") {
+    candidates.push((0, import_path6.join)(__dirname, "..", "scripts", SCRIPT_NAME));
+  }
   for (const candidate of candidates) {
     if ((0, import_fs5.existsSync)(candidate)) return candidate;
   }
@@ -68605,9 +68632,16 @@ function shouldUseDocstringMode(filepath, changedLines) {
   const config6 = getConfig();
   const mode = config6.OCO_PYTHON_DOCSTRING_MODE || "auto";
   const threshold = config6.OCO_PYTHON_DOCSTRING_THRESHOLD ?? 500;
+  const wholeFileRatio = config6.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO ?? 0.9;
   if (mode === "never") return false;
   if (mode === "always") return true;
-  return changedLines > threshold;
+  if (changedLines <= threshold) return false;
+  try {
+    const fileLines = (0, import_fs5.readFileSync)(filepath, "utf-8").split("\n").length;
+    return changedLines / fileLines >= wholeFileRatio;
+  } catch {
+    return true;
+  }
 }
 
 // src/utils/diffRouter.ts
@@ -68628,7 +68662,7 @@ function isBinaryOrGenerated(file) {
     "." + file.split(".").pop()?.toLowerCase() || ""
   ) || file.endsWith("-lock.json") || file.endsWith(".lock");
 }
-function routeDiff(stats, config6) {
+function routeDiff(stats, config6, _shouldUse = shouldUseDocstringMode, _extract = extractPythonDocstrings) {
   const mode = config6.OCO_PER_FILE_COMMIT_MODE || "auto";
   const threshold = config6.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
   const relevantStats = stats.filter((s2) => !isBinaryOrGenerated(s2.file));
@@ -68664,7 +68698,7 @@ function routeDiff(stats, config6) {
   }
   const groups = largeFiles.map((s2) => {
     const totalLines = s2.added + s2.deleted;
-    const docstringOverride = shouldUseDocstringMode(s2.file, totalLines) ? extractPythonDocstrings(s2.file) ?? void 0 : void 0;
+    const docstringOverride = _shouldUse(s2.file, totalLines) ? _extract(s2.file) ?? void 0 : void 0;
     return {
       files: [s2.file],
       totalLines,
@@ -68873,36 +68907,40 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
 async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, context, fullGitMojiSpec, skipCommitConfirmation) {
   const currentConfig = getConfig();
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || "single";
-  const commitMessages = [];
   const genSpinner = le();
   genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
+  let rawMessages;
   try {
-    for (const group of fileGroups) {
-      const groupDiff = await getDiffForFiles(group.files);
-      const message = await generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context);
-      commitMessages.push({ files: group.files, message });
-    }
-    genSpinner.stop(`\u{1F4DD} Generated ${commitMessages.length} commit message(s)`);
+    rawMessages = await Promise.all(
+      fileGroups.map(async (group) => {
+        const groupDiff = await getDiffForFiles(group.files);
+        return generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context);
+      })
+    );
+    genSpinner.stop(`\u{1F4DD} Generated ${rawMessages.length} commit message(s)`);
   } catch (error) {
     genSpinner.stop(`${source_default.red("\u2716")} Failed to generate commit messages`);
     throw error;
   }
+  const commitPlan = buildCommitPlan(fileGroups, rawMessages);
   if (strategy === "single") {
-    const combinedMessage = commitMessages.map((c4) => c4.message).join("\n\n");
+    const combinedMessage = combineCommitMessages(commitPlan.map((c4) => c4.message));
     const fullDiff = await getDiffForFiles(stagedFiles);
     setCachedCommitMessage(fullDiff, combinedMessage);
     const committed = await performCommit(combinedMessage, extraArgs2, skipCommitConfirmation);
     if (committed) await handleGitPush();
     return;
   }
+  await execa("git", ["reset", "HEAD", "--"]);
   let acceptAll = false;
   const accepted = [];
-  for (let i3 = 0; i3 < commitMessages.length; i3++) {
-    const { files, message } = commitMessages[i3];
-    const label = `File group ${i3 + 1}/${commitMessages.length}: ${files.join(", ")}`;
+  for (let i3 = 0; i3 < commitPlan.length; i3++) {
+    const { files, message } = commitPlan[i3];
+    const label = `File group ${i3 + 1}/${commitPlan.length}: ${files.join(", ")}`;
+    await execa("git", ["add", "--", ...files]);
     if (acceptAll) {
       const committingSpinner = le();
-      committingSpinner.start(`Committing group ${i3 + 1}/${commitMessages.length}`);
+      committingSpinner.start(`Committing group ${i3 + 1}/${commitPlan.length}`);
       await execa("git", ["commit", "-m", message, ...extraArgs2]);
       committingSpinner.stop(`${source_default.green("\u2714")} Committed group ${i3 + 1}`);
       accepted.push(message);
@@ -68915,7 +68953,7 @@ ${message}
 ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014")}`
     );
     const userAction = skipCommitConfirmation ? "Accept" : await ee({
-      message: `Commit message ${i3 + 1}/${commitMessages.length}?`,
+      message: `Commit message ${i3 + 1}/${commitPlan.length}?`,
       options: [
         { value: "Accept", label: "Accept" },
         { value: "Edit", label: "Edit" },
@@ -68927,7 +68965,10 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
     if (userAction === "AcceptAll") {
       acceptAll = true;
     }
-    if (userAction === "Skip") continue;
+    if (userAction === "Skip") {
+      await execa("git", ["reset", "HEAD", "--", ...files]);
+      continue;
+    }
     let finalMessage = message;
     if (userAction === "Edit") {
       const textResponse = await J4({
@@ -69186,7 +69227,7 @@ var prepareCommitMessageHook = async (isStageAllFlag = false) => {
     const config6 = getConfig();
     if (!config6.OCO_API_KEY) {
       ce(
-        "No OCO_API_KEY is set. Set your key via `oco config set OCO_API_KEY=<value>. For more info see https://github.com/di-sukharev/opencommit"
+        "No OCO_API_KEY is set. Set your key via `ocox config set OCO_API_KEY=<value>. For more info see https://github.com/xwberry/opencommitx"
       );
       return;
     }

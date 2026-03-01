@@ -1,11 +1,10 @@
 import { routeDiff } from '../../src/utils/diffRouter';
 import type { FileStats } from '../../src/utils/git';
 
-// Prevent actual Python docstring extraction in tests
-jest.mock('../../src/utils/pythonDocstringExtractor', () => ({
-  extractPythonDocstrings: jest.fn().mockReturnValue(null),
-  shouldUseDocstringMode: jest.fn().mockReturnValue(false)
-}));
+// Dependency-injected mocks — no jest.mock() path games needed.
+const neverUse = () => false;
+const alwaysUse = () => true;
+const nullExtract = () => null;
 
 describe('diffRouter', () => {
   const baseConfig = {
@@ -17,9 +16,7 @@ describe('diffRouter', () => {
 
   describe('never mode', () => {
     it('returns usePerFile=false regardless of file sizes', () => {
-      const stats: FileStats[] = [
-        { added: 500, deleted: 200, file: 'big.ts' }
-      ];
+      const stats: FileStats[] = [{ added: 500, deleted: 200, file: 'big.ts' }];
       const result = routeDiff(stats, { ...baseConfig, OCO_PER_FILE_COMMIT_MODE: 'never' });
       expect(result.usePerFile).toBe(false);
       expect(result.reason).toContain('disabled');
@@ -58,11 +55,9 @@ describe('diffRouter', () => {
       ];
       const result = routeDiff(stats, baseConfig);
       expect(result.usePerFile).toBe(true);
-      // large.ts gets its own group
       const largeGroup = result.fileGroups.find((g) => g.files.includes('large.ts'));
       expect(largeGroup).toBeDefined();
       expect(largeGroup!.files).toEqual(['large.ts']);
-      // small files are merged
       const smallGroup = result.fileGroups.find((g) => g.files.includes('small1.ts'));
       expect(smallGroup).toBeDefined();
       expect(smallGroup!.files).toContain('small2.ts');
@@ -90,6 +85,27 @@ describe('diffRouter', () => {
     it('returns no groups for empty stats', () => {
       const result = routeDiff([], baseConfig);
       expect(result.usePerFile).toBe(false);
+    });
+
+    it('attaches docstringOverride when shouldUseDocstringMode returns true', () => {
+      const extractResult = '## module: big_module.py (line 1)\nModule docstring here.';
+      const stats: FileStats[] = [{ added: 600, deleted: 50, file: 'big_module.py' }];
+      const result = routeDiff(stats, baseConfig, alwaysUse, () => extractResult);
+      expect(result.usePerFile).toBe(true);
+      expect(result.fileGroups[0].docstringOverride).toContain('Module docstring here');
+    });
+
+    it('leaves docstringOverride undefined when extraction returns null', () => {
+      const stats: FileStats[] = [{ added: 600, deleted: 50, file: 'big_module.py' }];
+      const result = routeDiff(stats, baseConfig, alwaysUse, nullExtract);
+      expect(result.usePerFile).toBe(true);
+      expect(result.fileGroups[0].docstringOverride).toBeUndefined();
+    });
+
+    it('leaves docstringOverride undefined when shouldUse returns false', () => {
+      const stats: FileStats[] = [{ added: 600, deleted: 50, file: 'big_module.py' }];
+      const result = routeDiff(stats, baseConfig, neverUse, () => 'should not appear');
+      expect(result.fileGroups[0].docstringOverride).toBeUndefined();
     });
   });
 });

@@ -31,10 +31,15 @@ function isBinaryOrGenerated(file: string): boolean {
 /**
  * Given numstat results and config, determine whether to use per-file mode
  * and how to group the files.
+ *
+ * `_shouldUse` and `_extract` are injectable for unit tests; production callers
+ * rely on the defaults.
  */
 export function routeDiff(
   stats: FileStats[],
-  config: Partial<ConfigType>
+  config: Partial<ConfigType>,
+  _shouldUse: (file: string, lines: number) => boolean = shouldUseDocstringMode,
+  _extract: (file: string) => string | null = extractPythonDocstrings
 ): RoutingResult {
   const mode = config.OCO_PER_FILE_COMMIT_MODE || 'auto';
   const threshold = config.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
@@ -78,10 +83,9 @@ export function routeDiff(
 
   const groups: FileGroupResult[] = largeFiles.map((s) => {
     const totalLines = s.added + s.deleted;
-    const docstringOverride =
-      shouldUseDocstringMode(s.file, totalLines)
-        ? extractPythonDocstrings(s.file) ?? undefined
-        : undefined;
+    const docstringOverride = _shouldUse(s.file, totalLines)
+      ? _extract(s.file) ?? undefined
+      : undefined;
     return {
       files: [s.file],
       totalLines,

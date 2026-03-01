@@ -1,11 +1,5 @@
-import { getProviderApiKey } from '../../src/utils/engine';
+import { getProviderApiKey } from '../../src/utils/providerKeys';
 import type { ConfigType } from '../../src/commands/config';
-
-// Prevent actual config file access
-jest.mock('../../src/commands/config', () => {
-  const original = jest.requireActual('../../src/commands/config');
-  return { ...original, getConfig: jest.fn() };
-});
 
 describe('getProviderApiKey', () => {
   const baseConfig: Partial<ConfigType> = {

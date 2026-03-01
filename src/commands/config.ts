@@ -37,6 +37,7 @@ export enum CONFIG_KEYS {
   OCO_PER_FILE_COMMIT_MODE = 'OCO_PER_FILE_COMMIT_MODE',
   OCO_PYTHON_DOCSTRING_THRESHOLD = 'OCO_PYTHON_DOCSTRING_THRESHOLD',
   OCO_PYTHON_DOCSTRING_MODE = 'OCO_PYTHON_DOCSTRING_MODE',
+  OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO = 'OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO',
   // Multi-commit strategy (Phase 5)
   OCO_MULTI_COMMIT_STRATEGY = 'OCO_MULTI_COMMIT_STRATEGY',
   // Per-provider API keys (Phase 6)
@@ -632,7 +633,7 @@ const validateConfig = (
     outro(`${chalk.red('✖')} wrong value for ${key}: ${validationMessage}.`);
 
     outro(
-      'For more help refer to docs https://github.com/di-sukharev/opencommit'
+      'For more help refer to docs https://github.com/xwberry/opencommitx'
     );
 
     process.exit(1);
@@ -904,6 +905,16 @@ export const configValidators = {
     return value;
   },
 
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO,
+      !isNaN(n) && n >= 0 && n <= 1,
+      'Must be a number between 0 and 1 (e.g. 0.9)'
+    );
+    return n;
+  },
+
   [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY,
@@ -1029,6 +1040,7 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE]: string;
   [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD]: number;
   [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE]: string;
+  [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO]: number;
   // Multi-commit
   [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY]: string;
   // Per-provider keys
@@ -1043,7 +1055,7 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_AZURE_KEY]?: string;
 };
 
-export const defaultConfigPath = pathJoin(homedir(), '.opencommit');
+export const defaultConfigPath = pathJoin(homedir(), '.opencommitx');
 export const defaultEnvPath = pathResolve(process.cwd(), '.env');
 
 const assertConfigsAreValid = (config: Record<string, any>) => {
@@ -1061,7 +1073,7 @@ const assertConfigsAreValid = (config: Record<string, any>) => {
     } catch (error) {
       outro(`Unknown '${key}' config option or missing validator.`);
       outro(
-        `Manually fix the '.env' file or global '~/.opencommit' config file.`
+        `Manually fix the '.env' file or global '~/.opencommitx' config file.`
       );
 
       process.exit(1);
@@ -1098,6 +1110,9 @@ export const DEFAULT_CONFIG = {
   OCO_PER_FILE_COMMIT_MODE: 'auto',
   OCO_PYTHON_DOCSTRING_THRESHOLD: 500,
   OCO_PYTHON_DOCSTRING_MODE: 'auto',
+  // Only use docstrings when diff covers at least this fraction of the file.
+  // Prevents extracting docstrings on partial refactors (use the real diff instead).
+  OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: 0.9,
   // Multi-commit default
   OCO_MULTI_COMMIT_STRATEGY: 'single'
 };
@@ -1192,9 +1207,9 @@ export const getGlobalConfig = (configPath: string = defaultConfigPath) => {
 
 /**
  * Merges two configs.
- * Env config takes precedence over global ~/.opencommit config file
+ * Env config takes precedence over global ~/.opencommitx config file
  * @param main - env config
- * @param fallback - global ~/.opencommit config file
+ * @param fallback - global ~/.opencommitx config file
  * @returns merged config
  */
 const mergeConfigs = (main: Partial<ConfigType>, fallback: ConfigType) => {
@@ -1258,7 +1273,7 @@ export const setConfig = (
     if (!configValidators.hasOwnProperty(key)) {
       const supportedKeys = Object.keys(configValidators).join('\n');
       throw new Error(
-        `Unsupported config key: ${key}. Expected keys are:\n\n${supportedKeys}.\n\nFor more help refer to our docs: https://github.com/XanderBerry/opencommitx`
+        `Unsupported config key: ${key}. Expected keys are:\n\n${supportedKeys}.\n\nFor more help refer to our docs: https://github.com/xwberry/opencommitx`
       );
     }
 
@@ -1461,7 +1476,7 @@ function printConfigKeyHelp(param) {
   }
 
   if (currentValue !== undefined && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? '~/.opencommit' : '.env';
+    const source = getIsGlobalConfigFileExist() ? '~/.opencommitx' : '.env';
     console.log(chalk.cyan(`  Current: ${currentValue}`) + chalk.dim(` (from ${source})`));
   } else {
     console.log(chalk.dim('  Current: (not set)'));
@@ -1485,7 +1500,7 @@ function printConfigKeyHelp(param) {
 
 function printAllConfigHelp() {
   const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {} as any;
-  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommit' : '(no config file)';
+  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommitx' : '(no config file)';
 
   console.log(chalk.bold('Available config parameters:'));
   console.log(chalk.dim(`  Current values loaded from: ${configFileSource}\n`));

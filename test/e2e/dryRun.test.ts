@@ -12,7 +12,7 @@ it('--dry-run flag generates a commit message without committing', async () => {
   await render('git', ['add dryrun.ts'], { cwd: gitDir });
 
   const { findByText } = await render(
-    'node',
+    `OCO_AI_PROVIDER='test' node`,
     [resolve('./out/cli.cjs'), '--dry-run'],
     { cwd: gitDir }
   );
@@ -29,7 +29,7 @@ it('-d short flag also triggers dry run', async () => {
   await render('git', ['add shortflag.ts'], { cwd: gitDir });
 
   const { findByText } = await render(
-    'node',
+    `OCO_AI_PROVIDER='test' node`,
     [resolve('./out/cli.cjs'), '-d'],
     { cwd: gitDir }
   );

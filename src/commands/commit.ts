@@ -12,6 +12,10 @@ import chalk from 'chalk';
 import { execa } from 'execa';
 import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff';
 import {
+  buildCommitPlan,
+  combineCommitMessages
+} from '../utils/commitStrategy';
+import {
   formatUserFriendlyError,
   printFormattedError
 } from '../utils/errors';
@@ -268,25 +272,29 @@ async function generatePerFileCommits(
 ): Promise<void> {
   const currentConfig = getConfig();
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || 'single';
-  const commitMessages: Array<{ files: string[]; message: string }> = [];
 
   const genSpinner = spinner();
   genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
 
+  let rawMessages: string[];
   try {
-    for (const group of fileGroups) {
-      const groupDiff = await getDiffForFiles(group.files);
-      const message = await generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context);
-      commitMessages.push({ files: group.files, message });
-    }
-    genSpinner.stop(`📝 Generated ${commitMessages.length} commit message(s)`);
+    rawMessages = await Promise.all(
+      fileGroups.map(async (group) => {
+        const groupDiff = await getDiffForFiles(group.files);
+        return generateCommitMessageByDiff(groupDiff, fullGitMojiSpec, context);
+      })
+    );
+    genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
   } catch (error) {
     genSpinner.stop(`${chalk.red('✖')} Failed to generate commit messages`);
     throw error;
   }
 
+  // buildCommitPlan enforces the index-aligned file↔message contract
+  const commitPlan = buildCommitPlan(fileGroups, rawMessages);
+
   if (strategy === 'single') {
-    const combinedMessage = commitMessages.map((c) => c.message).join('\n\n');
+    const combinedMessage = combineCommitMessages(commitPlan.map((c) => c.message));
     const fullDiff = await getDiffForFiles(stagedFiles);
     setCachedCommitMessage(fullDiff, combinedMessage);
     const committed = await performCommit(combinedMessage, extraArgs, skipCommitConfirmation);
@@ -294,17 +302,23 @@ async function generatePerFileCommits(
     return;
   }
 
-  // Sequential: loop through each message with Accept/Skip/Accept All
+  // Sequential strategy: unstage everything, then stage and commit per-group.
+  // This ensures group[i].files are committed with group[i].message — not all staged files.
+  await execa('git', ['reset', 'HEAD', '--']);
+
   let acceptAll = false;
   const accepted: string[] = [];
 
-  for (let i = 0; i < commitMessages.length; i++) {
-    const { files, message } = commitMessages[i];
-    const label = `File group ${i + 1}/${commitMessages.length}: ${files.join(', ')}`;
+  for (let i = 0; i < commitPlan.length; i++) {
+    const { files, message } = commitPlan[i];
+    const label = `File group ${i + 1}/${commitPlan.length}: ${files.join(', ')}`;
+
+    // Stage only this group's files before presenting/committing
+    await execa('git', ['add', '--', ...files]);
 
     if (acceptAll) {
       const committingSpinner = spinner();
-      committingSpinner.start(`Committing group ${i + 1}/${commitMessages.length}`);
+      committingSpinner.start(`Committing group ${i + 1}/${commitPlan.length}`);
       await execa('git', ['commit', '-m', message, ...extraArgs]);
       committingSpinner.stop(`${chalk.green('✔')} Committed group ${i + 1}`);
       accepted.push(message);
@@ -318,7 +332,7 @@ async function generatePerFileCommits(
     const userAction = skipCommitConfirmation
       ? 'Accept'
       : await select({
-          message: `Commit message ${i + 1}/${commitMessages.length}?`,
+          message: `Commit message ${i + 1}/${commitPlan.length}?`,
           options: [
             { value: 'Accept', label: 'Accept' },
             { value: 'Edit', label: 'Edit' },
@@ -333,7 +347,11 @@ async function generatePerFileCommits(
       acceptAll = true;
     }
 
-    if (userAction === 'Skip') continue;
+    if (userAction === 'Skip') {
+      // Unstage this group's files so they don't bleed into a later commit
+      await execa('git', ['reset', 'HEAD', '--', ...files]);
+      continue;
+    }
 
     let finalMessage = message;
     if (userAction === 'Edit') {

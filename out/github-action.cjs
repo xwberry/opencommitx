@@ -71554,6 +71554,7 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PER_FILE_COMMIT_MODE"] = "OCO_PER_FILE_COMMIT_MODE";
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_THRESHOLD"] = "OCO_PYTHON_DOCSTRING_THRESHOLD";
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_MODE"] = "OCO_PYTHON_DOCSTRING_MODE";
+  CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
   CONFIG_KEYS2["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
   CONFIG_KEYS2["OCO_ANTHROPIC_KEY"] = "OCO_ANTHROPIC_KEY";
@@ -72131,7 +72132,7 @@ var validateConfig = (key, condition, validationMessage) => {
   if (!condition) {
     ce(`${source_default.red("\u2716")} wrong value for ${key}: ${validationMessage}.`);
     ce(
-      "For more help refer to docs https://github.com/di-sukharev/opencommit"
+      "For more help refer to docs https://github.com/xwberry/opencommitx"
     );
     process.exit(1);
   }
@@ -72365,6 +72366,15 @@ var configValidators = {
     );
     return value;
   },
+  ["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */,
+      !isNaN(n2) && n2 >= 0 && n2 <= 1,
+      "Must be a number between 0 and 1 (e.g. 0.9)"
+    );
+    return n2;
+  },
   ["OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */](value) {
     validateConfig(
       "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */,
@@ -72436,7 +72446,7 @@ var RECOMMENDED_MODELS = {
   ["openrouter" /* OPENROUTER */]: "openai/gpt-4o-mini",
   ["aimlapi" /* AIMLAPI */]: "gpt-4o-mini"
 };
-var defaultConfigPath = (0, import_path.join)((0, import_os.homedir)(), ".opencommit");
+var defaultConfigPath = (0, import_path.join)((0, import_os.homedir)(), ".opencommitx");
 var defaultEnvPath = (0, import_path.resolve)(process.cwd(), ".env");
 var OCO_PROMPT_MODULE_ENUM = /* @__PURE__ */ ((OCO_PROMPT_MODULE_ENUM2) => {
   OCO_PROMPT_MODULE_ENUM2["CONVENTIONAL_COMMIT"] = "conventional-commit";
@@ -72468,6 +72478,9 @@ var DEFAULT_CONFIG = {
   OCO_PER_FILE_COMMIT_MODE: "auto",
   OCO_PYTHON_DOCSTRING_THRESHOLD: 500,
   OCO_PYTHON_DOCSTRING_MODE: "auto",
+  // Only use docstrings when diff covers at least this fraction of the file.
+  // Prevents extracting docstrings on partial refactors (use the real diff instead).
+  OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: 0.9,
   // Multi-commit default
   OCO_MULTI_COMMIT_STRATEGY: "single"
 };
@@ -72589,7 +72602,7 @@ var setConfig = (keyValues, globalConfigPath = defaultConfigPath) => {
 
 ${supportedKeys}.
 
-For more help refer to our docs: https://github.com/XanderBerry/opencommitx`
+For more help refer to our docs: https://github.com/xwberry/opencommitx`
       );
     }
     let parsedConfigValue;
@@ -72775,7 +72788,7 @@ ${param}:`));
     console.log(source_default.gray(`  Default: ${defaultValue}`));
   }
   if (currentValue !== void 0 && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? "~/.opencommit" : ".env";
+    const source = getIsGlobalConfigFileExist() ? "~/.opencommitx" : ".env";
     console.log(source_default.cyan(`  Current: ${currentValue}`) + source_default.dim(` (from ${source})`));
   } else {
     console.log(source_default.dim("  Current: (not set)"));
@@ -72797,7 +72810,7 @@ ${param}:`));
 }
 function printAllConfigHelp() {
   const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {};
-  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommit" : "(no config file)";
+  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommitx" : "(no config file)";
   console.log(source_default.bold("Available config parameters:"));
   console.log(source_default.dim(`  Current values loaded from: ${configFileSource}
 `));
@@ -72883,6 +72896,22 @@ init_dist2();
 
 // src/modules/commitlint/config.ts
 init_dist2();
+
+// src/utils/providerKeys.ts
+function getProviderApiKey(config5, provider) {
+  const providerKeyMap = {
+    openai: config5.OCO_OPENAI_KEY,
+    anthropic: config5.OCO_ANTHROPIC_KEY,
+    openrouter: config5.OCO_OPENROUTER_KEY,
+    gemini: config5.OCO_GEMINI_KEY,
+    groq: config5.OCO_GROQ_KEY,
+    mistral: config5.OCO_MISTRAL_KEY,
+    deepseek: config5.OCO_DEEPSEEK_KEY,
+    aimlapi: config5.OCO_AIMLAPI_KEY,
+    azure: config5.OCO_AZURE_KEY
+  };
+  return providerKeyMap[provider] || config5.OCO_API_KEY || "";
+}
 
 // node_modules/@anthropic-ai/sdk/version.mjs
 var VERSION = "0.19.2";
@@ -88309,7 +88338,7 @@ var AimlApiEngine = class {
       baseURL: config5.baseURL || "https://api.aimlapi.com/v1/chat/completions",
       headers: {
         Authorization: `Bearer ${config5.apiKey}`,
-        "HTTP-Referer": "https://github.com/di-sukharev/opencommit",
+        "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "opencommit",
         "Content-Type": "application/json",
         ...config5.customHeaders
@@ -88341,7 +88370,7 @@ var OpenRouterEngine = class {
       apiKey: config5.apiKey,
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
-        "HTTP-Referer": "https://github.com/XanderBerry/opencommitx",
+        "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "OpenCommitX",
         ...config5.customHeaders || {}
       }
@@ -88367,20 +88396,6 @@ function parseCustomHeaders(headers) {
     );
   }
   return parsedHeaders;
-}
-function getProviderApiKey(config5, provider) {
-  const providerKeyMap = {
-    openai: config5.OCO_OPENAI_KEY,
-    anthropic: config5.OCO_ANTHROPIC_KEY,
-    openrouter: config5.OCO_OPENROUTER_KEY,
-    gemini: config5.OCO_GEMINI_KEY,
-    groq: config5.OCO_GROQ_KEY,
-    mistral: config5.OCO_MISTRAL_KEY,
-    deepseek: config5.OCO_DEEPSEEK_KEY,
-    aimlapi: config5.OCO_AIMLAPI_KEY,
-    azure: config5.OCO_AZURE_KEY
-  };
-  return providerKeyMap[provider] || config5.OCO_API_KEY || "";
 }
 function getEngine() {
   const config5 = getConfig();

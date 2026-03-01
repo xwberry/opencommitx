@@ -25,7 +25,7 @@
     "oco": "out/cli.cjs"
   },
   "repository": {
-    "url": "git+https://github.com/XanderBerry/opencommitx.git"
+    "url": "git+https://github.com/xwberry/opencommitx.git"
   },
   "type": "module",
   "author": "https://github.com/di-sukharev",
@@ -69,7 +69,6 @@
   },
   "devDependencies": {
     "@commitlint/types": "^17.4.4",
-    "cross-env": "^7.0.3",
     "@types/ini": "^1.3.31",
     "@types/inquirer": "^9.0.3",
     "@types/jest": "^29.5.12",

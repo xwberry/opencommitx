@@ -20,8 +20,17 @@
 ## In Progress
 
 - [x] Build and verify TypeScript compilation (`npm run build`) — **succeeded, exit code 0**
-- [ ] Run unit tests to verify new tests pass
-- [ ] Add `cross-env` to `package.json` test scripts for Windows PowerShell compatibility
+- [x] Run unit tests — 6 suites passing (1 upstream skip in gemini.test.ts, pre-existing)
+- [x] Add `cross-env` to `package.json` test scripts for Windows PowerShell compatibility
+- [x] Add `test/unit/pythonDocstringExtractor.test.ts` — tests `shouldUseDocstringMode` logic + conditional integration tests for Python script invocation
+- [x] Extended `diffRouter.test.ts` — added docstring override coverage using `mockReturnValueOnce`
+- [x] Added `test/unit/commitStrategy.test.ts` — covers `OCO_MULTI_COMMIT_STRATEGY` (buildCommitPlan file-message association, combineCommitMessages, isValidCommitStrategy, env var reading) and DEFAULT_CONFIG defaults for all new keys
+- [x] Extracted `buildCommitPlan` + `combineCommitMessages` into `src/utils/commitStrategy.ts`; updated `commit.ts` to use both
+- [x] Fixed sequential strategy staging bug: now does `git reset HEAD --` before loop, then `git add -- <files>` per group (and `git reset HEAD -- <files>` on Skip), ensuring group[i].files are committed with group[i].message
+- [x] Fixed `diffRouter.test.ts` mock fragility — switched to dependency injection on `routeDiff(_shouldUse, _extract)` params; removed `jest.mock()` entirely
+- [x] Fixed `commitStrategy.test.ts` env var tests — removed incorrect `JSON.parse` on bare strings; plain `process.env` read matches `parseConfigVarValue` fallback behaviour
+- [x] Changed `defaultConfigPath` from `~/.opencommit` to `~/.opencommitx` to avoid config file collision when both packages are installed
+- [x] Added `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` config key (default 0.9): `shouldUseDocstringMode` now checks `changedLines / fileLines >= ratio` in auto mode, preventing docstring extraction on partial refactors — updated tests with temp-file ratio scenarios
 
 ## Backlog
 

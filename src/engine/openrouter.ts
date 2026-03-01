@@ -18,7 +18,7 @@ export class OpenRouterEngine implements AiEngine {
       apiKey: config.apiKey,
       baseURL: 'https://openrouter.ai/api/v1',
       defaultHeaders: {
-        'HTTP-Referer': 'https://github.com/XanderBerry/opencommitx',
+        'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
         'X-Title': 'OpenCommitX',
         ...(config.customHeaders || {})
       }

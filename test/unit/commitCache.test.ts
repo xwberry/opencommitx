@@ -1,16 +1,8 @@
-import { existsSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 
 const CACHE_FILE = pathJoin(homedir(), '.opencommit-cache.json');
-
-// Mock getConfig to control OCO_CACHE_ENABLED and OCO_CACHE_TTL_SECONDS
-jest.mock('../../src/commands/config', () => ({
-  getConfig: jest.fn().mockReturnValue({
-    OCO_CACHE_ENABLED: true,
-    OCO_CACHE_TTL_SECONDS: 3600
-  })
-}));
 
 import {
   hashDiff,
@@ -22,7 +14,15 @@ import {
 
 describe('commitCache', () => {
   beforeEach(() => {
+    // Control config via process.env — avoids jest.mock ESM binding issues
+    process.env.OCO_CACHE_ENABLED = 'true';
+    process.env.OCO_CACHE_TTL_SECONDS = '3600';
     if (existsSync(CACHE_FILE)) rmSync(CACHE_FILE);
+  });
+
+  afterEach(() => {
+    delete process.env.OCO_CACHE_ENABLED;
+    delete process.env.OCO_CACHE_TTL_SECONDS;
   });
 
   afterAll(() => {
@@ -75,7 +75,7 @@ describe('commitCache', () => {
       setCachedCommitMessage(diff, message);
 
       // Manually set the timestamp to be older than TTL
-      const store = JSON.parse(require('fs').readFileSync(CACHE_FILE, 'utf-8'));
+      const store = JSON.parse(readFileSync(CACHE_FILE, 'utf-8'));
       const key = hashDiff(diff);
       store[key].timestamp = Date.now() - 4000 * 1000; // 4000 seconds ago
       writeFileSync(CACHE_FILE, JSON.stringify(store));

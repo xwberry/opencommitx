@@ -41,7 +41,7 @@ export const prepareCommitMessageHook = async (
 
     if (!config.OCO_API_KEY) {
       outro(
-        'No OCO_API_KEY is set. Set your key via `oco config set OCO_API_KEY=<value>. For more info see https://github.com/di-sukharev/opencommit'
+        'No OCO_API_KEY is set. Set your key via `ocox config set OCO_API_KEY=<value>. For more info see https://github.com/xwberry/opencommitx'
       );
       return;
     }
