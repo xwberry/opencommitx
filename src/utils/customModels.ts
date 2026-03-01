@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 
-const CUSTOM_MODELS_FILE = pathJoin(homedir(), '.opencommit-custom-models.json');
+const CUSTOM_MODELS_FILE = pathJoin(homedir(), '.opencommitx-custom-models.json');
 
 type CustomModelStore = Record<string, string[]>;
 

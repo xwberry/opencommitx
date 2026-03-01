@@ -1,7 +1,7 @@
-name: 'OpenCommit — improve commits with AI 🧙'
-description: 'Replaces lame commit messages with meaningful AI-generated messages when you push to remote'
-author: 'https://github.com/di-sukharev'
-repo: 'https://github.com/di-sukharev/opencommit/tree/github-action'
+name: 'OpenCommitX — improve commits with AI 🧙'
+description: 'Fork of OpenCommit (https://github.com/di-sukharev/opencommit) that replaces lame commit messages with meaningful AI-generated messages when you push to remote) + some additional features and configurability.'
+author: 'https://github.com/xwberry'
+repo: 'https://github.com/xwberry/opencommitx/tree/github-action'
 branding:
   icon: 'git-commit'
   color: 'green'

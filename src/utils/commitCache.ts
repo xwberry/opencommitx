@@ -4,7 +4,7 @@ import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 import { getConfig } from '../commands/config';
 
-const CACHE_FILE = pathJoin(homedir(), '.opencommit-cache.json');
+const CACHE_FILE = pathJoin(homedir(), '.opencommitx-cache.json');
 
 interface CacheEntry {
   message: string;

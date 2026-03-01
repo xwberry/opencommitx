@@ -55,7 +55,7 @@ async function listModels(provider: string, useCache: boolean = true): Promise<v
   console.log(`\n${chalk.bold('Available models for')} ${chalk.cyan(provider)}:\n`);
 
   if (customModels.length > 0) {
-    console.log(chalk.dim('  Custom models (from ~/.opencommit-custom-models.json):'));
+    console.log(chalk.dim('  Custom models (from ~/.opencommitx-custom-models.json):'));
     customModels.forEach((model) => {
       const isCurrent = model === currentModel;
       const prefix = isCurrent ? chalk.green('* ') : '  + ';

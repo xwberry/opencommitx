@@ -2,20 +2,24 @@
 
 A fork of [opencommit](https://github.com/di-sukharev/opencommit) with extensions for smarter diff routing, pre-commit result caching, per-provider API keys, and an enhanced configuration experience.
 
+Repository: [github.com/xwberry/opencommitx](https://github.com/xwberry/opencommitx)
+
 ---
 
 ## What's Different from Upstream
 
 | Feature | opencommit | opencommitx |
 |---|---|---|
-| CLI aliases | `oco`, `opencommit` | `ocox`, `opencommitx` (plus upstream aliases) |
+| CLI aliases | `oco`, `opencommit` | `ocox`, `opencommitx` |
+| Config file | `~/.opencommit` | `~/.opencommitx` (no collision if both installed) |
 | Pre-commit cache | None | Caches LLM result by diff hash; survives pre-commit hook failures |
 | Diff routing | Always aggregate | Smart per-file routing based on `git diff --numstat` |
 | Per-file commit loop | Not supported | Optional per-file messages with Accept/Skip/Accept All |
-| Python large files | Full diff always sent | Docstring-only extraction for large `.py` files |
+| Multi-commit file association | Not supported | `buildCommitPlan` correctly stages each file group before committing |
+| Python large files | Full diff always sent | Docstring-only extraction when diff ≥ `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` of the file |
 | Per-provider API keys | Single `OCO_API_KEY` | `OCO_OPENAI_KEY`, `OCO_ANTHROPIC_KEY`, etc. |
 | OpenRouter engine | axios | OpenAI SDK (OpenAI-compatible endpoint) |
-| `config describe` | Shows default only | Shows current value from `~/.opencommit` |
+| `config describe` | Shows default only | Shows current value from `~/.opencommitx` |
 | `setup full` | Not available | Full walkthrough of all config keys |
 | `models add/remove` | Not available | Add custom models per-provider |
 | `--dry-run` flag | Not available | Generates mock message without committing |
@@ -30,7 +34,7 @@ A fork of [opencommit](https://github.com/di-sukharev/opencommit) with extension
 npm install -g opencommitx
 ```
 
-This installs both `ocox` and `opencommitx` CLI aliases.
+This installs the `ocox` and `opencommitx` CLI commands. It does **not** register `oco` or `opencommit` aliases — install this alongside the original `opencommit` package without conflicts.
 
 ---
 
@@ -100,7 +104,7 @@ ocox commitlint      # configure @commitlint integration
 
 ## Configuration Reference
 
-All settings are stored in `~/.opencommit` (INI format). Environment variables and a local `.env` file take precedence.
+All settings are stored in `~/.opencommitx` (INI format). Environment variables and a local `.env` file take precedence.
 
 ### Core Settings
 
@@ -148,7 +152,7 @@ Provider-specific keys take precedence over `OCO_API_KEY`.
 | `OCO_CACHE_ENABLED` | `true` | Cache LLM results by diff hash |
 | `OCO_CACHE_TTL_SECONDS` | `3600` | Cache TTL in seconds (1 hour) |
 
-Cache is stored at `~/.opencommit-cache.json`. Solves the pre-commit hook failure loop — if your hooks cancel the commit, the cached message is offered on the next `ocox` run without re-calling the LLM.
+Cache is stored at `~/.opencommitx-cache.json`. If you have an existing `~/.opencommit-cache.json` from a previous install, it will be ignored — a fresh cache will be created automatically. Solves the pre-commit hook failure loop — if your hooks cancel the commit, the cached message is offered on the next `ocox` run without re-calling the LLM.
 
 ### Smart Diff Routing (New in opencommitx)
 
@@ -156,9 +160,10 @@ Cache is stored at `~/.opencommit-cache.json`. Solves the pre-commit hook failur
 |---|---|---|
 | `OCO_PER_FILE_COMMIT_MODE` | `auto` | `auto`, `always`, `never` |
 | `OCO_PER_FILE_THRESHOLD_LINES` | `300` | Lines changed above which a file gets its own message |
-| `OCO_MULTI_COMMIT_STRATEGY` | `single` | `single` (join messages) or `sequential` (one commit each) |
+| `OCO_MULTI_COMMIT_STRATEGY` | `single` | `single` (join messages) or `sequential` (one commit per file group) |
 | `OCO_PYTHON_DOCSTRING_MODE` | `auto` | `auto`, `always`, `never` |
-| `OCO_PYTHON_DOCSTRING_THRESHOLD` | `500` | Lines above which Python files use docstring extraction |
+| `OCO_PYTHON_DOCSTRING_THRESHOLD` | `500` | Min changed lines before docstring extraction is considered |
+| `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` | `0.9` | Docstring extraction only triggers when `changedLines / totalLines >= ratio` — prevents extraction on partial refactors |
 
 ### Developer / Testing
 
@@ -190,7 +195,7 @@ Free models on OpenRouter use the `:free` suffix.
 
 The cache feature was designed specifically for pre-commit hook workflows:
 
-1. You run `ocox` — LLM generates a message, cached
+1. You run `ocox` — LLM generates a message, cached by diff hash
 2. `git commit` runs pre-commit hooks (ruff, gitleaks, etc.)
 3. Hooks fix/fail the commit
 4. You run `ocox` again — cache hit detected, offers the same message
@@ -200,12 +205,33 @@ Configure cache TTL: `ocox config set OCO_CACHE_TTL_SECONDS=7200` (2 hours)
 
 ---
 
+## Python Docstring Extraction
+
+For large Python files, opencommitx can extract docstrings instead of sending the full diff to the LLM, saving tokens. This only activates when two conditions are both met:
+
+1. `changedLines > OCO_PYTHON_DOCSTRING_THRESHOLD` (default 500)
+2. `changedLines / totalFileLines >= OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9)
+
+The second condition prevents docstring extraction on comprehensive refactors of existing files — it only kicks in for new files or near-complete rewrites where the diff covers most of the file.
+
+Requires Python 3 available in `PATH`.
+
+---
+
 ## Prompt Modes
 
 See [PROMPT_ANALYSIS.md](PROMPT_ANALYSIS.md) for a full breakdown of each prompt configuration, pros/cons, and situational recommendations.
 
 ---
 
+## CI / GitHub Actions
+
+The included workflow (`.github/workflows/test.yml`) runs unit tests with both Node.js and Python (3.11) available, which is required for the docstring extractor tests.
+
+E2E tests are designed for Linux and run correctly on GitHub Actions (Ubuntu). Running E2E tests locally on Windows requires WSL due to Unix inline env-var syntax used in the test fixtures.
+
+---
+
 ## Upstream Relationship
 
-This fork aims to stay reasonably compatible with upstream `opencommit`. The existing `oco` and `opencommit` bin aliases are preserved. Changes are focused on additive features and bug fixes rather than structural rewrites.
+This fork adds features on top of `opencommit` without structurally rewriting the core commit flow. The config file (`~/.opencommitx`) and binary names (`ocox`, `opencommitx`) are distinct from the original so both packages can be globally installed simultaneously without conflict.
