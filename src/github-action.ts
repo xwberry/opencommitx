@@ -72,8 +72,7 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
       
       const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map(
         (improvedMsg, i) => {
-          const index = improvedMessagesAndSHAs.length;
-          const sha = diffsAndSHAs![index + i].sha;
+          const sha = diffsAndSHAs![step + i].sha;
 
           return { sha, msg: improvedMsg };
         }
