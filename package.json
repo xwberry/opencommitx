@@ -1,7 +1,7 @@
 {
-  "name": "opencommit",
-  "version": "3.2.14",
-  "description": "Auto-generate impressive commits in 1 second. Killing lame commits with AI 🤯🔫",
+  "name": "opencommitx",
+  "version": "1.0.0",
+  "description": "AI-powered commit message generator with smart diff routing, caching, and per-provider API keys. Fork of opencommit.",
   "keywords": [
     "git",
     "chatgpt",
@@ -9,26 +9,29 @@
     "ai",
     "openai",
     "opencommit",
+    "opencommitx",
     "aicommit",
     "aicommits",
     "gptcommit",
     "commit",
-    "ollama"
+    "ollama",
+    "openrouter"
   ],
   "main": "cli.js",
   "bin": {
-    "opencommit": "out/cli.cjs",
-    "oco": "out/cli.cjs"
+    "opencommitx": "out/cli.cjs",
+    "ocox": "out/cli.cjs"
   },
   "repository": {
-    "url": "git+https://github.com/di-sukharev/opencommit.git"
+    "url": "git+https://github.com/xwberry/opencommitx.git"
   },
   "type": "module",
-  "author": "https://github.com/di-sukharev",
+  "author": "https://github.com/xwberry",
   "license": "MIT",
   "files": [
     "out/cli.cjs",
-    "out/tiktoken_bg.wasm"
+    "out/tiktoken_bg.wasm",
+    "scripts/extract_docstrings.py"
   ],
   "release": {
     "branches": [
@@ -41,72 +44,74 @@
   "scripts": {
     "watch": "npm run -S build -- --sourcemap --watch",
     "start": "node ./out/cli.cjs",
-    "ollama:start": "OCO_AI_PROVIDER='ollama' node ./out/cli.cjs",
+    "ollama:start": "cross-env OCO_AI_PROVIDER=ollama node ./out/cli.cjs",
     "dev": "ts-node ./src/cli.ts",
-    "dev:gemini": "OCO_AI_PROVIDER='gemini' ts-node ./src/cli.ts",
+    "dev:gemini": "cross-env OCO_AI_PROVIDER=gemini ts-node ./src/cli.ts",
     "build": "npx rimraf out && node esbuild.config.js",
-    "build:push": "npm run build && git add . && git commit -m 'build' && git push",
+    "local:build-push": "npm run build && git add . && git commit -m 'build' && git push",
     "deploy": "npm publish --tag latest",
-    "deploy:build": "npm run build:push && git push --tags && npm run deploy",
-    "deploy:patch": "npm version patch && npm run deploy:build",
+    "deploy:npm": "npm run local:build-push && git push --tags && npm run deploy",
+    "deploy:patch": "npm version patch && npm run deploy:npm",
     "lint": "eslint src --ext ts && tsc --noEmit",
     "format": "prettier --write src",
     "format:check": "prettier --check src",
-    "test": "node --no-warnings --experimental-vm-modules $( [ -f ./node_modules/.bin/jest ] && echo ./node_modules/.bin/jest || which jest ) test/unit",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest test/unit",
     "test:all": "npm run test:unit:docker && npm run test:e2e:docker",
     "test:docker-build": "docker build -t oco-test -f test/Dockerfile .",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest test/unit",
-    "test:unit:docker": "npm run test:docker-build && DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:unit",
-    "test:e2e": "npm run test:e2e:setup && jest test/e2e",
+    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest test/unit",
+    "test:unit:docker": "npm run test:docker-build && cross-env DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:unit",
+    "test:e2e": "npm run test:e2e:setup && cross-env NODE_OPTIONS=--experimental-vm-modules jest test/e2e",
     "test:e2e:setup": "sh test/e2e/setup.sh",
-    "test:e2e:docker": "npm run test:docker-build && DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:e2e",
-    "mlx:start": "OCO_AI_PROVIDER='mlx' node ./out/cli.cjs"
+    "test:e2e:docker": "npm run test:docker-build && cross-env DOCKER_CONTENT_TRUST=0 docker run --rm oco-test npm run test:e2e",
+    "mlx:start": "cross-env OCO_AI_PROVIDER=mlx node ./out/cli.cjs"
   },
   "devDependencies": {
-    "@commitlint/types": "^17.4.4",
-    "@types/ini": "^1.3.31",
-    "@types/inquirer": "^9.0.3",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^16.18.14",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
+    "@commitlint/types": "^17.8.1",
+    "@types/ini": "^1.3.34",
+    "@types/inquirer": "^9.0.9",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
     "cli-testing-library": "^2.0.2",
-    "dotenv": "^16.0.3",
-    "esbuild": "^0.25.5",
-    "eslint": "^9.24.0",
+    "cross-env": "^10.1.0",
+    "dotenv": "^16.6.1",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.3",
     "jest": "^29.7.0",
-    "prettier": "^2.8.4",
-    "rimraf": "^6.0.1",
-    "ts-jest": "^29.1.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.3"
+    "prettier": "^3.5.3",
+    "rimraf": "^6.1.3",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@actions/core": "^1.10.0",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.1",
-    "@anthropic-ai/sdk": "^0.19.2",
-    "@azure/openai": "^1.0.0-beta.12",
-    "@clack/prompts": "^0.6.1",
-    "@dqbd/tiktoken": "^1.0.2",
-    "@google/generative-ai": "^0.11.4",
-    "@mistralai/mistralai": "^1.3.5",
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@azure/openai": "^1.0.0-beta.13",
+    "@clack/prompts": "^0.11.0",
+    "@dqbd/tiktoken": "^1.0.22",
+    "@google/generative-ai": "^0.24.1",
+    "@mistralai/mistralai": "^1.14.1",
     "@octokit/webhooks-schemas": "^6.11.0",
     "@octokit/webhooks-types": "^6.11.0",
-    "axios": "^1.3.4",
-    "chalk": "^5.2.0",
-    "cleye": "^1.3.2",
+    "axios": "^1.13.6",
+    "chalk": "^5.6.2",
+    "cleye": "^1.3.4",
     "crypto": "^1.0.1",
-    "execa": "^7.0.0",
-    "ignore": "^5.2.4",
+    "execa": "^7.2.0",
+    "ignore": "^5.3.2",
     "ini": "^3.0.1",
-    "inquirer": "^9.1.4",
-    "openai": "^4.57.0",
+    "inquirer": "^9.3.8",
+    "openai": "^4.104.0",
     "punycode": "^2.3.1",
-    "zod": "^3.23.8"
+    "zod": "^3.25.76"
   },
   "overrides": {
     "ajv": "^8.17.1",
-    "whatwg-url": "^14.0.0"
+    "whatwg-url": "^14.0.0",
+    "undici": ">=6.23.0"
   }
 }

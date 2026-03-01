@@ -13,3 +13,7 @@ src/*.json
 test.ts
 notes.md
 .nvmrc
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml

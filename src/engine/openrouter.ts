@@ -1,22 +1,26 @@
 import OpenAI from 'openai';
-import axios, { AxiosInstance } from 'axios';
 import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
 interface OpenRouterConfig extends AiEngineConfig {}
 
+/**
+ * OpenRouter engine using the OpenAI-compatible API.
+ * Supports all models available on https://openrouter.ai including free tiers
+ * (append :free to model name, e.g. google/gemma-3-27b-it:free).
+ */
 export class OpenRouterEngine implements AiEngine {
-  client: AxiosInstance;
+  client: OpenAI;
 
   constructor(public config: OpenRouterConfig) {
-    this.client = axios.create({
-      baseURL: 'https://openrouter.ai/api/v1/chat/completions',
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        'HTTP-Referer': 'https://github.com/di-sukharev/opencommit',
-        'X-Title': 'OpenCommit',
-        'Content-Type': 'application/json'
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: 'https://openrouter.ai/api/v1',
+      defaultHeaders: {
+        'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
+        'X-Title': 'OpenCommitX',
+        ...(config.customHeaders || {})
       }
     });
   }
@@ -25,14 +29,16 @@ export class OpenRouterEngine implements AiEngine {
     messages: Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>
   ): Promise<string | null> => {
     try {
-      const response = await this.client.post('', {
+      const response = await this.client.chat.completions.create({
         model: this.config.model,
-        messages
+        messages,
+        temperature: 0,
+        top_p: 0.1,
+        max_tokens: this.config.maxTokensOutput
       });
 
-      const message = response.data.choices[0].message;
-      let content = message?.content;
-      return removeContentTags(content, 'think');
+      const content = response.choices[0]?.message?.content;
+      return removeContentTags(content ?? '', 'think');
     } catch (error) {
       throw normalizeEngineError(error, 'openrouter', this.config.model);
     }

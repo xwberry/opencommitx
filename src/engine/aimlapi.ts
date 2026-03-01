@@ -13,8 +13,8 @@ export class AimlApiEngine implements AiEngine {
       baseURL: config.baseURL || 'https://api.aimlapi.com/v1/chat/completions',
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
-        'HTTP-Referer': 'https://github.com/di-sukharev/opencommit',
-        'X-Title': 'opencommit',
+        'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
+        'X-Title': 'opencommitx',
         'Content-Type': 'application/json',
         ...config.customHeaders
       }

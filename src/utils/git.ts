@@ -137,3 +137,38 @@ export const getGitDir = async (): Promise<string> => {
 
   return gitDir;
 };
+
+export interface FileStats {
+  added: number;
+  deleted: number;
+  file: string;
+}
+
+export const getStagedFilesStats = async (): Promise<FileStats[]> => {
+  const gitDir = await getGitDir();
+
+  const { stdout } = await execa(
+    'git',
+    ['diff', '--staged', '--numstat'],
+    { cwd: gitDir }
+  );
+
+  if (!stdout.trim()) return [];
+
+  return stdout
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line) => {
+      const parts = line.split('\t');
+      return {
+        added: parts[0] === '-' ? 0 : parseInt(parts[0], 10) || 0,
+        deleted: parts[1] === '-' ? 0 : parseInt(parts[1], 10) || 0,
+        file: parts[2] || ''
+      };
+    })
+    .filter((stat) => stat.file);
+};
+
+export const getDiffForFiles = async (files: string[]): Promise<string> => {
+  return getDiff({ files });
+};

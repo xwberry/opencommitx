@@ -1,4 +1,5 @@
 import { getConfig, OCO_AI_PROVIDER_ENUM } from '../commands/config';
+import { getProviderApiKey as _getProviderApiKey } from './providerKeys';
 import { AnthropicEngine } from '../engine/anthropic';
 import { AzureEngine } from '../engine/azure';
 import { AiEngine } from '../engine/Engine';
@@ -36,18 +37,23 @@ export function parseCustomHeaders(headers: any): Record<string, string> {
   return parsedHeaders;
 }
 
+// Re-export for backward compatibility — implementation lives in providerKeys.ts
+export { getProviderApiKey } from './providerKeys';
+
 export function getEngine(): AiEngine {
   const config = getConfig();
   const provider = config.OCO_AI_PROVIDER;
 
   const customHeaders = parseCustomHeaders(config.OCO_API_CUSTOM_HEADERS);
 
+  const apiKey = _getProviderApiKey(config, provider);
+
   const DEFAULT_CONFIG = {
     model: config.OCO_MODEL!,
     maxTokensOutput: config.OCO_TOKENS_MAX_OUTPUT!,
     maxTokensInput: config.OCO_TOKENS_MAX_INPUT!,
     baseURL: config.OCO_API_URL!,
-    apiKey: config.OCO_API_KEY!,
+    apiKey,
     customHeaders
   };
 

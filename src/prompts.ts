@@ -111,6 +111,11 @@ const getOneLineCommitInstruction = () =>
     ? 'Craft a concise, single sentence, commit message that encapsulates all changes made, with an emphasis on the primary updates. If the modifications share a common theme or scope, mention it succinctly; otherwise, leave the scope out to maintain focus. The goal is to provide a clear and unified overview of the changes in one single message.'
     : '';
 
+const getWhyInstruction = () =>
+  config.OCO_WHY
+    ? 'After the commit message (and description if enabled), add a brief "Why:" section explaining the motivation or reason for the change in 1-2 sentences.'
+    : '';
+
 const getScopeInstruction = () =>
   config.OCO_OMIT_SCOPE
     ? 'Do not include a scope in the commit message format. Use the format: <type>: <subject>'
@@ -146,11 +151,12 @@ const INIT_MAIN_PROMPT = (
     const conventionGuidelines = getCommitConvention(fullGitMojiSpec);
     const descriptionGuideline = getDescriptionInstruction();
     const oneLineCommitGuideline = getOneLineCommitInstruction();
+    const whyInstruction = getWhyInstruction();
     const scopeInstruction = getScopeInstruction();
     const generalGuidelines = `Use the present tense. Lines must not be longer than 74 characters. Use ${language} for the commit message.`;
     const userInputContext = userInputCodeContext(context);
 
-    return `${missionStatement}\n${diffInstruction}\n${conventionGuidelines}\n${descriptionGuideline}\n${oneLineCommitGuideline}\n${scopeInstruction}\n${generalGuidelines}\n${userInputContext}`;
+    return `${missionStatement}\n${diffInstruction}\n${conventionGuidelines}\n${descriptionGuideline}\n${oneLineCommitGuideline}\n${whyInstruction}\n${scopeInstruction}\n${generalGuidelines}\n${userInputContext}`;
   })()
 });
 

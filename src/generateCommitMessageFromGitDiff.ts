@@ -19,14 +19,13 @@ import {
 import { mergeDiffs } from './utils/mergeDiffs';
 import { tokenCount } from './utils/tokenCount';
 
-const config = getConfig();
-const MAX_TOKENS_INPUT = config.OCO_TOKENS_MAX_INPUT;
-const MAX_TOKENS_OUTPUT = config.OCO_TOKENS_MAX_OUTPUT;
+// Note: config is intentionally read inside each function call, not at module
+// load time, so that runtime config changes (e.g. --dry-run flag) are respected.
 
 const generateCommitMessageChatCompletionPrompt = async (
   diff: string,
   fullGitMojiSpec: boolean,
-  context: string
+  context: string = ''
 ): Promise<Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>> => {
   const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
     fullGitMojiSpec,
@@ -149,6 +148,8 @@ export const generateCommitMessageByDiff = async (
   const currentConfig = getConfig();
   const provider = currentConfig.OCO_AI_PROVIDER || 'openai';
   const currentModel = retryWithModel || currentConfig.OCO_MODEL;
+  const MAX_TOKENS_INPUT = currentConfig.OCO_TOKENS_MAX_INPUT;
+  const MAX_TOKENS_OUTPUT = currentConfig.OCO_TOKENS_MAX_OUTPUT;
 
   try {
     const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
@@ -303,6 +304,8 @@ function splitDiff(diff: string, maxChangeLength: number) {
 
   return splitDiffs;
 }
+
+export const generateCommitMessagesPerFile = generateCommitMessageByDiff;
 
 export const getCommitMsgsPromisesFromFileDiffs = async (
   diff: string,

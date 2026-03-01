@@ -26,7 +26,7 @@ export const prepareCommitMessageHook = async (
 
       if (changedFiles) await gitAdd({ files: changedFiles });
       else {
-        outro('No changes detected, write some code and run `oco` again');
+        outro('No changes detected, write some code and run `ocox` again');
         process.exit(1);
       }
     }
@@ -35,13 +35,13 @@ export const prepareCommitMessageHook = async (
 
     if (!staged) return;
 
-    intro('opencommit');
+    intro('opencommitx');
 
     const config = getConfig();
 
     if (!config.OCO_API_KEY) {
       outro(
-        'No OCO_API_KEY is set. Set your key via `oco config set OCO_API_KEY=<value>. For more info see https://github.com/di-sukharev/opencommit'
+        'No OCO_API_KEY is set. Set your key via `ocox config set OCO_API_KEY=<value>. For more info see https://github.com/xwberry/opencommitx'
       );
       return;
     }
