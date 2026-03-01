@@ -94,8 +94,9 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
     } catch (error) {
       const currentRetries = retryCount.get(step) || 0;
       if (currentRetries >= MAX_RETRIES_PER_CHUNK) {
-        outro(`Max retries (${MAX_RETRIES_PER_CHUNK}) reached for chunk at step ${step}. Skipping.`);
-        continue;
+        throw new Error(
+          `Failed to process chunk at step ${step} after ${MAX_RETRIES_PER_CHUNK} retries. Aborting to avoid partial rebase.`
+        );
       }
       retryCount.set(step, currentRetries + 1);
 
@@ -238,7 +239,7 @@ async function run() {
     } else {
       outro('Wrong action.');
       core.error(
-        `OpenCommit was called on ${github.context.payload.action}. OpenCommit is supposed to be used on "push" action.`
+        `OpenCommitX was called on ${github.context.payload.action}. OpenCommitX is supposed to be used on "push" action.`
       );
     }
   } catch (error: any) {
