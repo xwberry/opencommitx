@@ -1,6 +1,5 @@
-- [ ] add dynamic provider utility to route specific requests to different APIs
-    - [ ] maybe a failover in case an api rate limit is hit; could also check api key limits before sending prompts and have anything that's expected to surpass the rate limit route to a different model.
-    - [ ] not sure if this requires some additional aggregation logic but maybe if the multi-commit feature works it won't matter?
+- [x] add dynamic provider utility to route specific requests to different APIs
+    - [x] Fallback model on rate-limit/model-not-found: `OCO_FALLBACK_MODEL` + `OCO_FALLBACK_PROVIDER` config keys. `generateCommitMessageByDiff` retries with the fallback engine on retriable errors.
 - [x] For the long python files, if the diff length is the same as the length of the file (maybe have a buffer for empty or skipped lines) then use the docstring script. otherwise this will just read docstrings on comprehensive refactors. — Implemented via `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9): docstring extraction only activates when `addedLines / totalFileLines >= ratio`. Deleted lines excluded — a refactor with many deletions will not trigger.
 - [x] consider changing home directory file operations to a dedicated .opencommitx directory rather than individual files, since this version may save multiple files. — Implemented: all cache files now live in `~/.opencommitx/cache-<repo>-<hash>.json`.
 
@@ -33,3 +32,29 @@
 - [x] Add raw API response logging to OpenRouter engine: `raw-api-response` debug event now includes full `choices` (with `finish_reason`), `usage` (prompt/completion/total tokens), and the model echo. `api-error` debug event captures HTTP status, error code, and raw error body. `thinking-truncated` event fires when `removeContentTags` strips a `<think>` block that consumed all output tokens, with a hint to increase `OCO_TOKENS_MAX_OUTPUT`.
 - [x] Fix few-shot example framing: system prompt now explicitly states "An example input/output pair follows to demonstrate the expected format. Your actual task will be the final user message." — prevents weak models from summarizing the example response instead of analyzing the actual diff.
 - [x] Fix pre-processed payload chunking: when `docstringOverride=true` the payload passed to `generateCommitMessageByDiff` is already extracted docstring text (not a raw git diff). If that text exceeded `MAX_REQUEST_TOKENS` it was being chunked into arbitrary pieces, producing garbage messages like "Fixed" / "feat updates". Now detects the absence of `diff --git ` headers and applies line-based truncation to fit the budget, sending as a single request instead.
+
+## Phase 2 improvements (completed)
+
+- [x] Fix "Committing…" cascade spinner: `committingChangesSpinner.start()` inside `stderr.on('data')` replaced with `.message()`. This also eliminates the `MaxListenersExceededWarning` (each `.start()` added a new keypress listener).
+- [x] Fix "Generating:" cascade spinner: file list in `genSpinner.message()` now truncated to terminal width via `truncateFileList()`, preventing clack bug #132 (line re-renders when message > terminal columns).
+- [x] Add `process.stdin.setMaxListeners(+20)` guard in `cli.ts` to suppress residual warnings in sequential multi-commit mode.
+- [x] Fix sequential mode spinner leak: `try/finally` added around both `execa` commit calls in the `acceptAll` path so `committingSpinner.stop()` is guaranteed even on hook failure.
+- [x] Fix `modelCache.ts` namespace: model cache now stored at `~/.opencommitx-data/models.json` (was `~/.opencommit-models.json`).
+- [x] Fix `mlx` provider validation: `'mlx'` added to `OCO_AI_PROVIDER` validator allowlist in `config.ts`.
+- [x] Fix `splitDiff` character vs token: `substring` now uses `maxChangeLength * 4` chars (≈4 chars/token) instead of token count directly.
+- [x] Fix `prompts.ts` module-level config snapshot: `getConfig()` now called fresh inside each helper function instead of cached at module import time (fixes stale config in dry-run/test mode).
+- [x] Upfront staged-files table: after routing, a `note()` table shows File / +/- lines / New? / DS mode / Group# for every staged file.
+- [x] `getStagedFilesStatus()` added to `git.ts` to retrieve A/M/D/R status for staged files.
+- [x] `OCO_DIFF_INDIVIDUAL_FILES=true`: forces per-file grouping with boilerplate files (`__init__.py`, `index.ts`, etc.) grouped together.
+- [x] `OCO_MAX_FILES_PER_GROUP` (default 10): caps small-file groups to avoid oversized single groups on large repos.
+- [x] Lock file grouping fix: lock files (`pixi.lock`, `package-lock.json`, etc.) now attached to the group containing their manifest file instead of always appended to the last group.
+- [x] Cache per-group files: each cache entry now stored as a separate JSON file at `~/.opencommitx-data/<repo>-<hash>/<diffhash>.json`.
+- [x] Cache model metadata: `model` field stored in every cache entry; shown when cached model differs from current model.
+- [x] Cache lifecycle: successful commits archive their cache entry to `archived/` subdir; `pruneArchivedCache()` cleans entries older than TTL.
+- [x] Regeneration flow: "Regenerate" option added to `performCommit` select with concise/detailed/feedback sub-menu.
+- [x] Fallback model: `OCO_FALLBACK_MODEL` + `OCO_FALLBACK_PROVIDER` config keys; auto-retries on rate-limit/timeout errors.
+- [x] Setup wizard pre-population: current provider highlighted as "(current)"; existing API keys shown as masked with keep/update option.
+- [x] Config location migration: `~/.opencommitx` → `~/.opencommitx-data/config.ini` via migration `04_migrate_config_location`; backward-compat fallback read from legacy path.
+- [x] `OCO_TEMPERATURE` config key (default 0): threaded to all engine adapters (OpenAI, OpenRouter, Anthropic, Gemini, Ollama, MLX, DeepSeek).
+- [x] Thinking-model warning: `note()` shown before generation if model name contains `thinking`, `:thinking`, `-think`, or matches `o1`/`o3` patterns.
+- [x] `OCO_COMMIT_DETAIL` config key (`concise`/`normal`/`detailed`): adjusts system prompt verbosity instructions.
