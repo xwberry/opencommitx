@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+// Raise the default limit before any @clack/prompts spinners or selects are
+// created. Sequential multi-commit mode creates one spinner+select per group;
+// without this guard Node emits MaxListenersExceededWarning at >10 groups.
+process.stdin.setMaxListeners(process.stdin.getMaxListeners() + 20);
+
 import { cli } from 'cleye';
 
 import packageJSON from '../package.json';
