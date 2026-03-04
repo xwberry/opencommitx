@@ -23534,7 +23534,7 @@ var require_eventsource_stream = __commonJS({
        * @param {Function} callback
        * @returns {void}
        */
-      _transform(chunk, _encoding, callback) {
+      _transform(chunk, _encoding2, callback) {
         if (chunk.length === 0) {
           callback();
           return;
@@ -91201,7 +91201,7 @@ var import_core30 = __toESM(require_core(), 1);
 var import_exec = __toESM(require_exec(), 1);
 var import_github = __toESM(require_github(), 1);
 init_dist2();
-var import_fs3 = require("fs");
+var import_fs5 = require("fs");
 
 // src/generateCommitMessageFromGitDiff.ts
 init_dist2();
@@ -92105,6 +92105,7 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_MODE"] = "OCO_PYTHON_DOCSTRING_MODE";
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
+  CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
   CONFIG_KEYS2["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
   CONFIG_KEYS2["OCO_ANTHROPIC_KEY"] = "OCO_ANTHROPIC_KEY";
   CONFIG_KEYS2["OCO_OPENROUTER_KEY"] = "OCO_OPENROUTER_KEY";
@@ -92933,6 +92934,10 @@ var configValidators = {
     );
     return value;
   },
+  ["OCO_DEBUG" /* OCO_DEBUG */](value) {
+    const parsed = typeof value === "boolean" ? value : value === "true" || value === true;
+    return parsed;
+  },
   ["OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */](value) {
     validateConfig("OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */, typeof value === "string", "Must be a string");
     return value;
@@ -93032,7 +93037,9 @@ var DEFAULT_CONFIG = {
   // Prevents extracting docstrings on partial refactors (use the real diff instead).
   OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: 0.9,
   // Multi-commit default
-  OCO_MULTI_COMMIT_STRATEGY: "single"
+  OCO_MULTI_COMMIT_STRATEGY: "single",
+  // Debug mode (off by default)
+  OCO_DEBUG: false
 };
 var initGlobalConfig = (configPath = defaultConfigPath) => {
   (0, import_fs.writeFileSync)(configPath, (0, import_ini.stringify)(DEFAULT_CONFIG), "utf8");
@@ -93080,6 +93087,8 @@ var getEnvConfig = (envPath) => {
     ),
     // Multi-commit
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
+    // Debug
+    OCO_DEBUG: parseConfigVarValue(process.env.OCO_DEBUG),
     // Per-provider keys
     OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
     OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
@@ -93301,6 +93310,11 @@ function getConfigKeyDetails(key) {
         description: "When multiple commit messages are generated, controls how they are committed",
         values: ["single (join all into one commit)", "sequential (one commit per message)"]
       };
+    case "OCO_DEBUG" /* OCO_DEBUG */:
+      return {
+        description: "Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting",
+        values: ["true", "false (default)"]
+      };
     case "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */:
       return { description: "API key for OpenAI (overrides OCO_API_KEY when provider is openai)", values: ["sk-..."] };
     case "OCO_ANTHROPIC_KEY" /* OCO_ANTHROPIC_KEY */:
@@ -93405,7 +93419,7 @@ var configCommand = G3(
         "Describe all config parameters: ocox config describe",
         "Describe a specific parameter: ocox config describe OCO_MODEL",
         "Get a config value: ocox config get OCO_MODEL",
-        "Set a config value: ocox config set OCO_MODEL=gpt-4"
+        "Set a config value: ocox config set OCO_MODEL=gpt-4 (or: ocox config set OCO_MODEL gpt-4)"
       ]
     }
   },
@@ -93434,8 +93448,17 @@ var configCommand = G3(
         if (!keyValues || keyValues.length === 0) {
           throw new Error("No config keys specified for set mode");
         }
+        const normalized = [];
+        for (let i3 = 0; i3 < keyValues.length; i3++) {
+          if (!keyValues[i3].includes("=") && i3 + 1 < keyValues.length) {
+            normalized.push(`${keyValues[i3]}=${keyValues[i3 + 1]}`);
+            i3++;
+          } else {
+            normalized.push(keyValues[i3]);
+          }
+        }
         await setConfig(
-          keyValues.map((keyValue) => keyValue.split("="))
+          normalized.map((kv) => kv.split("="))
         );
       } else {
         throw new Error(
@@ -102320,15 +102343,20 @@ var cl100k_base_default = { pat_str: "(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\\r\\n\\p{L
 
 // src/utils/tokenCount.ts
 var import_lite = __toESM(require_tiktoken(), 1);
+var _encoding = null;
+function getEncoding() {
+  if (!_encoding) {
+    _encoding = new import_lite.Tiktoken(
+      cl100k_base_default.bpe_ranks,
+      cl100k_base_default.special_tokens,
+      cl100k_base_default.pat_str
+    );
+  }
+  return _encoding;
+}
 function tokenCount(content) {
-  const encoding = new import_lite.Tiktoken(
-    cl100k_base_default.bpe_ranks,
-    cl100k_base_default.special_tokens,
-    cl100k_base_default.pat_str
-  );
-  const tokens = encoding.encode(content);
-  encoding.free();
-  return tokens.length;
+  if (!content) return 0;
+  return getEncoding().encode(content).length;
 }
 
 // src/engine/anthropic.ts
@@ -103441,7 +103469,7 @@ var ReportTransform = class extends import_node_stream2.Transform {
   loadedBytes = 0;
   progressCallback;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  _transform(chunk, _encoding, callback) {
+  _transform(chunk, _encoding2, callback) {
     this.push(chunk);
     this.loadedBytes += chunk.length;
     try {
@@ -114665,11 +114693,35 @@ var AimlApiEngine = class {
   }
 };
 
+// src/utils/debugLog.ts
+var import_fs3 = require("fs");
+var import_os2 = require("os");
+var import_path10 = require("path");
+function writeDebugLog(entry) {
+  const debugDir = (0, import_path10.join)((0, import_os2.homedir)(), ".opencommitx-data", "debug");
+  try {
+    (0, import_fs3.mkdirSync)(debugDir, { recursive: true });
+    const ts = (/* @__PURE__ */ new Date()).toISOString();
+    const slug = ts.replace(/[:.]/g, "-");
+    const filepath = (0, import_path10.join)(debugDir, `${slug}-${entry.event}.json`);
+    const payload = { timestamp: ts, ...entry };
+    (0, import_fs3.writeFileSync)(filepath, JSON.stringify(payload, null, 2), {
+      encoding: "utf-8"
+    });
+  } catch (err) {
+    process.stderr.write(
+      `[ocox debug] Failed to write debug log to ${debugDir}: ${err}
+`
+    );
+  }
+}
+
 // src/engine/openrouter.ts
 var OpenRouterEngine = class {
   constructor(config5) {
     this.config = config5;
     this.generateCommitMessage = async (messages) => {
+      const debugEnabled = Boolean(getConfig().OCO_DEBUG);
       try {
         const response = await this.client.chat.completions.create({
           model: this.config.model,
@@ -114678,15 +114730,61 @@ var OpenRouterEngine = class {
           top_p: 0.1,
           max_tokens: this.config.maxTokensOutput
         });
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "raw-api-response",
+            provider: "openrouter",
+            model: this.config.model,
+            response: {
+              id: response.id,
+              model: response.model,
+              choices: response.choices.map((c2) => ({
+                finish_reason: c2.finish_reason,
+                message: c2.message
+              })),
+              usage: response.usage
+            }
+          });
+        }
         const content = response.choices[0]?.message?.content;
-        return removeContentTags(content ?? "", "think");
+        const cleaned = removeContentTags(content ?? "", "think");
+        if (!cleaned && content) {
+          if (debugEnabled) {
+            writeDebugLog({
+              event: "thinking-truncated",
+              provider: "openrouter",
+              model: this.config.model,
+              meta: {
+                finish_reason: response.choices[0]?.finish_reason,
+                usage: response.usage,
+                rawContentLength: content.length,
+                hint: "Model exhausted max_tokens inside <think> block. Increase OCO_TOKENS_MAX_OUTPUT or switch to a non-thinking model variant."
+              }
+            });
+          }
+        }
+        return cleaned || null;
       } catch (error) {
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "api-error",
+            provider: "openrouter",
+            model: this.config.model,
+            error: error instanceof Error ? error.message : String(error),
+            meta: {
+              status: error?.status,
+              code: error?.code,
+              errorBody: error?.error
+            }
+          });
+        }
         throw normalizeEngineError(error, "openrouter", this.config.model);
       }
     };
     this.client = new openai_default({
       apiKey: config5.apiKey,
       baseURL: "https://openrouter.ai/api/v1",
+      timeout: 6e4,
       defaultHeaders: {
         "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "OpenCommitX",
@@ -114915,12 +115013,12 @@ var commitlintPrompts = {
 
 // src/modules/commitlint/pwd-commitlint.ts
 var import_promises = __toESM(require("fs/promises"), 1);
-var import_path10 = __toESM(require("path"), 1);
+var import_path11 = __toESM(require("path"), 1);
 var findModulePath = (moduleName) => {
   const searchPaths = [
-    import_path10.default.join("node_modules", moduleName),
-    import_path10.default.join("node_modules", ".pnpm"),
-    import_path10.default.resolve(__dirname, "../..")
+    import_path11.default.join("node_modules", moduleName),
+    import_path11.default.join("node_modules", ".pnpm"),
+    import_path11.default.resolve(__dirname, "../..")
   ];
   for (const basePath of searchPaths) {
     try {
@@ -115152,7 +115250,7 @@ var INIT_MAIN_PROMPT2 = (language, fullGitMojiSpec, context4) => ({
   content: (() => {
     const commitConvention = fullGitMojiSpec ? "GitMoji specification" : "Conventional Commit Convention";
     const missionStatement = `${IDENTITY} Your mission is to create clean and comprehensive commit messages as per the ${commitConvention} and explain WHAT were the changes and mainly WHY the changes were done.`;
-    const diffInstruction = "I'll send you an output of 'git diff --staged' command, and you are to convert it into a commit message.";
+    const diffInstruction = "I'll send you an output of 'git diff --staged' command, and you are to convert it into a commit message. An example input/output pair follows to demonstrate the expected format. Your actual task will be the final user message.";
     const conventionGuidelines = getCommitConvention(fullGitMojiSpec);
     const descriptionGuideline = getDescriptionInstruction();
     const oneLineCommitGuideline = getOneLineCommitInstruction();
@@ -115249,6 +115347,7 @@ var getMainCommitPrompt = async (fullGitMojiSpec, context4) => {
 
 // src/utils/mergeDiffs.ts
 function mergeDiffs(arr, maxStringLength) {
+  if (arr.length === 0) return [];
   const mergedArr = [];
   let currentItem = arr[0];
   for (const item of arr.slice(1)) {
@@ -115261,6 +115360,59 @@ function mergeDiffs(arr, maxStringLength) {
   }
   mergedArr.push(currentItem);
   return mergedArr;
+}
+
+// src/utils/pythonDocstringExtractor.ts
+var import_child_process = require("child_process");
+var import_fs4 = require("fs");
+var import_path12 = require("path");
+var SCRIPT_NAME = "extract_docstrings.py";
+function findScriptPath() {
+  const candidates = [
+    (0, import_path12.join)(process.cwd(), "scripts", SCRIPT_NAME)
+  ];
+  if (typeof __dirname !== "undefined") {
+    candidates.push((0, import_path12.join)(__dirname, "..", "scripts", SCRIPT_NAME));
+  }
+  for (const candidate of candidates) {
+    if ((0, import_fs4.existsSync)(candidate)) return candidate;
+  }
+  return null;
+}
+function isPythonAvailable() {
+  const result = (0, import_child_process.spawnSync)("python", ["--version"], { encoding: "utf-8" });
+  if (result.status === 0) return true;
+  const result3 = (0, import_child_process.spawnSync)("python3", ["--version"], { encoding: "utf-8" });
+  return result3.status === 0;
+}
+function getPythonCommand() {
+  const result = (0, import_child_process.spawnSync)("python", ["--version"], { encoding: "utf-8" });
+  return result.status === 0 ? "python" : "python3";
+}
+function changedNamesFromDiff(diff) {
+  const names = /* @__PURE__ */ new Set();
+  for (const m4 of diff.matchAll(/^@@[^@]*@@\s*(?:(?:async\s+)?def|class)\s+(\w+)/gm)) {
+    names.add(m4[1]);
+  }
+  return [...names];
+}
+function extractPythonDocstrings(filepath, changedNames) {
+  const scriptPath = findScriptPath();
+  if (!scriptPath) return null;
+  if (!isPythonAvailable()) return null;
+  const pythonCmd = getPythonCommand();
+  const args = [scriptPath, filepath];
+  if (changedNames && changedNames.length > 0) {
+    args.push("--changed", changedNames.join(","));
+  }
+  const result = (0, import_child_process.spawnSync)(pythonCmd, args, {
+    encoding: "utf-8",
+    timeout: 1e4
+  });
+  if (result.status === 0 || result.status === 2) {
+    return result.stdout?.trim() || null;
+  }
+  return null;
 }
 
 // src/generateCommitMessageFromGitDiff.ts
@@ -115294,7 +115446,7 @@ async function handleModelNotFoundError(error, provider, currentModel) {
   if (suggestedModels.length === 0) {
     console.log(
       source_default.yellow(
-        `No alternative models available. Run 'oco setup' to configure a different model.`
+        `No alternative models available. Run 'ocox setup' to configure a different model.`
       )
     );
     return null;
@@ -115350,12 +115502,32 @@ async function handleModelNotFoundError(error, provider, currentModel) {
   return newModel;
 }
 var ADJUSTMENT_FACTOR = 20;
+function enrichDiffWithPythonDocstrings(diff, tokenBudget, docstringMode) {
+  if (docstringMode === "never") return diff;
+  const pyFileMatches = [...diff.matchAll(/^diff --git a\/.+ b\/(.+\.py)$/gm)];
+  if (pyFileMatches.length === 0) return diff;
+  const contextSections = [];
+  const changedNames = changedNamesFromDiff(diff);
+  if (changedNames.length === 0) return diff;
+  for (const match of pyFileMatches) {
+    const filepath = match[1];
+    const docContext = extractPythonDocstrings(filepath, changedNames);
+    if (docContext) contextSections.push(docContext);
+  }
+  if (contextSections.length === 0) return diff;
+  const contextBlock = "\n\n# Python docstring context for changed functions:\n" + contextSections.join("\n\n");
+  if (tokenCount(diff + contextBlock) <= tokenBudget) {
+    return diff + contextBlock;
+  }
+  return diff;
+}
 var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4 = "", retryWithModel) => {
   const currentConfig = getConfig();
   const provider = currentConfig.OCO_AI_PROVIDER || "openai";
   const currentModel = retryWithModel || currentConfig.OCO_MODEL;
   const MAX_TOKENS_INPUT = currentConfig.OCO_TOKENS_MAX_INPUT;
   const MAX_TOKENS_OUTPUT = currentConfig.OCO_TOKENS_MAX_OUTPUT;
+  const debugEnabled = Boolean(currentConfig.OCO_DEBUG);
   try {
     const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
       fullGitMojiSpec,
@@ -115364,29 +115536,204 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4
     const INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
       (msg) => tokenCount(msg.content) + 4
     ).reduce((a2, b4) => a2 + b4, 0);
-    const MAX_REQUEST_TOKENS = MAX_TOKENS_INPUT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH - MAX_TOKENS_OUTPUT;
-    if (tokenCount(diff) >= MAX_REQUEST_TOKENS) {
+    const MAX_REQUEST_TOKENS = MAX_TOKENS_INPUT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH;
+    if (MAX_REQUEST_TOKENS <= 0) {
+      throw new Error(
+        `OCO_TOKENS_MAX_INPUT (${MAX_TOKENS_INPUT}) is too low \u2014 it leaves no room for the diff.
+  Prompt overhead: ${INIT_MESSAGES_PROMPT_LENGTH + ADJUSTMENT_FACTOR}
+  Try: ocox config set OCO_TOKENS_MAX_INPUT 4096`
+      );
+    }
+    const diffTokens = tokenCount(diff);
+    if (debugEnabled) {
+      writeDebugLog({
+        event: "routing",
+        provider,
+        model: currentModel,
+        meta: {
+          diffTokens,
+          maxRequestTokens: MAX_REQUEST_TOKENS,
+          maxInputTokens: MAX_TOKENS_INPUT,
+          maxOutputTokens: MAX_TOKENS_OUTPUT,
+          promptOverhead: INIT_MESSAGES_PROMPT_LENGTH + ADJUSTMENT_FACTOR,
+          path: diffTokens >= MAX_REQUEST_TOKENS ? "large-diff" : "normal"
+        }
+      });
+    }
+    if (diffTokens >= MAX_REQUEST_TOKENS) {
+      const isRawGitDiff = diff.includes("diff --git ");
+      if (!isRawGitDiff) {
+        const lines = diff.split("\n");
+        let truncated = diff;
+        while (tokenCount(truncated) >= MAX_REQUEST_TOKENS && lines.length > 1) {
+          lines.pop();
+          truncated = lines.join("\n");
+        }
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "pre-processed-truncated",
+            provider,
+            model: currentModel,
+            meta: {
+              originalTokens: diffTokens,
+              truncatedTokens: tokenCount(truncated),
+              maxRequestTokens: MAX_REQUEST_TOKENS
+            }
+          });
+        }
+        const truncMessages = await generateCommitMessageChatCompletionPrompt(
+          truncated,
+          fullGitMojiSpec,
+          context4
+        );
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "llm-request-pre-processed",
+            provider,
+            model: currentModel,
+            messages: truncMessages,
+            meta: { truncatedTokens: tokenCount(truncated) }
+          });
+        }
+        const truncEngine = getEngine();
+        const truncCommit = await truncEngine.generateCommitMessage(truncMessages);
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "llm-response-pre-processed",
+            provider,
+            model: currentModel,
+            response: truncCommit,
+            meta: { empty: !truncCommit }
+          });
+        }
+        if (truncCommit) return truncCommit;
+      }
+      if (currentConfig.OCO_PYTHON_DOCSTRING_MODE !== "never") {
+        const pyFiles = [
+          ...diff.matchAll(/^diff --git a\/.+ b\/(.+\.py)$/gm)
+        ].map((m4) => m4[1]);
+        if (pyFiles.length > 0) {
+          const changedNames = changedNamesFromDiff(diff);
+          const docSections = pyFiles.flatMap((f2) => {
+            const doc = extractPythonDocstrings(
+              f2,
+              changedNames.length > 0 ? changedNames : void 0
+            );
+            return doc ? [doc] : [];
+          });
+          if (docSections.length > 0) {
+            const diffHeaders = pyFiles.map((f2) => {
+              const section = diff.split("diff --git ").find((s2) => s2.includes(`b/${f2}`));
+              if (!section) return "";
+              return ("diff --git " + section.split("@@")[0]).trimEnd();
+            }).filter(Boolean).join("\n\n");
+            const docPayload = (diffHeaders ? diffHeaders + "\n\n" : "") + "# Python docstring context (diff too large to send in full):\n" + docSections.join("\n\n");
+            if (tokenCount(docPayload) < MAX_REQUEST_TOKENS) {
+              const docMessages = await generateCommitMessageChatCompletionPrompt(
+                docPayload,
+                fullGitMojiSpec,
+                context4
+              );
+              const docEngine = getEngine();
+              if (debugEnabled) {
+                writeDebugLog({
+                  event: "llm-request-docstring-fallback",
+                  provider,
+                  model: currentModel,
+                  messages: docMessages,
+                  meta: { docFiles: pyFiles, tokenCount: tokenCount(docPayload) }
+                });
+              }
+              const docCommit = await docEngine.generateCommitMessage(docMessages);
+              if (debugEnabled) {
+                writeDebugLog({
+                  event: "llm-response-docstring-fallback",
+                  provider,
+                  model: currentModel,
+                  response: docCommit,
+                  meta: { empty: !docCommit }
+                });
+              }
+              if (docCommit) return docCommit;
+            }
+          }
+        }
+      }
       const commitMessagePromises = await getCommitMsgsPromisesFromFileDiffs(
         diff,
         MAX_REQUEST_TOKENS,
         fullGitMojiSpec
       );
       const commitMessages = [];
-      for (const promise of commitMessagePromises) {
-        commitMessages.push(await promise);
+      for (const [i3, promise] of commitMessagePromises.entries()) {
+        const msg = await promise;
+        if (debugEnabled) {
+          writeDebugLog({
+            event: "chunked-response",
+            provider,
+            model: currentModel,
+            response: msg,
+            meta: {
+              chunkIndex: i3,
+              totalChunks: commitMessagePromises.length,
+              empty: !msg
+            }
+          });
+        }
+        commitMessages.push(msg);
         await delay3(2e3);
       }
       return commitMessages.join("\n\n");
     }
-    const messages = await generateCommitMessageChatCompletionPrompt(
+    const enrichedDiff = enrichDiffWithPythonDocstrings(
       diff,
+      MAX_REQUEST_TOKENS,
+      currentConfig.OCO_PYTHON_DOCSTRING_MODE
+    );
+    const messages = await generateCommitMessageChatCompletionPrompt(
+      enrichedDiff,
       fullGitMojiSpec,
       context4
     );
     const engine = getEngine();
+    if (debugEnabled) {
+      writeDebugLog({
+        event: "llm-request",
+        provider,
+        model: currentModel,
+        messages,
+        meta: {
+          diffTokenCount: diffTokens,
+          maxRequestTokens: MAX_REQUEST_TOKENS
+        }
+      });
+    }
     const commitMessage = await engine.generateCommitMessage(messages);
-    if (!commitMessage)
-      throw new Error("EMPTY_MESSAGE" /* emptyMessage */);
+    if (debugEnabled) {
+      writeDebugLog({
+        event: "llm-response",
+        provider,
+        model: currentModel,
+        response: commitMessage,
+        meta: { empty: !commitMessage }
+      });
+    }
+    if (!commitMessage) {
+      const isThinkingModel = currentModel?.includes("thinking") || currentModel?.includes(":thinking") || currentModel?.includes("-think");
+      const thinkingHint = isThinkingModel ? `
+  This model uses reasoning/thinking tokens. The model may have hit the token
+  limit before generating any output. Try: ocox config set OCO_TOKENS_MAX_OUTPUT 2000
+  Or switch to a non-thinking model.` : "";
+      throw new Error(
+        `${"EMPTY_MESSAGE" /* emptyMessage */}
+  Provider: ${provider}, Model: ${currentModel}
+  The model returned an empty response. This can happen when:
+    - The model hit its token limit before generating output (finish_reason: length)${thinkingHint}
+    - The model hit a content policy or safety filter
+  Try a different model or adjust: ocox config set OCO_TOKENS_MAX_OUTPUT 1000
+` + (debugEnabled ? `  Debug logs written to ~/.opencommitx-data/debug/` : `  Enable debug logging: ocox config set OCO_DEBUG true`)
+      );
+    }
     return commitMessage;
   } catch (error) {
     if (isModelNotFoundError(error)) {
@@ -115605,14 +115952,14 @@ async function improveCommitMessages(commitsToImprove) {
   try {
     improvedMessagesWithSHAs.forEach(({ msg }, i3) => {
       const filename = `./commit-${i3}.txt`;
-      (0, import_fs3.writeFileSync)(filename, msg);
+      (0, import_fs5.writeFileSync)(filename, msg);
       tempFiles.push(filename);
     });
     const countFile = "./count.txt";
-    (0, import_fs3.writeFileSync)(countFile, "0");
+    (0, import_fs5.writeFileSync)(countFile, "0");
     tempFiles.push(countFile);
     const rebaseScript = "./rebase-exec.sh";
-    (0, import_fs3.writeFileSync)(
+    (0, import_fs5.writeFileSync)(
       rebaseScript,
       `#!/bin/bash
     count=$(cat count.txt)
@@ -115635,7 +115982,7 @@ async function improveCommitMessages(commitsToImprove) {
   } finally {
     tempFiles.forEach((file) => {
       try {
-        if ((0, import_fs3.existsSync)(file)) (0, import_fs3.unlinkSync)(file);
+        if ((0, import_fs5.existsSync)(file)) (0, import_fs5.unlinkSync)(file);
       } catch {
       }
     });
