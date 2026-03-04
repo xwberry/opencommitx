@@ -1,12 +1,9 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { homedir } from 'os';
-import { join as pathJoin } from 'path';
-
-const CACHE_FILE = pathJoin(homedir(), '.opencommitx-cache.json');
 
 import {
   hashDiff,
   getCachedCommitMessage,
+  getCacheFilePath,
   setCachedCommitMessage,
   clearCommitCache,
   formatCacheAge
@@ -14,10 +11,10 @@ import {
 
 describe('commitCache', () => {
   beforeEach(() => {
-    // Control config via process.env — avoids jest.mock ESM binding issues
     process.env.OCO_CACHE_ENABLED = 'true';
     process.env.OCO_CACHE_TTL_SECONDS = '3600';
-    if (existsSync(CACHE_FILE)) rmSync(CACHE_FILE);
+    const cacheFile = getCacheFilePath();
+    if (existsSync(cacheFile)) rmSync(cacheFile);
   });
 
   afterEach(() => {
@@ -26,7 +23,8 @@ describe('commitCache', () => {
   });
 
   afterAll(() => {
-    if (existsSync(CACHE_FILE)) rmSync(CACHE_FILE);
+    const cacheFile = getCacheFilePath();
+    if (existsSync(cacheFile)) rmSync(cacheFile);
   });
 
   describe('hashDiff', () => {
@@ -43,6 +41,24 @@ describe('commitCache', () => {
     it('returns different hashes for different inputs', () => {
       expect(hashDiff('diff A')).not.toBe(hashDiff('diff B'));
     });
+
+    it('returns the same hash for diffs that differ only in whitespace (formatter tolerance)', () => {
+      const before =
+        'diff --git a/x.py b/x.py\n' +
+        '+x=1+2\n' +
+        '+y  =  "hello"\n';
+      const afterRuff =
+        'diff --git a/x.py b/x.py\n' +
+        '+x = 1 + 2\n' +       // ruff added spaces around =
+        '+y = "hello"\n';      // ruff normalised spacing
+      expect(hashDiff(before)).toBe(hashDiff(afterRuff));
+    });
+
+    it('returns different hashes when content (not just whitespace) changes', () => {
+      const a = 'diff --git a/x.py b/x.py\n+x = 1\n';
+      const b = 'diff --git a/x.py b/x.py\n+x = 2\n';  // different value
+      expect(hashDiff(a)).not.toBe(hashDiff(b));
+    });
   });
 
   describe('setCachedCommitMessage / getCachedCommitMessage', () => {
@@ -51,7 +67,7 @@ describe('commitCache', () => {
       expect(result).toBeNull();
     });
 
-    it('stores and retrieves a commit message', () => {
+    it('stores and retrieves a commit message with explicit files', () => {
       const diff = 'diff --git a/foo.ts b/foo.ts\n+const x = 1;';
       const message = 'fix(foo): add constant x';
       setCachedCommitMessage(diff, message, ['foo.ts']);
@@ -60,6 +76,20 @@ describe('commitCache', () => {
       expect(cached).not.toBeNull();
       expect(cached!.message).toBe(message);
       expect(cached!.files).toEqual(['foo.ts']);
+    });
+
+    it('infers files from diff when files arg is omitted', () => {
+      const diff =
+        'diff --git a/src/utils.ts b/src/utils.ts\n' +
+        'index abc..def 100644\n' +
+        '--- a/src/utils.ts\n' +
+        '+++ b/src/utils.ts\n' +
+        '+const y = 2;';
+      setCachedCommitMessage(diff, 'feat: add y');
+
+      const cached = getCachedCommitMessage(diff);
+      expect(cached).not.toBeNull();
+      expect(cached!.files).toEqual(['src/utils.ts']);
     });
 
     it('returns null for a different diff', () => {
@@ -74,11 +104,11 @@ describe('commitCache', () => {
       const message = 'fix: something';
       setCachedCommitMessage(diff, message);
 
-      // Manually set the timestamp to be older than TTL
-      const store = JSON.parse(readFileSync(CACHE_FILE, 'utf-8'));
+      const cacheFile = getCacheFilePath();
+      const store = JSON.parse(readFileSync(cacheFile, 'utf-8'));
       const key = hashDiff(diff);
-      store[key].timestamp = Date.now() - 4000 * 1000; // 4000 seconds ago
-      writeFileSync(CACHE_FILE, JSON.stringify(store));
+      store[key].timestamp = Date.now() - 4000 * 1000;
+      writeFileSync(cacheFile, JSON.stringify(store));
 
       expect(getCachedCommitMessage(diff)).toBeNull();
     });

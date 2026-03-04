@@ -38,16 +38,45 @@ function getPythonCommand(): string {
 }
 
 /**
- * Extracts docstrings from a Python file using the bundled AST helper script.
- * Returns a formatted docstring summary, or null if extraction is unavailable.
+ * Parse function/class names that appear in git unified-diff `@@` hunk headers.
+ * Git often appends the enclosing symbol after the line numbers, e.g.:
+ *   "@@ -12,7 +12,9 @@ def my_function"
+ * Only captures plain identifiers that look like Python def/class names.
  */
-export function extractPythonDocstrings(filepath: string): string | null {
+export function changedNamesFromDiff(diff: string): string[] {
+  const names = new Set<string>();
+  // Match: @@ ... @@ <optional whitespace> <keyword> <name>
+  for (const m of diff.matchAll(/^@@[^@]*@@\s*(?:(?:async\s+)?def|class)\s+(\w+)/gm)) {
+    names.add(m[1]);
+  }
+  return [...names];
+}
+
+/**
+ * Extracts docstrings from a Python file using the bundled AST helper script.
+ *
+ * @param filepath   Path to the .py file on disk.
+ * @param changedNames  Optional list of function/class names to filter to
+ *                   (from git diff @@ hunk headers). When provided the module
+ *                   docstring is always included plus any listed symbol.
+ *                   When omitted all docstrings are returned (whole-file mode).
+ * @returns Formatted docstring summary string, or null if unavailable.
+ */
+export function extractPythonDocstrings(
+  filepath: string,
+  changedNames?: string[]
+): string | null {
   const scriptPath = findScriptPath();
   if (!scriptPath) return null;
   if (!isPythonAvailable()) return null;
 
   const pythonCmd = getPythonCommand();
-  const result = spawnSync(pythonCmd, [scriptPath, filepath], {
+  const args = [scriptPath, filepath];
+  if (changedNames && changedNames.length > 0) {
+    args.push('--changed', changedNames.join(','));
+  }
+
+  const result = spawnSync(pythonCmd, args, {
     encoding: 'utf-8',
     timeout: 10_000
   });
@@ -61,17 +90,22 @@ export function extractPythonDocstrings(filepath: string): string | null {
 
 /**
  * Determines whether to use docstring-only mode for a Python file based on config
- * and the number of changed lines.
+ * and the number of added lines.
  *
  * In auto mode the check has two gates:
- *  1. changedLines must exceed OCO_PYTHON_DOCSTRING_THRESHOLD (line count guard).
- *  2. The diff must cover at least OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO of the
- *     actual file (whole-file guard).  This prevents docstring extraction on
- *     partial refactors where the real diff is more informative.
+ *  1. addedLines must exceed OCO_PYTHON_DOCSTRING_THRESHOLD (line count guard).
+ *  2. addedLines must cover at least OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO of the
+ *     current file size (whole-file guard).
+ *
+ * Deleted lines are intentionally excluded from both checks. A refactor that
+ * removes 1000 lines from a 2000-line file but only adds 200 new lines should
+ * NOT trigger docstring mode — the actual diff is far more informative.
+ * Docstring mode is appropriate only when the added content represents most of
+ * the resulting file (i.e. a new file or a near-complete rewrite).
  */
 export function shouldUseDocstringMode(
   filepath: string,
-  changedLines: number
+  addedLines: number
 ): boolean {
   if (!filepath.endsWith('.py')) return false;
 
@@ -83,14 +117,12 @@ export function shouldUseDocstringMode(
   if (mode === 'never') return false;
   if (mode === 'always') return true;
 
-  if (changedLines <= threshold) return false;
+  if (addedLines <= threshold) return false;
 
-  // Whole-file check: diff must cover >= wholeFileRatio of the file.
-  // changedLines = added + deleted from numstat; for a new file that equals
-  // the file length; for a rewrite it can exceed it (old lines + new lines).
+  // Whole-file check: added lines must be >= wholeFileRatio of the resulting file.
   try {
     const fileLines = readFileSync(filepath, 'utf-8').split('\n').length;
-    return changedLines / fileLines >= wholeFileRatio;
+    return addedLines / fileLines >= wholeFileRatio;
   } catch {
     // File not readable (e.g. already deleted/moved) — skip ratio check.
     return true;

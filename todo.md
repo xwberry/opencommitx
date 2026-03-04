@@ -69,6 +69,6 @@
 - [ ] i18n for new CLI messages added in this fork
 - [ ] OpenRouter free model auto-discovery (`:free` suffix models highlighted in `ocox models list openrouter`)
 - [ ] Sync `ENUMS.ts` `COMMANDS` to add any new subcommands formally
-- [ ] Investigate upstream's "new version available" notification — update to check npm for `opencommitx` package
+- [x] Investigate upstream's "new version available" notification — update to check npm for `opencommitx` package
 - [ ] Reduce bundle size (esbuild tree-shaking improvements)
 - [ ] Investigate `OCO_API_CUSTOM_HEADERS` behavior with OpenRouter SDK approach

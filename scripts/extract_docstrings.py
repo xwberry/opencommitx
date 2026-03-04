@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """
 Extract docstrings from a Python file using the AST module.
-Outputs a structured text summary of all module/class/function docstrings.
+Outputs a structured text summary of module/class/function docstrings.
 
-Usage: python extract_docstrings.py <filepath>
+Usage:
+  python extract_docstrings.py <filepath>
+      → extract all docstrings (whole-file mode)
+
+  python extract_docstrings.py <filepath> --changed <name1,name2,...>
+      → always include the module docstring; include function/class docstrings
+        only for the names listed (names that appear in git diff @@ hunk headers)
 
 Exit codes:
   0 - success, docstrings printed to stdout
@@ -81,17 +87,36 @@ def format_output(filepath: str, docstrings: list[dict]) -> str:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: extract_docstrings.py <filepath>", file=sys.stderr)
+        print("Usage: extract_docstrings.py <filepath> [--changed name1,name2,...]",
+              file=sys.stderr)
         sys.exit(1)
 
     filepath = sys.argv[1]
-    docstrings = extract_docstrings(filepath)
 
-    if not docstrings:
-        print(f"# No docstrings found in: {filepath}")
+    # Parse optional --changed argument
+    changed_names: set[str] | None = None
+    args = sys.argv[2:]
+    if '--changed' in args:
+        idx = args.index('--changed')
+        if idx + 1 < len(args):
+            changed_names = {n.strip() for n in args[idx + 1].split(',') if n.strip()}
+
+    all_docstrings = extract_docstrings(filepath)
+
+    if changed_names is not None:
+        # Partial mode: always keep module docstring; keep function/class only if changed.
+        filtered = [
+            d for d in all_docstrings
+            if d['type'] == 'module' or d['name'] in changed_names
+        ]
+    else:
+        filtered = all_docstrings
+
+    if not filtered:
+        print(f"# No relevant docstrings found in: {filepath}")
         sys.exit(2)
 
-    print(format_output(filepath, docstrings))
+    print(format_output(filepath, filtered))
     sys.exit(0)
 
 

@@ -5,7 +5,8 @@ import { spawnSync } from 'child_process';
 
 import {
   shouldUseDocstringMode,
-  extractPythonDocstrings
+  extractPythonDocstrings,
+  changedNamesFromDiff
 } from '../../src/utils/pythonDocstringExtractor';
 
 function isPythonAvailable(): boolean {
@@ -56,14 +57,14 @@ describe('shouldUseDocstringMode', () => {
     expect(shouldUseDocstringMode('foo.py', 1)).toBe(true);
   });
 
-  it('returns false in auto mode when below threshold', () => {
+  it('returns false in auto mode when addedLines is below threshold', () => {
     process.env.OCO_PYTHON_DOCSTRING_MODE = 'auto';
     process.env.OCO_PYTHON_DOCSTRING_THRESHOLD = '500';
     expect(shouldUseDocstringMode('foo.py', 499)).toBe(false);
   });
 
   it('returns true in auto mode when above threshold and file is unreadable (ratio fallback)', () => {
-    // 'foo.py' does not exist — catch block falls back to true (line count only).
+    // 'foo.py' does not exist — catch block falls back to true.
     process.env.OCO_PYTHON_DOCSTRING_MODE = 'auto';
     process.env.OCO_PYTHON_DOCSTRING_THRESHOLD = '500';
     expect(shouldUseDocstringMode('foo.py', 501)).toBe(true);
@@ -72,7 +73,6 @@ describe('shouldUseDocstringMode', () => {
   it('uses default threshold of 500 when not configured', () => {
     process.env.OCO_PYTHON_DOCSTRING_MODE = 'auto';
     expect(shouldUseDocstringMode('foo.py', 499)).toBe(false);
-    // 501 > 500 threshold, file unreadable → ratio fallback → true
     expect(shouldUseDocstringMode('foo.py', 501)).toBe(true);
   });
 
@@ -92,20 +92,65 @@ describe('shouldUseDocstringMode', () => {
       try { rmSync(tmpFile); } catch { /* ignore */ }
     });
 
-    it('returns true when changedLines/fileLines >= ratio (new-file or full rewrite)', () => {
-      // 95 changed / 100 file lines = 0.95 >= 0.9
+    it('returns true when addedLines/fileLines >= ratio (new file or full rewrite)', () => {
+      // 95 added / 100 file lines = 0.95 >= 0.9
       expect(shouldUseDocstringMode(tmpFile, 95)).toBe(true);
     });
 
-    it('returns false when changedLines/fileLines < ratio (partial refactor)', () => {
-      // 60 changed / 100 file lines = 0.60 < 0.9
+    it('returns false when addedLines/fileLines < ratio (partial refactor)', () => {
+      // 60 added / 100 file lines = 0.60 < 0.9
       expect(shouldUseDocstringMode(tmpFile, 60)).toBe(false);
     });
 
-    it('returns false when changedLines is below the line-count threshold', () => {
+    it('returns false when addedLines is below the line-count threshold', () => {
       // 40 < threshold of 50 — ratio check never reached
       expect(shouldUseDocstringMode(tmpFile, 40)).toBe(false);
     });
+
+    it('does NOT trigger for a refactor with many deletions but few additions', () => {
+      // Real-world scenario: 254 added, 1045 deleted, file is 945 lines.
+      // Only added lines count: 254 / 945 = 0.27 < 0.9 — should NOT trigger.
+      // Replicating proportionally: 27 added / 100 file lines = 0.27 < 0.9
+      process.env.OCO_PYTHON_DOCSTRING_THRESHOLD = '20';
+      expect(shouldUseDocstringMode(tmpFile, 27)).toBe(false);
+    });
+  });
+});
+
+describe('changedNamesFromDiff', () => {
+  it('returns empty array for a diff with no Python hunk headers', () => {
+    const diff = '@@ -1,3 +1,4 @@\n +const x = 1;';
+    expect(changedNamesFromDiff(diff)).toEqual([]);
+  });
+
+  it('extracts function names from @@ hunk headers', () => {
+    const diff = [
+      '@@ -10,7 +10,9 @@ def process_data',
+      '+    new_line = 1',
+      '@@ -50,3 +52,5 @@ def validate_input',
+      '+    extra = True'
+    ].join('\n');
+    const names = changedNamesFromDiff(diff);
+    expect(names).toContain('process_data');
+    expect(names).toContain('validate_input');
+  });
+
+  it('extracts class names from @@ hunk headers', () => {
+    const diff = '@@ -20,10 +20,12 @@ class DataProcessor\n +    pass';
+    expect(changedNamesFromDiff(diff)).toContain('DataProcessor');
+  });
+
+  it('extracts async def names', () => {
+    const diff = '@@ -5,4 +5,6 @@ async def fetch_data\n +    await something()';
+    expect(changedNamesFromDiff(diff)).toContain('fetch_data');
+  });
+
+  it('deduplicates names appearing in multiple hunks', () => {
+    const diff = [
+      '@@ -1,3 +1,4 @@ def my_func',
+      '@@ -10,2 +11,3 @@ def my_func'
+    ].join('\n');
+    expect(changedNamesFromDiff(diff)).toEqual(['my_func']);
   });
 });
 
@@ -121,13 +166,12 @@ describe('extractPythonDocstrings', () => {
   });
 
   it('returns null for a non-existent file (Python error → exit 1)', () => {
-    // Either Python unavailable or script returns null for missing file — both give null
     const result = extractPythonDocstrings('/does/not/exist.py');
     expect(result).toBeNull();
   });
 
   (PYTHON_AVAILABLE ? it : it.skip)(
-    'extracts module, class, and function docstrings',
+    'extracts module, class, and function docstrings in whole-file mode',
     () => {
       const result = extractPythonDocstrings(TMP_PY);
       expect(result).not.toBeNull();
@@ -139,13 +183,24 @@ describe('extractPythonDocstrings', () => {
   );
 
   (PYTHON_AVAILABLE ? it : it.skip)(
-    'returns non-null for a file with no docstrings (exit 2 is treated as success)',
+    'filters to changed functions when changedNames is provided',
     () => {
-      // Exit code 2 means "no docstrings found" — the script still prints a summary line
+      const result = extractPythonDocstrings(TMP_PY, ['standalone_func']);
+      expect(result).not.toBeNull();
+      // Module docstring is always included
+      expect(result).toContain('Module docstring for testing');
+      // Only the requested function
+      expect(result).toContain('standalone_func');
+      // Other functions/classes should be excluded
+      expect(result).not.toContain('my_method');
+      expect(result).not.toContain('MyClass');
+    }
+  );
+
+  (PYTHON_AVAILABLE ? it : it.skip)(
+    'returns non-null for a file with no docstrings (exit 2 treated as success)',
+    () => {
       const result = extractPythonDocstrings(TMP_NO_DOCS);
-      // extractPythonDocstrings returns stdout on exit 0 or 2
-      // With no docstrings the script prints "# No docstrings found in: ..." to stdout
-      // stdout.trim() may be empty if Python echoes nothing — either null or a summary string is valid
       expect(typeof result === 'string' || result === null).toBe(true);
     }
   );

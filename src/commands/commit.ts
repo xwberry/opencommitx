@@ -4,6 +4,7 @@ import {
   intro,
   isCancel,
   multiselect,
+  note,
   outro,
   select,
   spinner
@@ -19,11 +20,14 @@ import {
   formatUserFriendlyError,
   printFormattedError
 } from '../utils/errors';
+import { existsSync } from 'fs';
+import { join as pathJoin } from 'path';
 import {
   assertGitRepo,
   getChangedFiles,
   getDiff,
   getDiffForFiles,
+  getGitDir,
   getStagedFiles,
   getStagedFilesStats,
   gitAdd
@@ -150,16 +154,73 @@ async function performCommit(
 
   if (userAction === 'Yes' || userAction === 'Edit') {
     const committingChangesSpinner = spinner();
-    committingChangesSpinner.start('Committing the changes');
-    const { stdout } = await execa('git', [
-      'commit',
-      '-m',
-      finalMessage,
-      ...extraArgs
-    ]);
-    committingChangesSpinner.stop(`${chalk.green('✔')} Successfully committed`);
-    outro(stdout);
-    return true;
+
+    // Show a pre-commit hint if hooks are configured, so the user knows
+    // why the spinner may run for a while.
+    try {
+      const gitDir = await getGitDir();
+      if (existsSync(pathJoin(gitDir, '.pre-commit-config.yaml'))) {
+        note('Pre-commit hooks are configured and will run now.');
+      }
+    } catch { /* non-fatal */ }
+
+    committingChangesSpinner.start('Committing...');
+
+    try {
+      // Use reject:false so we control error handling, and pipe stderr so we
+      // can relay hook output to the spinner message in real time.
+      const proc = execa('git', ['commit', '-m', finalMessage, ...extraArgs], {
+        reject: false
+      });
+
+      // Stream pre-commit hook output via the spinner message.
+      if (proc.stderr) {
+        proc.stderr.setEncoding('utf-8');
+        proc.stderr.on('data', (chunk: string) => {
+          const lastLine = chunk.split('\n').filter((l) => l.trim()).pop() ?? '';
+          if (lastLine) {
+            committingChangesSpinner.start(
+              `Committing... ${chalk.dim(lastLine.slice(0, 60))}`
+            );
+          }
+        });
+      }
+
+      const result = await proc;
+
+      if (result.exitCode === 0) {
+        committingChangesSpinner.stop(`${chalk.green('✔')} Successfully committed`);
+        if (result.stdout) outro(result.stdout);
+        return true;
+      }
+
+      committingChangesSpinner.stop(`${chalk.red('✖')} Commit failed`);
+
+      const hookOutput = [result.stderr, result.stdout].filter(Boolean).join('\n').trim();
+      if (hookOutput) process.stderr.write(hookOutput + '\n');
+
+      const isHookFailure =
+        hookOutput.includes('hook id:') ||
+        hookOutput.includes('[WARNING] Unstaged files detected') ||
+        hookOutput.includes('pre-commit');
+
+      if (isHookFailure) {
+        outro(
+          chalk.yellow(
+            '⚠  Pre-commit hooks made changes or failed.\n' +
+              '   Re-stage any reformatted files (e.g. git add -u) and run ocox again.'
+          )
+        );
+      } else {
+        outro(chalk.red(`✖ git commit failed (exit ${result.exitCode ?? 1})`));
+      }
+
+      return false;
+    } catch (unexpectedErr: unknown) {
+      committingChangesSpinner.stop(`${chalk.red('✖')} Commit failed`);
+      outro(chalk.red(`✖ Unexpected error: ${String(unexpectedErr)}`));
+      return false;
+    }
   }
 
   return false;
@@ -276,12 +337,23 @@ async function generatePerFileCommits(
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || 'single';
 
   const genSpinner = spinner();
+  // Per-group timeout: 90s. The OpenRouter engine has a 60s TCP timeout, so
+  // this outer guard catches any other hang (WASM, git subprocess, etc.).
+  const GROUP_TIMEOUT_MS = 90_000;
 
-  const sigintHandler = () => {
-    genSpinner.stop('Cancelled');
+  const stopAndExit = (label: string) => {
+    genSpinner.stop(label);
     process.exit(1);
   };
+
+  const sigintHandler = () => stopAndExit('Cancelled');
+  // SIGBREAK fires for Ctrl+Break on Windows; add it as an alias for Ctrl+C
+  // in environments (e.g. PowerShell pixi shell) that intercept SIGINT.
+  const sigbreakHandler = () => stopAndExit('Cancelled');
   process.once('SIGINT', sigintHandler);
+  if (process.platform === 'win32') {
+    process.once('SIGBREAK', sigbreakHandler);
+  }
 
   genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
 
@@ -289,8 +361,40 @@ async function generatePerFileCommits(
   try {
     rawMessages = [];
     for (const group of fileGroups) {
+      if (group.docstringOverride) {
+        genSpinner.message(
+          `Generating (docstring mode): ${group.files.join(', ')}`
+        );
+      } else {
+        genSpinner.message(
+          `Generating: ${group.files.join(', ')}`
+        );
+      }
       const payload = group.docstringOverride ?? (await getDiffForFiles(group.files));
-      const msg = await generateCommitMessageByDiff(payload, fullGitMojiSpec, context);
+
+      // Race the LLM call against a hard timeout so a stalled model/network
+      // does not hold the process open indefinitely.
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `Generation timed out after ${GROUP_TIMEOUT_MS / 1000}s for: ${group.files.join(', ')}\n` +
+                  `  The model or network may be unresponsive. Try a different model.`
+              )
+            ),
+          GROUP_TIMEOUT_MS
+        )
+      );
+
+      const msg = await Promise.race([
+        generateCommitMessageByDiff(payload, fullGitMojiSpec, context),
+        timeoutPromise
+      ]);
+
+      // Cache each group message immediately so a pre-commit failure on a later
+      // group doesn't lose already-generated messages.
+      setCachedCommitMessage(payload, msg, group.files);
       rawMessages.push(msg);
     }
     genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
@@ -299,6 +403,9 @@ async function generatePerFileCommits(
     throw error;
   } finally {
     process.removeListener('SIGINT', sigintHandler);
+    if (process.platform === 'win32') {
+      process.removeListener('SIGBREAK', sigbreakHandler);
+    }
   }
 
   // buildCommitPlan enforces the index-aligned file↔message contract
@@ -307,7 +414,7 @@ async function generatePerFileCommits(
   if (strategy === 'single') {
     const combinedMessage = combineCommitMessages(commitPlan.map((c) => c.message));
     const fullDiff = await getDiffForFiles(stagedFiles);
-    setCachedCommitMessage(fullDiff, combinedMessage);
+    setCachedCommitMessage(fullDiff, combinedMessage, stagedFiles);
     const committed = await performCommit(combinedMessage, extraArgs, skipCommitConfirmation);
     if (committed) await handleGitPush();
     return;
@@ -318,9 +425,15 @@ async function generatePerFileCommits(
   const groupedFiles = new Set(commitPlan.flatMap((c) => c.files));
   const omittedFiles = stagedFiles.filter((f) => !groupedFiles.has(f));
   if (omittedFiles.length > 0) {
-    throw new Error(
-      `Sequential strategy would omit staged files: ${omittedFiles.join(', ')}`
+    // Files excluded from `git diff` (e.g. pixi.lock, package-lock.json via
+    // .gitattributes) never appear in fileGroups but are still staged.
+    // Append them to the last commit group so they are not silently dropped.
+    note(
+      `The following staged files are excluded from diff and cannot be individually analysed.\n` +
+        `They will be committed with the last group:\n` +
+        omittedFiles.map((f) => `  ${f}`).join('\n')
     );
+    commitPlan[commitPlan.length - 1].files.push(...omittedFiles);
   }
   await execa('git', ['reset', 'HEAD', '--']);
 
@@ -467,6 +580,17 @@ export async function commit(
       .map((file) => `  ${file}`)
       .join('\n')}`
   );
+
+  // Warn about partially staged files (staged AND modified in working tree).
+  // These files will differ between what was reviewed and what gets committed
+  // if a pre-commit hook (e.g. ruff-format) reformats them.
+  const partiallyStaged = stagedFiles.filter((f) => changedFiles?.includes(f));
+  if (partiallyStaged.length > 0) {
+    note(
+      partiallyStaged.join('\n'),
+      chalk.yellow('⚠  These files have both staged and unstaged changes — a pre-commit formatter may alter them')
+    );
+  }
 
   // Check diff routing
   const currentConfig = getConfig();

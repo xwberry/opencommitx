@@ -40,6 +40,8 @@ export enum CONFIG_KEYS {
   OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO = 'OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO',
   // Multi-commit strategy (Phase 5)
   OCO_MULTI_COMMIT_STRATEGY = 'OCO_MULTI_COMMIT_STRATEGY',
+  // Debug mode
+  OCO_DEBUG = 'OCO_DEBUG',
   // Per-provider API keys (Phase 6)
   OCO_OPENAI_KEY = 'OCO_OPENAI_KEY',
   OCO_ANTHROPIC_KEY = 'OCO_ANTHROPIC_KEY',
@@ -925,6 +927,11 @@ export const configValidators = {
     return value;
   },
 
+  [CONFIG_KEYS.OCO_DEBUG](value: any) {
+    const parsed = typeof value === 'boolean' ? value : value === 'true' || value === true;
+    return parsed;
+  },
+
   [CONFIG_KEYS.OCO_OPENAI_KEY](value: any) {
     validateConfig(CONFIG_KEYS.OCO_OPENAI_KEY, typeof value === 'string', 'Must be a string');
     return value;
@@ -1044,6 +1051,8 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO]: number;
   // Multi-commit
   [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY]: string;
+  // Debug
+  [CONFIG_KEYS.OCO_DEBUG]: boolean;
   // Per-provider keys
   [CONFIG_KEYS.OCO_OPENAI_KEY]?: string;
   [CONFIG_KEYS.OCO_ANTHROPIC_KEY]?: string;
@@ -1115,7 +1124,9 @@ export const DEFAULT_CONFIG = {
   // Prevents extracting docstrings on partial refactors (use the real diff instead).
   OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: 0.9,
   // Multi-commit default
-  OCO_MULTI_COMMIT_STRATEGY: 'single'
+  OCO_MULTI_COMMIT_STRATEGY: 'single',
+  // Debug mode (off by default)
+  OCO_DEBUG: false
 };
 
 const initGlobalConfig = (configPath: string = defaultConfigPath) => {
@@ -1170,6 +1181,8 @@ const getEnvConfig = (envPath: string) => {
     ),
     // Multi-commit
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
+    // Debug
+    OCO_DEBUG: parseConfigVarValue(process.env.OCO_DEBUG),
     // Per-provider keys
     OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
     OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
@@ -1436,6 +1449,11 @@ function getConfigKeyDetails(key) {
         description: 'When multiple commit messages are generated, controls how they are committed',
         values: ['single (join all into one commit)', 'sequential (one commit per message)']
       };
+    case CONFIG_KEYS.OCO_DEBUG:
+      return {
+        description: 'Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting',
+        values: ['true', 'false (default)']
+      };
     case CONFIG_KEYS.OCO_OPENAI_KEY:
       return { description: 'API key for OpenAI (overrides OCO_API_KEY when provider is openai)', values: ['sk-...'] };
     case CONFIG_KEYS.OCO_ANTHROPIC_KEY:
@@ -1550,7 +1568,7 @@ export const configCommand = command(
         'Describe all config parameters: ocox config describe',
         'Describe a specific parameter: ocox config describe OCO_MODEL',
         'Get a config value: ocox config get OCO_MODEL',
-        'Set a config value: ocox config set OCO_MODEL=gpt-4'
+        'Set a config value: ocox config set OCO_MODEL=gpt-4 (or: ocox config set OCO_MODEL gpt-4)'
       ]
     }
   },
@@ -1580,8 +1598,18 @@ export const configCommand = command(
         if (!keyValues || keyValues.length === 0) {
           throw new Error('No config keys specified for set mode');
         }
+        // Normalise both "KEY=VALUE" and "KEY VALUE" (space-separated) styles.
+        const normalized: string[] = [];
+        for (let i = 0; i < keyValues.length; i++) {
+          if (!keyValues[i].includes('=') && i + 1 < keyValues.length) {
+            normalized.push(`${keyValues[i]}=${keyValues[i + 1]}`);
+            i++;
+          } else {
+            normalized.push(keyValues[i]);
+          }
+        }
         await setConfig(
-          keyValues.map((keyValue) => keyValue.split('=') as [string, string])
+          normalized.map((kv) => kv.split('=') as [string, string])
         );
       } else {
         throw new Error(

@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { getConfig } from '../commands/config';
+import { writeDebugLog } from '../utils/debugLog';
 import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
@@ -29,6 +31,7 @@ export class OpenRouterEngine implements AiEngine {
   public generateCommitMessage = async (
     messages: Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>
   ): Promise<string | null> => {
+    const debugEnabled = Boolean(getConfig().OCO_DEBUG);
     try {
       const response = await this.client.chat.completions.create({
         model: this.config.model,
@@ -38,9 +41,60 @@ export class OpenRouterEngine implements AiEngine {
         max_tokens: this.config.maxTokensOutput
       });
 
+      if (debugEnabled) {
+        writeDebugLog({
+          event: 'raw-api-response',
+          provider: 'openrouter',
+          model: this.config.model,
+          response: {
+            id: response.id,
+            model: response.model,
+            choices: response.choices.map((c) => ({
+              finish_reason: c.finish_reason,
+              message: c.message
+            })),
+            usage: response.usage
+          }
+        });
+      }
+
       const content = response.choices[0]?.message?.content;
-      return removeContentTags(content ?? '', 'think');
+      const cleaned = removeContentTags(content ?? '', 'think');
+
+      // If the cleaned result is empty but the raw content was not, it means
+      // the model hit max_tokens inside a <think> block (reasoning filled the
+      // entire output budget before producing a commit message).
+      if (!cleaned && content) {
+        if (debugEnabled) {
+          writeDebugLog({
+            event: 'thinking-truncated',
+            provider: 'openrouter',
+            model: this.config.model,
+            meta: {
+              finish_reason: response.choices[0]?.finish_reason,
+              usage: response.usage,
+              rawContentLength: content.length,
+              hint: 'Model exhausted max_tokens inside <think> block. Increase OCO_TOKENS_MAX_OUTPUT or switch to a non-thinking model variant.'
+            }
+          });
+        }
+      }
+
+      return cleaned || null;
     } catch (error) {
+      if (debugEnabled) {
+        writeDebugLog({
+          event: 'api-error',
+          provider: 'openrouter',
+          model: this.config.model,
+          error: error instanceof Error ? error.message : String(error),
+          meta: {
+            status: (error as any)?.status,
+            code: (error as any)?.code,
+            errorBody: (error as any)?.error
+          }
+        });
+      }
       throw normalizeEngineError(error, 'openrouter', this.config.model);
     }
   };

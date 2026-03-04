@@ -226,7 +226,7 @@ export function formatErrorWithRecovery(
   }
 
   message += '\nTo fix this, run: oco config set OCO_MODEL=<model-name>\n';
-  message += 'Or run: oco setup\n';
+  message += 'Or run: ocox setup\n';
 
   return message;
 }
@@ -384,7 +384,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Authentication Failed',
       message: `Your ${provider} API key is invalid or expired.`,
       helpUrl: billingUrl,
-      suggestion: 'Run `oco setup` to configure a valid API key.'
+      suggestion: 'Run `ocox setup` to configure a valid API key.'
     };
   }
 
@@ -393,7 +393,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Model Not Found',
       message: `The model '${error.modelName}' is not available for ${provider}.`,
       helpUrl: null,
-      suggestion: 'Run `oco setup` to select a valid model.'
+      suggestion: 'Run `ocox setup` to select a valid model.'
     };
   }
 
@@ -430,7 +430,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Authentication Failed',
       message: `Your ${provider} API key is invalid or expired.`,
       helpUrl: billingUrl,
-      suggestion: 'Run `oco setup` to configure a valid API key.'
+      suggestion: 'Run `ocox setup` to configure a valid API key.'
     };
   }
 
@@ -440,7 +440,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Model Not Found',
       message: `The model '${model}' is not available for ${provider}.`,
       helpUrl: null,
-      suggestion: 'Run `oco setup` to select a valid model.'
+      suggestion: 'Run `ocox setup` to select a valid model.'
     };
   }
 
@@ -450,7 +450,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
     title: 'Error',
     message: errorMessage,
     helpUrl: null,
-    suggestion: 'Run `oco setup` to reconfigure or check your settings.'
+    suggestion: 'Run `ocox setup` to reconfigure or check your settings.'
   };
 }
 

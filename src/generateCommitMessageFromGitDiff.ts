@@ -18,6 +18,11 @@ import {
 } from './utils/errors';
 import { mergeDiffs } from './utils/mergeDiffs';
 import { tokenCount } from './utils/tokenCount';
+import { writeDebugLog } from './utils/debugLog';
+import {
+  changedNamesFromDiff,
+  extractPythonDocstrings
+} from './utils/pythonDocstringExtractor';
 
 // Note: config is intentionally read inside each function call, not at module
 // load time, so that runtime config changes (e.g. --dry-run flag) are respected.
@@ -65,7 +70,7 @@ async function handleModelNotFoundError(
   if (suggestedModels.length === 0) {
     console.log(
       chalk.yellow(
-        `No alternative models available. Run 'oco setup' to configure a different model.`
+        `No alternative models available. Run 'ocox setup' to configure a different model.`
       )
     );
     return null;
@@ -139,6 +144,46 @@ async function handleModelNotFoundError(
 
 const ADJUSTMENT_FACTOR = 20;
 
+/**
+ * For Python files in the diff that are NOT in whole-file docstring mode,
+ * extract the docstrings of changed functions and append them as context.
+ * This helps the LLM understand intent for partial refactors without replacing
+ * the actual diff.  Only adds context if it fits within the remaining token budget.
+ */
+function enrichDiffWithPythonDocstrings(
+  diff: string,
+  tokenBudget: number,
+  docstringMode: string | undefined
+): string {
+  if (docstringMode === 'never') return diff;
+
+  // Find distinct Python files in this diff
+  const pyFileMatches = [...diff.matchAll(/^diff --git a\/.+ b\/(.+\.py)$/gm)];
+  if (pyFileMatches.length === 0) return diff;
+
+  const contextSections: string[] = [];
+  const changedNames = changedNamesFromDiff(diff);
+  if (changedNames.length === 0) return diff;
+
+  for (const match of pyFileMatches) {
+    const filepath = match[1];
+    const docContext = extractPythonDocstrings(filepath, changedNames);
+    if (docContext) contextSections.push(docContext);
+  }
+
+  if (contextSections.length === 0) return diff;
+
+  const contextBlock =
+    '\n\n# Python docstring context for changed functions:\n' +
+    contextSections.join('\n\n');
+
+  if (tokenCount(diff + contextBlock) <= tokenBudget) {
+    return diff + contextBlock;
+  }
+
+  return diff;
+}
+
 export const generateCommitMessageByDiff = async (
   diff: string,
   fullGitMojiSpec: boolean = false,
@@ -150,6 +195,7 @@ export const generateCommitMessageByDiff = async (
   const currentModel = retryWithModel || currentConfig.OCO_MODEL;
   const MAX_TOKENS_INPUT = currentConfig.OCO_TOKENS_MAX_INPUT;
   const MAX_TOKENS_OUTPUT = currentConfig.OCO_TOKENS_MAX_OUTPUT;
+  const debugEnabled = Boolean(currentConfig.OCO_DEBUG);
 
   try {
     const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
@@ -161,13 +207,161 @@ export const generateCommitMessageByDiff = async (
       (msg) => tokenCount(msg.content as string) + 4
     ).reduce((a, b) => a + b, 0);
 
+    // OCO_TOKENS_MAX_INPUT is the input token budget (diff + prompt).
+    // OCO_TOKENS_MAX_OUTPUT is passed as max_tokens to the API independently.
+    // They are NOT subtracted from each other — the API enforces them as
+    // separate limits.
     const MAX_REQUEST_TOKENS =
-      MAX_TOKENS_INPUT -
-      ADJUSTMENT_FACTOR -
-      INIT_MESSAGES_PROMPT_LENGTH -
-      MAX_TOKENS_OUTPUT;
+      MAX_TOKENS_INPUT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH;
 
-    if (tokenCount(diff) >= MAX_REQUEST_TOKENS) {
+    if (MAX_REQUEST_TOKENS <= 0) {
+      throw new Error(
+        `OCO_TOKENS_MAX_INPUT (${MAX_TOKENS_INPUT}) is too low — it leaves no room for the diff.\n` +
+          `  Prompt overhead: ${INIT_MESSAGES_PROMPT_LENGTH + ADJUSTMENT_FACTOR}\n` +
+          `  Try: ocox config set OCO_TOKENS_MAX_INPUT 4096`
+      );
+    }
+
+    const diffTokens = tokenCount(diff);
+    if (debugEnabled) {
+      writeDebugLog({
+        event: 'routing',
+        provider,
+        model: currentModel,
+        meta: {
+          diffTokens,
+          maxRequestTokens: MAX_REQUEST_TOKENS,
+          maxInputTokens: MAX_TOKENS_INPUT,
+          maxOutputTokens: MAX_TOKENS_OUTPUT,
+          promptOverhead: INIT_MESSAGES_PROMPT_LENGTH + ADJUSTMENT_FACTOR,
+          path: diffTokens >= MAX_REQUEST_TOKENS ? 'large-diff' : 'normal'
+        }
+      });
+    }
+
+    if (diffTokens >= MAX_REQUEST_TOKENS) {
+      // When the payload is pre-processed content (docstrings, not a raw git
+      // diff), chunking it into arbitrary pieces produces garbage commit
+      // messages.  Detect this case by the absence of `diff --git ` headers
+      // and instead truncate to the token budget, sending as a single request.
+      const isRawGitDiff = diff.includes('diff --git ');
+      if (!isRawGitDiff) {
+        // Line-based truncation: remove trailing lines until content fits.
+        const lines = diff.split('\n');
+        let truncated = diff;
+        while (tokenCount(truncated) >= MAX_REQUEST_TOKENS && lines.length > 1) {
+          lines.pop();
+          truncated = lines.join('\n');
+        }
+        if (debugEnabled) {
+          writeDebugLog({
+            event: 'pre-processed-truncated',
+            provider,
+            model: currentModel,
+            meta: {
+              originalTokens: diffTokens,
+              truncatedTokens: tokenCount(truncated),
+              maxRequestTokens: MAX_REQUEST_TOKENS
+            }
+          });
+        }
+        const truncMessages = await generateCommitMessageChatCompletionPrompt(
+          truncated,
+          fullGitMojiSpec,
+          context
+        );
+        if (debugEnabled) {
+          writeDebugLog({
+            event: 'llm-request-pre-processed',
+            provider,
+            model: currentModel,
+            messages: truncMessages,
+            meta: { truncatedTokens: tokenCount(truncated) }
+          });
+        }
+        const truncEngine = getEngine();
+        const truncCommit = await truncEngine.generateCommitMessage(truncMessages);
+        if (debugEnabled) {
+          writeDebugLog({
+            event: 'llm-response-pre-processed',
+            provider,
+            model: currentModel,
+            response: truncCommit,
+            meta: { empty: !truncCommit }
+          });
+        }
+        if (truncCommit) return truncCommit;
+      }
+
+      // For Python files: before falling back to chunk-and-join (which produces
+      // repetitive multi-block messages), try extracting docstrings. Docstrings
+      // give the LLM a concise structural summary in one request.
+      if (currentConfig.OCO_PYTHON_DOCSTRING_MODE !== 'never') {
+        const pyFiles = [
+          ...diff.matchAll(/^diff --git a\/.+ b\/(.+\.py)$/gm)
+        ].map((m) => m[1]);
+
+        if (pyFiles.length > 0) {
+          const changedNames = changedNamesFromDiff(diff);
+          const docSections = pyFiles.flatMap((f) => {
+            const doc = extractPythonDocstrings(
+              f,
+              changedNames.length > 0 ? changedNames : undefined
+            );
+            return doc ? [doc] : [];
+          });
+
+          if (docSections.length > 0) {
+            // Include the per-file diff headers (new file / modified / renamed)
+            // so the model knows what kind of change this is, even without hunks.
+            const diffHeaders = pyFiles
+              .map((f) => {
+                const section = diff
+                  .split('diff --git ')
+                  .find((s) => s.includes(`b/${f}`));
+                if (!section) return '';
+                return ('diff --git ' + section.split('@@')[0]).trimEnd();
+              })
+              .filter(Boolean)
+              .join('\n\n');
+
+            const docPayload =
+              (diffHeaders ? diffHeaders + '\n\n' : '') +
+              '# Python docstring context (diff too large to send in full):\n' +
+              docSections.join('\n\n');
+
+            if (tokenCount(docPayload) < MAX_REQUEST_TOKENS) {
+              const docMessages = await generateCommitMessageChatCompletionPrompt(
+                docPayload,
+                fullGitMojiSpec,
+                context
+              );
+              const docEngine = getEngine();
+              if (debugEnabled) {
+                writeDebugLog({
+                  event: 'llm-request-docstring-fallback',
+                  provider,
+                  model: currentModel,
+                  messages: docMessages,
+                  meta: { docFiles: pyFiles, tokenCount: tokenCount(docPayload) }
+                });
+              }
+              const docCommit = await docEngine.generateCommitMessage(docMessages);
+              if (debugEnabled) {
+                writeDebugLog({
+                  event: 'llm-response-docstring-fallback',
+                  provider,
+                  model: currentModel,
+                  response: docCommit,
+                  meta: { empty: !docCommit }
+                });
+              }
+              if (docCommit) return docCommit;
+            }
+          }
+        }
+      }
+
       const commitMessagePromises = await getCommitMsgsPromisesFromFileDiffs(
         diff,
         MAX_REQUEST_TOKENS,
@@ -175,25 +369,89 @@ export const generateCommitMessageByDiff = async (
       );
 
       const commitMessages = [] as string[];
-      for (const promise of commitMessagePromises) {
-        commitMessages.push((await promise) as string);
+      for (const [i, promise] of commitMessagePromises.entries()) {
+        const msg = (await promise) as string;
+        if (debugEnabled) {
+          writeDebugLog({
+            event: 'chunked-response',
+            provider,
+            model: currentModel,
+            response: msg,
+            meta: {
+              chunkIndex: i,
+              totalChunks: commitMessagePromises.length,
+              empty: !msg
+            }
+          });
+        }
+        commitMessages.push(msg);
         await delay(2000);
       }
 
       return commitMessages.join('\n\n');
     }
 
-    const messages = await generateCommitMessageChatCompletionPrompt(
+    const enrichedDiff = enrichDiffWithPythonDocstrings(
       diff,
+      MAX_REQUEST_TOKENS,
+      currentConfig.OCO_PYTHON_DOCSTRING_MODE
+    );
+
+    const messages = await generateCommitMessageChatCompletionPrompt(
+      enrichedDiff,
       fullGitMojiSpec,
       context
     );
 
     const engine = getEngine();
+
+    if (debugEnabled) {
+      writeDebugLog({
+        event: 'llm-request',
+        provider,
+        model: currentModel,
+        messages,
+        meta: {
+          diffTokenCount: diffTokens,
+          maxRequestTokens: MAX_REQUEST_TOKENS
+        }
+      });
+    }
+
     const commitMessage = await engine.generateCommitMessage(messages);
 
-    if (!commitMessage)
-      throw new Error(GenerateCommitMessageErrorEnum.emptyMessage);
+    if (debugEnabled) {
+      writeDebugLog({
+        event: 'llm-response',
+        provider,
+        model: currentModel,
+        response: commitMessage,
+        meta: { empty: !commitMessage }
+      });
+    }
+
+    if (!commitMessage) {
+      const isThinkingModel =
+        currentModel?.includes('thinking') ||
+        currentModel?.includes(':thinking') ||
+        currentModel?.includes('-think');
+      const thinkingHint = isThinkingModel
+        ? `\n  This model uses reasoning/thinking tokens. The model may have hit the token\n` +
+          `  limit before generating any output. Try: ocox config set OCO_TOKENS_MAX_OUTPUT 2000\n` +
+          `  Or switch to a non-thinking model.`
+        : '';
+      throw new Error(
+        `${GenerateCommitMessageErrorEnum.emptyMessage}\n` +
+          `  Provider: ${provider}, Model: ${currentModel}\n` +
+          `  The model returned an empty response. This can happen when:\n` +
+          `    - The model hit its token limit before generating output (finish_reason: length)${thinkingHint}\n` +
+          `    - The model hit a content policy or safety filter\n` +
+          `  Try a different model or adjust: ocox config set OCO_TOKENS_MAX_OUTPUT 1000\n` +
+          (debugEnabled
+            ? `  Debug logs written to ~/.opencommitx-data/debug/`
+            : `  Enable debug logging: ocox config set OCO_DEBUG true`)
+      );
+    }
 
     return commitMessage;
   } catch (error) {

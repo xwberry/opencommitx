@@ -17,3 +17,6 @@ notes.md
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# XB
+*/inspo_notes.md

@@ -89,7 +89,9 @@ export function routeDiff(
 
   const groups: FileGroupResult[] = largeFiles.map((s) => {
     const totalLines = s.added + s.deleted;
-    const docstringOverride = _shouldUse(s.file, totalLines)
+    // Pass only s.added — deleted lines must not inflate the ratio.
+    // See shouldUseDocstringMode for full rationale.
+    const docstringOverride = _shouldUse(s.file, s.added)
       ? _extract(s.file) ?? undefined
       : undefined;
     return {
