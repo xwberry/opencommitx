@@ -30,7 +30,8 @@ export function writeDebugLog(entry: Omit<DebugLogEntry, 'timestamp'>): void {
     mkdirSync(debugDir, { recursive: true });
     const ts = new Date().toISOString();
     const slug = ts.replace(/[:.]/g, '-');
-    const filepath = pathJoin(debugDir, `${slug}-${entry.event}.json`);
+    const safeEvent = entry.event.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filepath = pathJoin(debugDir, `${slug}-${safeEvent}.json`);
     const payload: DebugLogEntry = { timestamp: ts, ...entry };
     writeFileSync(filepath, JSON.stringify(payload, null, 2), {
       encoding: 'utf-8'
