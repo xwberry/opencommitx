@@ -20,6 +20,7 @@ import {
   promptForMissingApiKey
 } from './commands/setup';
 import { modelsCommand } from './commands/models';
+import { benchmarkCommand } from './commands/benchmark';
 import { checkIsLatestVersion } from './utils/checkIsLatestVersion';
 import { runMigrations } from './migrations/_run.js';
 
@@ -29,7 +30,7 @@ cli(
   {
     version: packageJSON.version,
     name: 'opencommitx',
-    commands: [configCommand, hookCommand, commitlintConfigCommand, setupCommand, modelsCommand],
+    commands: [configCommand, hookCommand, commitlintConfigCommand, setupCommand, modelsCommand, benchmarkCommand],
     flags: {
       fgm: {
         type: Boolean,
