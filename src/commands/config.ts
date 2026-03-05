@@ -939,8 +939,14 @@ export const configValidators = {
   },
 
   [CONFIG_KEYS.OCO_DEBUG](value: any) {
-    const parsed = typeof value === 'boolean' ? value : value === 'true' || value === true;
-    return parsed;
+    if (typeof value === 'boolean') return value;
+    const str = String(value).toLowerCase().trim();
+    validateConfig(
+      CONFIG_KEYS.OCO_DEBUG,
+      ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'].includes(str),
+      'Must be a boolean (true/false/1/0/yes/no)'
+    );
+    return ['true', '1', 'yes', 'on'].includes(str);
   },
 
   [CONFIG_KEYS.OCO_OPENAI_KEY](value: any) {
@@ -1221,6 +1227,7 @@ export const DEFAULT_CONFIG = {
 };
 
 const initGlobalConfig = (configPath: string = defaultConfigPath) => {
+  mkdirSync(dirname(configPath), { recursive: true });
   writeFileSync(configPath, iniStringify(DEFAULT_CONFIG), 'utf8');
   return DEFAULT_CONFIG;
 };
@@ -1834,7 +1841,12 @@ export const configCommand = command(
           }
         }
         await setConfig(
-          normalized.map((kv) => kv.split('=') as [string, string])
+          normalized.map((kv) => {
+            const eqIdx = kv.indexOf('=');
+            return eqIdx === -1
+              ? ([kv, ''] as [string, string])
+              : ([kv.slice(0, eqIdx), kv.slice(eqIdx + 1)] as [string, string]);
+          })
         );
       } else {
         throw new Error(
