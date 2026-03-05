@@ -531,7 +531,8 @@ async function generatePerFileCommits(
               { value: 'regenerate', label: `Regenerate with ${currentModel}` }
             ]
           });
-          if (isCancel(reuseAction) || reuseAction === 'use') {
+          if (isCancel(reuseAction)) process.exit(1);
+          if (reuseAction === 'use') {
             rawMessages.push(cached.message);
             if (fileGroups.indexOf(group) < fileGroups.length - 1) {
               genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
