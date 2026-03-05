@@ -120,6 +120,18 @@ describe('commitStrategy', () => {
     it('defaults OCO_PYTHON_DOCSTRING_THRESHOLD to 500', () => {
       expect(DEFAULT_CONFIG.OCO_PYTHON_DOCSTRING_THRESHOLD).toBe(500);
     });
+
+    it('defaults OCO_MAX_FILES_PER_GROUP to 10', () => {
+      expect(DEFAULT_CONFIG.OCO_MAX_FILES_PER_GROUP).toBe(10);
+    });
+
+    it('defaults OCO_GENERATION_TIMEOUT_SECONDS to 90', () => {
+      expect(DEFAULT_CONFIG.OCO_GENERATION_TIMEOUT_SECONDS).toBe(90);
+    });
+
+    it('does not have OCO_DIFF_INDIVIDUAL_FILES (removed key)', () => {
+      expect('OCO_DIFF_INDIVIDUAL_FILES' in DEFAULT_CONFIG).toBe(false);
+    });
   });
 
   describe('OCO_MULTI_COMMIT_STRATEGY env var', () => {
