@@ -30,16 +30,17 @@ export class AnthropicEngine implements AiEngine {
       (msg) => msg.role !== 'system'
     ) as MessageParam[];
 
+    const temperature = this.config.temperature ?? 0;
     const params: MessageCreateParamsNonStreaming = {
       model: this.config.model,
       system: systemMessage,
       messages: restMessages,
-      temperature: 0,
+      temperature,
       max_tokens: this.config.maxTokensOutput
     };
 
-    // add top_p for non-4.5 models
-    if (!/claude.*-4-5/.test(params.model)) {
+    // add top_p for non-4.5 models when temperature is 0
+    if (temperature === 0 && !/claude.*-4-5/.test(params.model)) {
       params.top_p = 0.1;
     }
 
