@@ -225,7 +225,7 @@ export function formatErrorWithRecovery(
     });
   }
 
-  message += '\nTo fix this, run: oco config set OCO_MODEL=<model-name>\n';
+  message += '\nTo fix this, run: ocox config set OCO_MODEL=<model-name>\n';
   message += 'Or run: ocox setup\n';
 
   return message;
