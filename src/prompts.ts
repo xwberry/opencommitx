@@ -8,9 +8,6 @@ import { ConsistencyPrompt } from './modules/commitlint/types';
 import * as utils from './modules/commitlint/utils';
 import { removeConventionalCommitWord } from './utils/removeConventionalCommitWord';
 
-const config = getConfig();
-const translation = i18n[(config.OCO_LANGUAGE as I18nLocals) || 'en'];
-
 export const IDENTITY =
   'You are to act as an author of a commit message in git.';
 
@@ -94,32 +91,54 @@ const FULL_GITMOJI_SPEC = `${GITMOJI_HELP}
 const CONVENTIONAL_COMMIT_KEYWORDS =
   'Do not preface the commit with anything, except for the conventional commit keywords: fix, feat, build, chore, ci, docs, style, refactor, perf, test.';
 
-const getCommitConvention = (fullGitMojiSpec: boolean) =>
-  config.OCO_EMOJI
+const getCommitConvention = (fullGitMojiSpec: boolean) => {
+  const cfg = getConfig();
+  return cfg.OCO_EMOJI
     ? fullGitMojiSpec
       ? FULL_GITMOJI_SPEC
       : GITMOJI_HELP
     : CONVENTIONAL_COMMIT_KEYWORDS;
+};
 
-const getDescriptionInstruction = () =>
-  config.OCO_DESCRIPTION
+const getDescriptionInstruction = () => {
+  const cfg = getConfig();
+  return cfg.OCO_DESCRIPTION
     ? 'Add a short description of WHY the changes are done after the commit message. Don\'t start it with "This commit", just describe the changes.'
     : "Don't add any descriptions to the commit, only commit message.";
+};
 
-const getOneLineCommitInstruction = () =>
-  config.OCO_ONE_LINE_COMMIT
+const getOneLineCommitInstruction = () => {
+  const cfg = getConfig();
+  return cfg.OCO_ONE_LINE_COMMIT
     ? 'Craft a concise, single sentence, commit message that encapsulates all changes made, with an emphasis on the primary updates. If the modifications share a common theme or scope, mention it succinctly; otherwise, leave the scope out to maintain focus. The goal is to provide a clear and unified overview of the changes in one single message.'
     : '';
+};
 
-const getWhyInstruction = () =>
-  config.OCO_WHY
+const getDetailInstruction = () => {
+  const cfg = getConfig();
+  const detail = cfg.OCO_COMMIT_DETAIL ?? 'normal';
+  if (detail === 'concise') {
+    return 'Be very concise. Write only one short commit message line — no description, no "Why:" section, no scope unless truly essential.';
+  }
+  if (detail === 'detailed') {
+    return 'Be thorough and detailed. Include a description explaining what changed and why. If multiple logical changes are present, summarize each briefly.';
+  }
+  return '';
+};
+
+const getWhyInstruction = () => {
+  const cfg = getConfig();
+  return cfg.OCO_WHY
     ? 'After the commit message (and description if enabled), add a brief "Why:" section explaining the motivation or reason for the change in 1-2 sentences.'
     : '';
+};
 
-const getScopeInstruction = () =>
-  config.OCO_OMIT_SCOPE
+const getScopeInstruction = () => {
+  const cfg = getConfig();
+  return cfg.OCO_OMIT_SCOPE
     ? 'Do not include a scope in the commit message format. Use the format: <type>: <subject>'
     : '';
+};
 
 /**
  * Get the context of the user input
@@ -153,10 +172,11 @@ const INIT_MAIN_PROMPT = (
     const oneLineCommitGuideline = getOneLineCommitInstruction();
     const whyInstruction = getWhyInstruction();
     const scopeInstruction = getScopeInstruction();
+    const detailInstruction = getDetailInstruction();
     const generalGuidelines = `Use the present tense. Lines must not be longer than 74 characters. Use ${language} for the commit message.`;
     const userInputContext = userInputCodeContext(context);
 
-    return `${missionStatement}\n${diffInstruction}\n${conventionGuidelines}\n${descriptionGuideline}\n${oneLineCommitGuideline}\n${whyInstruction}\n${scopeInstruction}\n${generalGuidelines}\n${userInputContext}`;
+    return `${missionStatement}\n${diffInstruction}\n${conventionGuidelines}\n${descriptionGuideline}\n${oneLineCommitGuideline}\n${whyInstruction}\n${scopeInstruction}\n${detailInstruction}\n${generalGuidelines}\n${userInputContext}`;
   })()
 });
 
@@ -198,27 +218,30 @@ const generateCommitString = (
   type: keyof typeof COMMIT_TYPES,
   message: string
 ): string => {
+  const cfg = getConfig();
   const cleanMessage = removeConventionalCommitWord(message);
-  return config.OCO_EMOJI ? `${COMMIT_TYPES[type]} ${cleanMessage}` : message;
+  return cfg.OCO_EMOJI ? `${COMMIT_TYPES[type]} ${cleanMessage}` : message;
 };
 
 const getConsistencyContent = (translation: ConsistencyPrompt) => {
+  const cfg = getConfig();
+
   const fixMessage =
-    config.OCO_OMIT_SCOPE && translation.commitFixOmitScope
+    cfg.OCO_OMIT_SCOPE && translation.commitFixOmitScope
       ? translation.commitFixOmitScope
       : translation.commitFix;
 
   const featMessage =
-    config.OCO_OMIT_SCOPE && translation.commitFeatOmitScope
+    cfg.OCO_OMIT_SCOPE && translation.commitFeatOmitScope
       ? translation.commitFeatOmitScope
       : translation.commitFeat;
 
   const fix = generateCommitString('fix', fixMessage);
-  const feat = config.OCO_ONE_LINE_COMMIT
+  const feat = cfg.OCO_ONE_LINE_COMMIT
     ? ''
     : generateCommitString('feat', featMessage);
 
-  const description = config.OCO_DESCRIPTION
+  const description = cfg.OCO_DESCRIPTION
     ? translation.commitDescription
     : '';
 
@@ -236,8 +259,11 @@ export const getMainCommitPrompt = async (
   fullGitMojiSpec: boolean,
   context: string
 ): Promise<Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>> => {
+  const config = getConfig();
+  const translation = i18n[(config.OCO_LANGUAGE as I18nLocals) || 'en'];
+
   switch (config.OCO_PROMPT_MODULE) {
-    case '@commitlint':
+    case '@commitlint': {
       if (!(await utils.commitlintLLMConfigExists())) {
         note(
           `OCO_PROMPT_MODULE is @commitlint but you haven't generated consistency for this project yet.`
@@ -245,7 +271,6 @@ export const getMainCommitPrompt = async (
         await configureCommitlintIntegration();
       }
 
-      // Replace example prompt with a prompt that's generated by OpenAI for the commitlint config.
       const commitLintConfig = await utils.getCommitlintLLMConfig();
 
       return [
@@ -260,6 +285,7 @@ export const getMainCommitPrompt = async (
           ] as ConsistencyPrompt
         )
       ];
+    }
 
     default:
       return [
