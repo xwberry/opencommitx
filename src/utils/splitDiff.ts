@@ -24,20 +24,21 @@ export function splitDiff(diff: string, maxChangeLength: number): string[] {
 
   for (let line of lines) {
     // If a single line exceeds maxChangeLength, split it into sub-lines.
-    // maxChangeLength is in tokens; substring operates on characters.
-    // Using ~4 chars/token as a conservative approximation.
+    // Derive the char-per-token ratio from the actual line to handle
+    // token-dense content (CJK, minified code, etc.) accurately.
     while (tokenCount(line) > maxChangeLength) {
-      const charBudget = maxChangeLength * 4;
+      const lineTokens = tokenCount(line);
+      const charBudget = Math.max(Math.floor(line.length * maxChangeLength / lineTokens), 1);
       const subLine = line.substring(0, charBudget);
       line = line.substring(charBudget);
       splitDiffs.push(subLine);
     }
 
-    if (tokenCount(currentDiff) + tokenCount('\n' + line) > maxChangeLength) {
+    if (currentDiff && tokenCount(currentDiff) + tokenCount('\n' + line) > maxChangeLength) {
       splitDiffs.push(currentDiff);
       currentDiff = line;
     } else {
-      currentDiff += '\n' + line;
+      currentDiff = currentDiff ? currentDiff + '\n' + line : line;
     }
   }
 
