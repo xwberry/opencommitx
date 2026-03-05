@@ -155,6 +155,8 @@ export const getStagedFilesStats = async (): Promise<FileStats[]> => {
 
   if (!stdout.trim()) return [];
 
+  const ig = await getOpenCommitIgnore();
+
   return stdout
     .split('\n')
     .filter((line) => line.trim())
@@ -166,7 +168,7 @@ export const getStagedFilesStats = async (): Promise<FileStats[]> => {
         file: parts[2] || ''
       };
     })
-    .filter((stat) => stat.file);
+    .filter((stat) => stat.file && !ig.ignores(stat.file));
 };
 
 export const getDiffForFiles = async (files: string[]): Promise<string> => {
@@ -192,6 +194,8 @@ export const getStagedFilesStatus = async (): Promise<FileStatusEntry[]> => {
 
   if (!stdout.trim()) return [];
 
+  const ig = await getOpenCommitIgnore();
+
   return stdout
     .split('\n')
     .filter((line) => line.trim())
@@ -201,5 +205,5 @@ export const getStagedFilesStatus = async (): Promise<FileStatusEntry[]> => {
       const file = parts[parts.length - 1]?.trim() ?? '';
       return { file, status: rawStatus };
     })
-    .filter((e) => e.file);
+    .filter((e) => e.file && !ig.ignores(e.file));
 };
