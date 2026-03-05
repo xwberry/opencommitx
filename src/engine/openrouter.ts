@@ -33,11 +33,12 @@ export class OpenRouterEngine implements AiEngine {
   ): Promise<string | null> => {
     const debugEnabled = Boolean(getConfig().OCO_DEBUG);
     try {
+      const temperature = this.config.temperature ?? 0;
       const response = await this.client.chat.completions.create({
         model: this.config.model,
         messages,
-        temperature: 0,
-        top_p: 0.1,
+        temperature,
+        top_p: temperature === 0 ? 0.1 : undefined,
         max_tokens: this.config.maxTokensOutput
       });
 
