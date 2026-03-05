@@ -465,7 +465,6 @@ export const generateCommitMessageByDiff = async (
 
       if (newModel) {
         console.log(chalk.cyan(`Retrying with ${newModel}...\n`));
-        // Retry with the new model by updating config temporarily
         const existingConfig = getGlobalConfig();
         setGlobalConfig({
           ...existingConfig,
@@ -478,6 +477,35 @@ export const generateCommitMessageByDiff = async (
           context,
           newModel
         );
+      }
+    }
+
+    // If a fallback model is configured and we haven't already retried, try it.
+    const fallbackModel = currentConfig.OCO_FALLBACK_MODEL;
+    const fallbackProvider = currentConfig.OCO_FALLBACK_PROVIDER;
+    if (fallbackModel && !retryWithModel) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      const isRetriable =
+        errMsg.includes('rate limit') ||
+        errMsg.includes('429') ||
+        errMsg.includes('overloaded') ||
+        errMsg.includes('unavailable') ||
+        errMsg.includes('timeout') ||
+        isModelNotFoundError(error);
+      if (isRetriable) {
+        console.log(chalk.yellow(`Primary model failed. Retrying with fallback: ${fallbackModel}\n`));
+        const existingConfig = getGlobalConfig();
+        setGlobalConfig({
+          ...existingConfig,
+          OCO_MODEL: fallbackModel,
+          ...(fallbackProvider ? { OCO_AI_PROVIDER: fallbackProvider as any } : {})
+        } as any);
+        try {
+          return await generateCommitMessageByDiff(diff, fullGitMojiSpec, context, fallbackModel);
+        } finally {
+          // Restore original model/provider so subsequent calls use the user's config.
+          setGlobalConfig(existingConfig);
+        }
       }
     }
 
@@ -537,10 +565,13 @@ function splitDiff(diff: string, maxChangeLength: number) {
   }
 
   for (let line of lines) {
-    // If a single line exceeds maxChangeLength, split it into multiple lines
+    // If a single line exceeds maxChangeLength, split it into multiple lines.
+    // maxChangeLength is in tokens; substring operates on characters.
+    // Using ~4 chars/token as an approximate conversion (conservative).
     while (tokenCount(line) > maxChangeLength) {
-      const subLine = line.substring(0, maxChangeLength);
-      line = line.substring(maxChangeLength);
+      const charBudget = maxChangeLength * 4;
+      const subLine = line.substring(0, charBudget);
+      line = line.substring(charBudget);
       splitDiffs.push(subLine);
     }
 
