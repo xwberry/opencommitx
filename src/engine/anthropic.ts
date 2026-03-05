@@ -16,7 +16,7 @@ export class AnthropicEngine implements AiEngine {
   config: AnthropicConfig;
   client: AnthropicClient;
 
-  constructor(config) {
+  constructor(config: AnthropicConfig) {
     this.config = config;
     this.client = new AnthropicClient({ apiKey: this.config.apiKey });
   }
