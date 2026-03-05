@@ -992,7 +992,7 @@ export const configValidators = {
     const n = Number(value);
     validateConfig(
       CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP,
-      !isNaN(n) && n >= 1,
+      Number.isInteger(n) && n >= 1,
       'Must be a positive integer (minimum 1)'
     );
     return n;
@@ -1002,7 +1002,7 @@ export const configValidators = {
     const n = Number(value);
     validateConfig(
       CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP,
-      !isNaN(n) && n >= 1,
+      Number.isInteger(n) && n >= 1,
       'Must be a positive integer (minimum 1)'
     );
     return n;
