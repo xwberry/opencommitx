@@ -223,6 +223,16 @@ export function clearCommitCache(): void {
         unlinkSync(pathJoin(cacheDir, file));
       } catch { /* skip */ }
     }
+
+    const archiveDir = pathJoin(cacheDir, 'archived');
+    if (existsSync(archiveDir)) {
+      for (const file of readdirSync(archiveDir)) {
+        if (!file.endsWith('.json')) continue;
+        try {
+          unlinkSync(pathJoin(archiveDir, file));
+        } catch { /* skip */ }
+      }
+    }
   } catch { /* non-fatal */ }
 }
 
