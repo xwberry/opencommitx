@@ -575,8 +575,10 @@ export const generateCommitMessageByDiff = async (
         setGlobalConfig({
           ...existingConfig,
           OCO_MODEL: fallbackModel,
-          ...(effectiveFallbackProvider ? { OCO_AI_PROVIDER: effectiveFallbackProvider as any } : {})
-        } as any);
+          ...(effectiveFallbackProvider
+            ? { OCO_AI_PROVIDER: effectiveFallbackProvider as OCO_AI_PROVIDER_ENUM }
+            : {})
+        });
         try {
           const result = await generateCommitMessageByDiff(diff, fullGitMojiSpec, context, fallbackModel);
           // Record that the fallback model was used so callers can pass it to setCachedCommitMessage.
