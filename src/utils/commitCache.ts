@@ -6,6 +6,7 @@ import {
   readFileSync,
   readdirSync,
   renameSync,
+  unlinkSync,
   writeFileSync
 } from 'fs';
 import { homedir } from 'os';
@@ -152,11 +153,15 @@ export function getCachedCommitMessage(diff: string): CacheEntry | null {
  * @param diff    The diff text for this group (used as the cache key).
  * @param message The generated commit message.
  * @param files   Staged file paths. Inferred from the diff when not supplied.
+ * @param model   The model that produced this message. Defaults to OCO_MODEL from config.
+ *                Pass explicitly when a fallback model was used so the cache records the
+ *                model that actually generated the response.
  */
 export function setCachedCommitMessage(
   diff: string,
   message: string,
-  files?: string[]
+  files?: string[],
+  model?: string
 ): void {
   const config = getConfig();
   if (!config.OCO_CACHE_ENABLED) return;
@@ -168,7 +173,7 @@ export function setCachedCommitMessage(
     message,
     timestamp: Date.now(),
     files: resolvedFiles,
-    model: config.OCO_MODEL ?? undefined
+    model: model ?? config.OCO_MODEL ?? undefined
   });
 }
 
@@ -202,7 +207,6 @@ export function pruneArchivedCache(retentionDays: number = 7): void {
         const entry: CacheEntry = JSON.parse(readFileSync(filePath, 'utf-8'));
         if (entry.timestamp < cutoff) {
           // Use unlinkSync via dynamic import to avoid direct fs import
-          const { unlinkSync } = require('fs');
           unlinkSync(filePath);
         }
       } catch { /* skip unreadable files */ }
@@ -216,7 +220,6 @@ export function clearCommitCache(): void {
     for (const file of readdirSync(cacheDir)) {
       if (!file.endsWith('.json')) continue;
       try {
-        const { unlinkSync } = require('fs');
         unlinkSync(pathJoin(cacheDir, file));
       } catch { /* skip */ }
     }
