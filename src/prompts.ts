@@ -170,9 +170,12 @@ const INIT_MAIN_PROMPT = (
     const conventionGuidelines = getCommitConvention(fullGitMojiSpec);
     const descriptionGuideline = getDescriptionInstruction();
     const oneLineCommitGuideline = getOneLineCommitInstruction();
-    const whyInstruction = getWhyInstruction();
-    const scopeInstruction = getScopeInstruction();
     const detailInstruction = getDetailInstruction();
+    // In concise mode the detail instruction already prohibits a Why section and
+    // descriptions — don't also inject conflicting instructions.
+    const isConcise = (getConfig().OCO_COMMIT_DETAIL ?? 'normal') === 'concise';
+    const whyInstruction = isConcise ? '' : getWhyInstruction();
+    const scopeInstruction = getScopeInstruction();
     const generalGuidelines = `Use the present tense. Lines must not be longer than 74 characters. Use ${language} for the commit message.`;
     const userInputContext = userInputCodeContext(context);
 
