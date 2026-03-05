@@ -22,10 +22,11 @@ export class OpenRouterEngine implements AiEngine {
   client: OpenAI;
 
   constructor(public config: OpenRouterConfig) {
+    const timeoutMs = (getConfig().OCO_GENERATION_TIMEOUT_SECONDS ?? 60) * 1000;
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: 'https://openrouter.ai/api/v1',
-      timeout: 60_000,
+      timeout: timeoutMs,
       defaultHeaders: {
         'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
         'X-Title': 'OpenCommitX',
