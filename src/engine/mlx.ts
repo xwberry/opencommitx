@@ -25,7 +25,7 @@ export class MLXEngine implements AiEngine {
   ): Promise<string | undefined> {
     const params = {
       messages,
-      temperature: 0,
+      temperature: this.config.temperature ?? 0,
       top_p: 0.1,
       repetition_penalty: 1.5,
       stream: false
