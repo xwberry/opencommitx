@@ -145,18 +145,29 @@ export function routeDiff(
   const mode = config.OCO_PER_FILE_COMMIT_MODE || 'auto';
   const threshold = config.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
   const maxFilesPerGroup = config.OCO_MAX_FILES_PER_GROUP ?? 10;
-  const maxLinesPerGroup = (config as any).OCO_MAX_LINES_PER_GROUP ?? 1500;
+  const maxLinesPerGroup = config.OCO_MAX_LINES_PER_GROUP ?? 1500;
 
   // Lock files are excluded from diff by git (binary/generated) but we want
   // them committed alongside their manifest. Collect them separately.
   const lockFiles = stats.filter((s) => isBinaryOrGenerated(s.file));
   const relevantStats = stats.filter((s) => !isBinaryOrGenerated(s.file));
 
-  if (mode === 'never' || relevantStats.length === 0) {
+  if (mode === 'never') {
     return {
       usePerFile: false,
       fileGroups: [{ files: relevantStats.map((s) => s.file), totalLines: 0 }],
-      reason: mode === 'never' ? 'per-file mode disabled' : 'no relevant files'
+      reason: 'per-file mode disabled'
+    };
+  }
+
+  if (relevantStats.length === 0) {
+    const lockOnlyFiles = lockFiles.map((s) => s.file);
+    return {
+      usePerFile: mode === 'always',
+      fileGroups: lockOnlyFiles.length
+        ? [{ files: lockOnlyFiles, totalLines: lockFiles.reduce((a, s) => a + s.added + s.deleted, 0) }]
+        : [],
+      reason: 'no relevant files'
     };
   }
 
