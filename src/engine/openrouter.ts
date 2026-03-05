@@ -7,6 +7,12 @@ import { AiEngine, AiEngineConfig } from './Engine';
 
 interface OpenRouterConfig extends AiEngineConfig {}
 
+interface OpenRouterErrorMeta {
+  status?: number;
+  code?: string;
+  error?: unknown;
+}
+
 /**
  * OpenRouter engine using the OpenAI-compatible API.
  * Supports all models available on https://openrouter.ai including free tiers
@@ -84,15 +90,17 @@ export class OpenRouterEngine implements AiEngine {
       return cleaned || null;
     } catch (error) {
       if (debugEnabled) {
+        const errMeta: OpenRouterErrorMeta =
+          typeof error === 'object' && error !== null ? (error as OpenRouterErrorMeta) : {};
         writeDebugLog({
           event: 'api-error',
           provider: 'openrouter',
           model: this.config.model,
           error: error instanceof Error ? error.message : String(error),
           meta: {
-            status: (error as any)?.status,
-            code: (error as any)?.code,
-            errorBody: (error as any)?.error
+            status: errMeta.status,
+            code: errMeta.code,
+            errorBody: errMeta.error
           }
         });
       }
