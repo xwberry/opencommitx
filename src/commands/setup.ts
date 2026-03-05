@@ -57,15 +57,23 @@ const NO_API_KEY_PROVIDERS = [
   OCO_AI_PROVIDER_ENUM.MLX
 ];
 
-async function selectProvider(): Promise<string | symbol> {
+async function selectProvider(currentProvider?: string): Promise<string | symbol> {
   const primaryOptions: { value: string; label: string }[] = PRIMARY_PROVIDERS.map((provider) => ({
     value: provider,
-    label: PROVIDER_DISPLAY_NAMES[provider] || provider
+    label:
+      provider === currentProvider
+        ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
+        : PROVIDER_DISPLAY_NAMES[provider] || provider
   }));
+
+  const otherIsCurrent =
+    currentProvider && !PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM);
 
   primaryOptions.push({
     value: 'other',
-    label: 'Other providers...'
+    label: otherIsCurrent
+      ? `Other providers... ${chalk.dim(`(current: ${currentProvider})`)}`
+      : 'Other providers...'
   });
 
   const selection = await select({
@@ -78,7 +86,10 @@ async function selectProvider(): Promise<string | symbol> {
   if (selection === 'other') {
     const otherOptions = OTHER_PROVIDERS.map((provider) => ({
       value: provider,
-      label: PROVIDER_DISPLAY_NAMES[provider] || provider
+      label:
+        provider === currentProvider
+          ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
+          : PROVIDER_DISPLAY_NAMES[provider] || provider
     }));
 
     return await select({
@@ -90,12 +101,27 @@ async function selectProvider(): Promise<string | symbol> {
   return selection;
 }
 
-async function getApiKey(provider: string): Promise<string | symbol> {
+async function getApiKey(provider: string, currentKey?: string): Promise<string | symbol> {
   const url = PROVIDER_API_KEY_URLS[provider as keyof typeof PROVIDER_API_KEY_URLS];
 
   let message = `Enter your ${provider} API key:`;
   if (url) {
     message = `Enter your API key:\n${chalk.dim(`  Get your key at: ${url}`)}`;
+  }
+
+  // If a key is already set, let the user keep it by pressing Enter.
+  if (currentKey) {
+    const maskedKey = currentKey.slice(0, 4) + '****' + currentKey.slice(-4);
+    const keepOrUpdate = await select({
+      message: `API key for ${provider}:`,
+      options: [
+        { value: 'keep', label: `Keep current key ${chalk.dim(`(${maskedKey})`)}` },
+        { value: 'update', label: 'Enter a new key' }
+      ]
+    });
+
+    if (isCancel(keepOrUpdate)) return keepOrUpdate;
+    if (keepOrUpdate === 'keep') return currentKey;
   }
 
   return await text({
@@ -332,8 +358,14 @@ async function setupOllama(): Promise<{
 export async function runSetup(): Promise<boolean> {
   intro(chalk.bgCyan(' Welcome to OpenCommitX! '));
 
+  // Load existing config to pre-populate fields.
+  const existingConfig = getIsGlobalConfigFileExist()
+    ? getGlobalConfig()
+    : { ...DEFAULT_CONFIG };
+  const currentProvider = (existingConfig as any).OCO_AI_PROVIDER as string | undefined;
+
   // Select provider
-  const provider = await selectProvider();
+  const provider = await selectProvider(currentProvider);
   if (isCancel(provider)) {
     outro('Setup cancelled');
     return false;
@@ -353,17 +385,18 @@ export async function runSetup(): Promise<boolean> {
       OCO_AI_PROVIDER: ollamaConfig.provider,
       OCO_MODEL: ollamaConfig.model,
       OCO_API_URL: ollamaConfig.apiUrl,
-      OCO_API_KEY: 'ollama' // Placeholder
+      OCO_API_KEY: 'ollama'
     };
   } else if (provider === OCO_AI_PROVIDER_ENUM.MLX) {
-    // MLX setup
     console.log(chalk.cyan('\n  MLX - Apple Silicon Local AI\n'));
     console.log(chalk.dim('  MLX runs locally on Apple Silicon Macs.'));
     console.log(chalk.dim('  No API key required.\n'));
 
+    const currentModel = (existingConfig as any).OCO_MODEL as string | undefined;
     const model = await text({
       message: 'Enter model name:',
-      placeholder: 'mlx-community/Llama-3-8B-Instruct-4bit'
+      placeholder: 'mlx-community/Llama-3-8B-Instruct-4bit',
+      initialValue: currentModel || ''
     });
 
     if (isCancel(model)) {
@@ -374,11 +407,19 @@ export async function runSetup(): Promise<boolean> {
     config = {
       OCO_AI_PROVIDER: OCO_AI_PROVIDER_ENUM.MLX,
       OCO_MODEL: model,
-      OCO_API_KEY: 'mlx' // Placeholder
+      OCO_API_KEY: 'mlx'
     };
   } else {
-    // Standard provider flow: API key then model
-    const apiKey = await getApiKey(provider as string);
+    // Standard provider flow: API key then model.
+    // Pass the current key so the user can keep it with one keypress.
+    const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY`;
+    const currentKey =
+      (existingConfig as any)[providerKeyName] ||
+      ((existingConfig as any).OCO_AI_PROVIDER === provider
+        ? (existingConfig as any).OCO_API_KEY
+        : undefined);
+
+    const apiKey = await getApiKey(provider as string, currentKey);
     if (isCancel(apiKey)) {
       outro('Setup cancelled');
       return false;
@@ -390,8 +431,6 @@ export async function runSetup(): Promise<boolean> {
       return false;
     }
 
-    // Save the API key to both the provider-specific key and the generic key
-    const providerKeyName = `OCO_${(provider as string).toUpperCase()}_KEY` as keyof typeof config;
     config = {
       OCO_AI_PROVIDER: provider,
       OCO_API_KEY: apiKey,
@@ -400,11 +439,7 @@ export async function runSetup(): Promise<boolean> {
     };
   }
 
-  // Save configuration
-  const existingConfig = getIsGlobalConfigFileExist()
-    ? getGlobalConfig()
-    : DEFAULT_CONFIG;
-
+  // Merge with existing config so all other settings are preserved.
   const newConfig = {
     ...existingConfig,
     ...config
