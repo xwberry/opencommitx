@@ -33,6 +33,33 @@
 - [x] Fix few-shot example framing: system prompt now explicitly states "An example input/output pair follows to demonstrate the expected format. Your actual task will be the final user message." — prevents weak models from summarizing the example response instead of analyzing the actual diff.
 - [x] Fix pre-processed payload chunking: when `docstringOverride=true` the payload passed to `generateCommitMessageByDiff` is already extracted docstring text (not a raw git diff). If that text exceeded `MAX_REQUEST_TOKENS` it was being chunked into arbitrary pieces, producing garbage messages like "Fixed" / "feat updates". Now detects the absence of `diff --git ` headers and applies line-based truncation to fit the budget, sending as a single request instead.
 
+## Phase 3 improvements (completed)
+
+- [x] Fix `Symbol(clack:cancel)` committed as message: added `isCancel()` guard in sequential Edit branch.
+- [x] Fix `.opencommitignore` not applied to `getStagedFilesStats` → LLM was receiving ignored files (e.g. `out/cli.cjs`).
+- [x] Fix cache never read in per-file generation path: `generatePerFileCommits` now checks cache before calling LLM per group.
+- [x] Fix `archiveCacheEntry` missing in per-file commit path.
+- [x] Fix cache recording wrong model after fallback: `consumeLastUsedModel()` tracks actual model used.
+- [x] Replace `require('fs')` / `require('path')` with static imports in `commitCache.ts` and `config.ts`.
+- [x] Remove redundant `OCO_DIFF_INDIVIDUAL_FILES` key; boilerplate grouping now wired to `OCO_PER_FILE_COMMIT_MODE=always`.
+- [x] Add `OCO_MAX_LINES_PER_GROUP` (default 1500) — caps combined line count of small-file groups to prevent everything glomming together.
+- [x] Subdirectory-aware grouping for small files: `groupByDirectory()` sorts by directory before bin-packing.
+- [x] Fix migration tracking file name: `.opencommit_migrations` → `.opencommitx_migrations` with copy-over logic.
+- [x] Fix `_run.ts` provider early-exit: only skips migration00 for unsupported providers, not all migrations.
+- [x] Fix provider pre-selection in `runSetup`: current provider sorted first so clack highlights it.
+- [x] Add `OCO_GENERATION_TIMEOUT_SECONDS` config key (default 90) replacing hardcoded constant.
+- [x] Add missing keys to `runFullSetup`: `OCO_FALLBACK_MODEL`, `OCO_FALLBACK_PROVIDER`, `OCO_TEMPERATURE`, `OCO_COMMIT_DETAIL`, `OCO_MAX_FILES_PER_GROUP`, `OCO_WHY`, `OCO_DEBUG`, `OCO_GENERATION_TIMEOUT_SECONDS`.
+- [x] Thematic ordering in `ocox config describe`; added describe entries for all new keys.
+- [x] API key plain-text warning shown once when writing a key via setup/promptForKey.
+- [x] Fallback model UX: naming convention hint, interactive provider/key setup on first failure.
+- [x] Staged files table DS column now uses `shouldUseDocstringMode()` directly instead of `docstringOverride` truthy check.
+- [x] Refactor `generateCommitMessageFromGitDiff.ts`: extracted `splitDiff` to `src/utils/splitDiff.ts` (no engine deps), chunking utils to `src/utils/diffChunking.ts`.
+- [x] Fix `getIsGlobalConfigFileExist` and `getGlobalConfig` to only check legacy path when using the default (production) path, not test temp paths.
+- [x] Test suite: updated `diffRouter.test.ts`, `commitCache.test.ts`, `commitStrategy.test.ts`; added `diffChunking.test.ts` (via `splitDiff.ts`), `configValidators.test.ts`. 10/10 suites pass.
+- [x] `ocox benchmark` command: setup wizard, per-candidate runner, single-call evaluator with structured JSON grades (score, accuracy, completeness, missing_key_details, hallucinations, conventional_commit_compliance, pros/cons, suggested_improvement, overall), terminal display, model selection, `benchmark_results_<ts>.md` output.
+- [x] `xdocs/inspo_notes.md` annotated with `[x]` for all addressed items.
+- [x] `xdocs/README.md` updated with all new keys, benchmark section, updated cache section.
+
 ## Phase 2 improvements (completed)
 
 - [x] Fix "Committing…" cascade spinner: `committingChangesSpinner.start()` inside `stderr.on('data')` replaced with `.message()`. This also eliminates the `MaxListenersExceededWarning` (each `.start()` added a new keypress listener).
