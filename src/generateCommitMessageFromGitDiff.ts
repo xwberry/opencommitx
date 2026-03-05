@@ -393,7 +393,7 @@ export const generateCommitMessageByDiff = async (
 
       const commitMessages = [] as string[];
       for (const [i, promise] of commitMessagePromises.entries()) {
-        const msg = (await promise) as string;
+        const msg = await promise;
         if (debugEnabled) {
           writeDebugLog({
             event: 'chunked-response',
@@ -407,7 +407,7 @@ export const generateCommitMessageByDiff = async (
             }
           });
         }
-        commitMessages.push(msg);
+        if (msg) commitMessages.push(msg);
         await delay(2000);
       }
 
@@ -507,7 +507,7 @@ export const generateCommitMessageByDiff = async (
     const fallbackModel = currentConfig.OCO_FALLBACK_MODEL;
     const fallbackProvider = currentConfig.OCO_FALLBACK_PROVIDER;
     if (fallbackModel && !retryWithModel) {
-      const errMsg = error instanceof Error ? error.message : String(error);
+      const errMsg = (error instanceof Error ? error.message : String(error)).toLowerCase();
       const isRetriable =
         errMsg.includes('rate limit') ||
         errMsg.includes('429') ||
@@ -565,7 +565,7 @@ export const generateCommitMessageByDiff = async (
             const keyInput = await text({ message: keyMessage, placeholder: 'sk-...' });
             if (!isCancel(keyInput) && keyInput) {
               const providerKeyName = `OCO_${effectiveFallbackProvider.toUpperCase()}_KEY`;
-              setGlobalConfig({ ...cfgNow, OCO_API_KEY: keyInput, [providerKeyName]: keyInput } as any);
+              setGlobalConfig({ ...cfgNow, [providerKeyName]: keyInput } as any);
             }
           }
         }
