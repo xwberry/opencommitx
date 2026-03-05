@@ -10,6 +10,7 @@ export interface AiEngineConfig {
   model: string;
   maxTokensOutput: number;
   maxTokensInput: number;
+  temperature?: number;
   baseURL?: string;
   customHeaders?: Record<string, string>;
 }
