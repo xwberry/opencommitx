@@ -2,10 +2,10 @@ import { intro, outro } from '@clack/prompts';
 import chalk from 'chalk';
 import { command } from 'cleye';
 import * as dotenv from 'dotenv';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { parse as iniParse, stringify as iniStringify } from 'ini';
 import { homedir } from 'os';
-import { join as pathJoin, resolve as pathResolve } from 'path';
+import { dirname, join as pathJoin, resolve as pathResolve } from 'path';
 import { COMMANDS } from './ENUMS';
 import { TEST_MOCK_TYPES } from '../engine/testAi';
 import { getI18nLocal, i18n } from '../i18n';
@@ -43,11 +43,12 @@ export enum CONFIG_KEYS {
   // Debug mode
   OCO_DEBUG = 'OCO_DEBUG',
   // Diff routing extras
-  OCO_DIFF_INDIVIDUAL_FILES = 'OCO_DIFF_INDIVIDUAL_FILES',
   OCO_MAX_FILES_PER_GROUP = 'OCO_MAX_FILES_PER_GROUP',
+  OCO_MAX_LINES_PER_GROUP = 'OCO_MAX_LINES_PER_GROUP',
   // LLM generation
   OCO_TEMPERATURE = 'OCO_TEMPERATURE',
   OCO_COMMIT_DETAIL = 'OCO_COMMIT_DETAIL',
+  OCO_GENERATION_TIMEOUT_SECONDS = 'OCO_GENERATION_TIMEOUT_SECONDS',
   // Fallback model
   OCO_FALLBACK_MODEL = 'OCO_FALLBACK_MODEL',
   OCO_FALLBACK_PROVIDER = 'OCO_FALLBACK_PROVIDER',
@@ -987,15 +988,20 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OCO_DIFF_INDIVIDUAL_FILES](value: any) {
-    const parsed = typeof value === 'boolean' ? value : value === 'true' || value === true;
-    return parsed;
-  },
-
   [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP](value: any) {
     const n = Number(value);
     validateConfig(
       CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP,
+      !isNaN(n) && n >= 1,
+      'Must be a positive integer (minimum 1)'
+    );
+    return n;
+  },
+
+  [CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP,
       !isNaN(n) && n >= 1,
       'Must be a positive integer (minimum 1)'
     );
@@ -1019,6 +1025,16 @@ export const configValidators = {
       "Must be 'concise', 'normal', or 'detailed'"
     );
     return value;
+  },
+
+  [CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS,
+      !isNaN(n) && n >= 10,
+      'Must be a positive integer >= 10 (seconds)'
+    );
+    return n;
   },
 
   [CONFIG_KEYS.OCO_FALLBACK_MODEL](value: any) {
@@ -1106,11 +1122,12 @@ export type ConfigType = {
   // Debug
   [CONFIG_KEYS.OCO_DEBUG]: boolean;
   // Diff routing extras
-  [CONFIG_KEYS.OCO_DIFF_INDIVIDUAL_FILES]: boolean;
   [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP]: number;
+  [CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP]: number;
   // LLM generation
   [CONFIG_KEYS.OCO_TEMPERATURE]: number;
   [CONFIG_KEYS.OCO_COMMIT_DETAIL]: string;
+  [CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS]: number;
   // Fallback model
   [CONFIG_KEYS.OCO_FALLBACK_MODEL]?: string;
   [CONFIG_KEYS.OCO_FALLBACK_PROVIDER]?: string;
@@ -1192,11 +1209,12 @@ export const DEFAULT_CONFIG = {
   // Debug mode (off by default)
   OCO_DEBUG: false,
   // Diff routing extras
-  OCO_DIFF_INDIVIDUAL_FILES: false,
   OCO_MAX_FILES_PER_GROUP: 10,
+  OCO_MAX_LINES_PER_GROUP: 1500,
   // LLM generation
   OCO_TEMPERATURE: 0,
   OCO_COMMIT_DETAIL: 'normal',
+  OCO_GENERATION_TIMEOUT_SECONDS: 90,
   // Fallback model (empty = disabled)
   OCO_FALLBACK_MODEL: '',
   OCO_FALLBACK_PROVIDER: ''
@@ -1267,11 +1285,12 @@ const getEnvConfig = (envPath: string) => {
     OCO_AIMLAPI_KEY: process.env.OCO_AIMLAPI_KEY,
     OCO_AZURE_KEY: process.env.OCO_AZURE_KEY,
     // Diff routing extras
-    OCO_DIFF_INDIVIDUAL_FILES: parseConfigVarValue(process.env.OCO_DIFF_INDIVIDUAL_FILES),
     OCO_MAX_FILES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_FILES_PER_GROUP),
+    OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_LINES_PER_GROUP),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
     OCO_COMMIT_DETAIL: process.env.OCO_COMMIT_DETAIL,
+    OCO_GENERATION_TIMEOUT_SECONDS: parseConfigVarValue(process.env.OCO_GENERATION_TIMEOUT_SECONDS),
     // Fallback model
     OCO_FALLBACK_MODEL: process.env.OCO_FALLBACK_MODEL,
     OCO_FALLBACK_PROVIDER: process.env.OCO_FALLBACK_PROVIDER
@@ -1283,30 +1302,37 @@ export const setGlobalConfig = (
   configPath: string = defaultConfigPath
 ) => {
   // Ensure the parent directory exists (e.g. ~/.opencommitx-data/).
-  const { mkdirSync: mkdirSyncFs } = require('fs');
-  const { dirname } = require('path');
-  try { mkdirSyncFs(dirname(configPath), { recursive: true }); } catch { /* ignore */ }
+  try { mkdirSync(dirname(configPath), { recursive: true }); } catch { /* ignore */ }
   writeFileSync(configPath, iniStringify(config), 'utf8');
 };
 
 /**
- * Check if a config file exists. Falls back to the legacy path (~/.opencommitx)
- * so existing installations continue to work before the migration runs.
+ * Check if a config file exists.
+ * When called with the default (production) path, also checks the legacy
+ * path (~/.opencommitx) so existing installs work before migration runs.
+ * When called with an explicit custom path (e.g. test temp dirs), only
+ * checks that specific path to avoid false positives.
  */
 export const getIsGlobalConfigFileExist = (
   configPath: string = defaultConfigPath
 ) => {
-  return existsSync(configPath) || existsSync(legacyConfigPath);
+  if (existsSync(configPath)) return true;
+  // Only fall back to the legacy path when the caller is using the default location.
+  if (configPath === defaultConfigPath) return existsSync(legacyConfigPath);
+  return false;
 };
 
 /**
- * Read the global config. Prefers the new path; falls back to the legacy path.
+ * Read the global config. When called with the default path, falls back to the
+ * legacy path (~/.opencommitx) so existing installs work before migration.
+ * When called with an explicit custom path (e.g. test temp dirs), only reads
+ * that specific path — no legacy fallback.
  */
 export const getGlobalConfig = (configPath: string = defaultConfigPath) => {
-  // Resolve which file to read: prefer new path, fall back to legacy.
+  // Only check the legacy path when using the default production location.
   const resolvedPath = existsSync(configPath)
     ? configPath
-    : existsSync(legacyConfigPath)
+    : (configPath === defaultConfigPath && existsSync(legacyConfigPath))
       ? legacyConfigPath
       : configPath;
 
@@ -1572,6 +1598,41 @@ function getConfigKeyDetails(key) {
       return { description: 'API key for AI/ML API (overrides OCO_API_KEY when provider is aimlapi)', values: ['String'] };
     case CONFIG_KEYS.OCO_AZURE_KEY:
       return { description: 'API key for Azure OpenAI (overrides OCO_API_KEY when provider is azure)', values: ['String'] };
+    case CONFIG_KEYS.OCO_TEMPERATURE:
+      return {
+        description: 'LLM sampling temperature. 0 = deterministic; higher = more creative (0–2)',
+        values: ['Number 0.0–2.0 (default: 0)']
+      };
+    case CONFIG_KEYS.OCO_COMMIT_DETAIL:
+      return {
+        description: 'Controls prompt verbosity: concise forces a one-liner, detailed asks for description + reasoning',
+        values: ['concise', 'normal (default)', 'detailed']
+      };
+    case CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS:
+      return {
+        description: 'Per-group LLM generation timeout. Increase for slow models or networks',
+        values: ['Positive integer ≥ 10 (default: 90)']
+      };
+    case CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP:
+      return {
+        description: 'Maximum number of files in a single commit group (auto mode)',
+        values: ['Positive integer (default: 10)']
+      };
+    case CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP:
+      return {
+        description: 'Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.',
+        values: ['Positive integer (default: 1500)']
+      };
+    case CONFIG_KEYS.OCO_FALLBACK_MODEL:
+      return {
+        description: 'Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.',
+        values: ['Model ID string (e.g. anthropic/claude-3-5-haiku or claude-3-5-haiku-20241022)']
+      };
+    case CONFIG_KEYS.OCO_FALLBACK_PROVIDER:
+      return {
+        description: 'Provider for OCO_FALLBACK_MODEL. Needed when the fallback model naming convention differs from the primary provider (e.g. OpenRouter uses "provider/model").',
+        values: Object.values(OCO_AI_PROVIDER_ENUM)
+      };
     default:
       return {
         description: 'String value',
@@ -1604,7 +1665,7 @@ function printConfigKeyHelp(param) {
   }
 
   if (currentValue !== undefined && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? '~/.opencommitx' : '.env';
+    const source = getIsGlobalConfigFileExist() ? '~/.opencommitx-data/config.ini' : '.env';
     console.log(chalk.cyan(`  Current: ${currentValue}`) + chalk.dim(` (from ${source})`));
   } else {
     console.log(chalk.dim('  Current: (not set)'));
@@ -1626,14 +1687,78 @@ function printConfigKeyHelp(param) {
   }
 }
 
+/** Thematic display order for `ocox config describe`. */
+const THEMATIC_KEY_ORDER: CONFIG_KEYS[] = [
+  // Provider & Model
+  CONFIG_KEYS.OCO_AI_PROVIDER,
+  CONFIG_KEYS.OCO_MODEL,
+  CONFIG_KEYS.OCO_API_KEY,
+  CONFIG_KEYS.OCO_API_URL,
+  CONFIG_KEYS.OCO_API_CUSTOM_HEADERS,
+  CONFIG_KEYS.OCO_OPENAI_KEY,
+  CONFIG_KEYS.OCO_ANTHROPIC_KEY,
+  CONFIG_KEYS.OCO_OPENROUTER_KEY,
+  CONFIG_KEYS.OCO_GEMINI_KEY,
+  CONFIG_KEYS.OCO_GROQ_KEY,
+  CONFIG_KEYS.OCO_MISTRAL_KEY,
+  CONFIG_KEYS.OCO_DEEPSEEK_KEY,
+  CONFIG_KEYS.OCO_AIMLAPI_KEY,
+  CONFIG_KEYS.OCO_AZURE_KEY,
+  // Fallback
+  CONFIG_KEYS.OCO_FALLBACK_MODEL,
+  CONFIG_KEYS.OCO_FALLBACK_PROVIDER,
+  // Token limits
+  CONFIG_KEYS.OCO_TOKENS_MAX_INPUT,
+  CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT,
+  // Generation
+  CONFIG_KEYS.OCO_TEMPERATURE,
+  CONFIG_KEYS.OCO_COMMIT_DETAIL,
+  CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS,
+  // Commit format
+  CONFIG_KEYS.OCO_PROMPT_MODULE,
+  CONFIG_KEYS.OCO_DESCRIPTION,
+  CONFIG_KEYS.OCO_WHY,
+  CONFIG_KEYS.OCO_EMOJI,
+  CONFIG_KEYS.OCO_ONE_LINE_COMMIT,
+  CONFIG_KEYS.OCO_OMIT_SCOPE,
+  CONFIG_KEYS.OCO_LANGUAGE,
+  CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
+  // Diff routing
+  CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE,
+  CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES,
+  CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP,
+  CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP,
+  // Multi-commit
+  CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY,
+  // Python docstrings
+  CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE,
+  CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD,
+  CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO,
+  // Cache
+  CONFIG_KEYS.OCO_CACHE_ENABLED,
+  CONFIG_KEYS.OCO_CACHE_TTL_SECONDS,
+  // Debug & Advanced
+  CONFIG_KEYS.OCO_DEBUG,
+  CONFIG_KEYS.OCO_HOOK_AUTO_UNCOMMENT,
+  CONFIG_KEYS.OCO_GITPUSH,
+  CONFIG_KEYS.OCO_TEST_MOCK_TYPE,
+];
+
 function printAllConfigHelp() {
   const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {} as any;
-  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommitx' : '(no config file)';
+  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommitx-data/config.ini' : '(no config file)';
 
   console.log(chalk.bold('Available config parameters:'));
   console.log(chalk.dim(`  Current values loaded from: ${configFileSource}\n`));
 
-  for (const key of Object.values(CONFIG_KEYS).sort()) {
+  // Use thematic order, then append any keys not yet in the list.
+  const allKeys = new Set(Object.values(CONFIG_KEYS));
+  const orderedKeys = [
+    ...THEMATIC_KEY_ORDER.filter((k) => allKeys.has(k)),
+    ...Object.values(CONFIG_KEYS).filter((k) => !THEMATIC_KEY_ORDER.includes(k)).sort()
+  ];
+
+  for (const key of orderedKeys) {
     const details = getConfigKeyDetails(key);
     let defaultValue = undefined;
     if (key in DEFAULT_CONFIG) {
