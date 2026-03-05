@@ -42,6 +42,15 @@ export enum CONFIG_KEYS {
   OCO_MULTI_COMMIT_STRATEGY = 'OCO_MULTI_COMMIT_STRATEGY',
   // Debug mode
   OCO_DEBUG = 'OCO_DEBUG',
+  // Diff routing extras
+  OCO_DIFF_INDIVIDUAL_FILES = 'OCO_DIFF_INDIVIDUAL_FILES',
+  OCO_MAX_FILES_PER_GROUP = 'OCO_MAX_FILES_PER_GROUP',
+  // LLM generation
+  OCO_TEMPERATURE = 'OCO_TEMPERATURE',
+  OCO_COMMIT_DETAIL = 'OCO_COMMIT_DETAIL',
+  // Fallback model
+  OCO_FALLBACK_MODEL = 'OCO_FALLBACK_MODEL',
+  OCO_FALLBACK_PROVIDER = 'OCO_FALLBACK_PROVIDER',
   // Per-provider API keys (Phase 6)
   OCO_OPENAI_KEY = 'OCO_OPENAI_KEY',
   OCO_ANTHROPIC_KEY = 'OCO_ANTHROPIC_KEY',
@@ -807,7 +816,8 @@ export const configValidators = {
         'groq',
         'deepseek',
         'aimlapi',
-        'openrouter'
+        'openrouter',
+        'mlx'
       ].includes(value) || value.startsWith('ollama'),
       `${value} is not supported yet, use 'ollama', 'mlx', 'anthropic', 'azure', 'gemini', 'flowise', 'mistral', 'deepseek', 'aimlapi' or 'openai' (default)`
     );
@@ -975,6 +985,48 @@ export const configValidators = {
   [CONFIG_KEYS.OCO_AZURE_KEY](value: any) {
     validateConfig(CONFIG_KEYS.OCO_AZURE_KEY, typeof value === 'string', 'Must be a string');
     return value;
+  },
+
+  [CONFIG_KEYS.OCO_DIFF_INDIVIDUAL_FILES](value: any) {
+    const parsed = typeof value === 'boolean' ? value : value === 'true' || value === true;
+    return parsed;
+  },
+
+  [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP,
+      !isNaN(n) && n >= 1,
+      'Must be a positive integer (minimum 1)'
+    );
+    return n;
+  },
+
+  [CONFIG_KEYS.OCO_TEMPERATURE](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_TEMPERATURE,
+      !isNaN(n) && n >= 0 && n <= 2,
+      'Must be a number between 0 and 2'
+    );
+    return n;
+  },
+
+  [CONFIG_KEYS.OCO_COMMIT_DETAIL](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_COMMIT_DETAIL,
+      ['concise', 'normal', 'detailed'].includes(value),
+      "Must be 'concise', 'normal', or 'detailed'"
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.OCO_FALLBACK_MODEL](value: any) {
+    return typeof value === 'string' ? value : '';
+  },
+
+  [CONFIG_KEYS.OCO_FALLBACK_PROVIDER](value: any) {
+    return typeof value === 'string' ? value : '';
   }
 };
 
@@ -1053,6 +1105,15 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY]: string;
   // Debug
   [CONFIG_KEYS.OCO_DEBUG]: boolean;
+  // Diff routing extras
+  [CONFIG_KEYS.OCO_DIFF_INDIVIDUAL_FILES]: boolean;
+  [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP]: number;
+  // LLM generation
+  [CONFIG_KEYS.OCO_TEMPERATURE]: number;
+  [CONFIG_KEYS.OCO_COMMIT_DETAIL]: string;
+  // Fallback model
+  [CONFIG_KEYS.OCO_FALLBACK_MODEL]?: string;
+  [CONFIG_KEYS.OCO_FALLBACK_PROVIDER]?: string;
   // Per-provider keys
   [CONFIG_KEYS.OCO_OPENAI_KEY]?: string;
   [CONFIG_KEYS.OCO_ANTHROPIC_KEY]?: string;
@@ -1065,7 +1126,10 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_AZURE_KEY]?: string;
 };
 
-export const defaultConfigPath = pathJoin(homedir(), '.opencommitx');
+/** Preferred config location inside the data directory. */
+export const defaultConfigPath = pathJoin(homedir(), '.opencommitx-data', 'config.ini');
+/** Legacy config location — kept for backward-compat read fallback. */
+export const legacyConfigPath = pathJoin(homedir(), '.opencommitx');
 export const defaultEnvPath = pathResolve(process.cwd(), '.env');
 
 const assertConfigsAreValid = (config: Record<string, any>) => {
@@ -1126,7 +1190,16 @@ export const DEFAULT_CONFIG = {
   // Multi-commit default
   OCO_MULTI_COMMIT_STRATEGY: 'single',
   // Debug mode (off by default)
-  OCO_DEBUG: false
+  OCO_DEBUG: false,
+  // Diff routing extras
+  OCO_DIFF_INDIVIDUAL_FILES: false,
+  OCO_MAX_FILES_PER_GROUP: 10,
+  // LLM generation
+  OCO_TEMPERATURE: 0,
+  OCO_COMMIT_DETAIL: 'normal',
+  // Fallback model (empty = disabled)
+  OCO_FALLBACK_MODEL: '',
+  OCO_FALLBACK_PROVIDER: ''
 };
 
 const initGlobalConfig = (configPath: string = defaultConfigPath) => {
@@ -1192,7 +1265,16 @@ const getEnvConfig = (envPath: string) => {
     OCO_MISTRAL_KEY: process.env.OCO_MISTRAL_KEY,
     OCO_DEEPSEEK_KEY: process.env.OCO_DEEPSEEK_KEY,
     OCO_AIMLAPI_KEY: process.env.OCO_AIMLAPI_KEY,
-    OCO_AZURE_KEY: process.env.OCO_AZURE_KEY
+    OCO_AZURE_KEY: process.env.OCO_AZURE_KEY,
+    // Diff routing extras
+    OCO_DIFF_INDIVIDUAL_FILES: parseConfigVarValue(process.env.OCO_DIFF_INDIVIDUAL_FILES),
+    OCO_MAX_FILES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_FILES_PER_GROUP),
+    // LLM generation
+    OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
+    OCO_COMMIT_DETAIL: process.env.OCO_COMMIT_DETAIL,
+    // Fallback model
+    OCO_FALLBACK_MODEL: process.env.OCO_FALLBACK_MODEL,
+    OCO_FALLBACK_PROVIDER: process.env.OCO_FALLBACK_PROVIDER
   };
 };
 
@@ -1200,22 +1282,40 @@ export const setGlobalConfig = (
   config: ConfigType,
   configPath: string = defaultConfigPath
 ) => {
+  // Ensure the parent directory exists (e.g. ~/.opencommitx-data/).
+  const { mkdirSync: mkdirSyncFs } = require('fs');
+  const { dirname } = require('path');
+  try { mkdirSyncFs(dirname(configPath), { recursive: true }); } catch { /* ignore */ }
   writeFileSync(configPath, iniStringify(config), 'utf8');
 };
 
+/**
+ * Check if a config file exists. Falls back to the legacy path (~/.opencommitx)
+ * so existing installations continue to work before the migration runs.
+ */
 export const getIsGlobalConfigFileExist = (
   configPath: string = defaultConfigPath
 ) => {
-  return existsSync(configPath);
+  return existsSync(configPath) || existsSync(legacyConfigPath);
 };
 
+/**
+ * Read the global config. Prefers the new path; falls back to the legacy path.
+ */
 export const getGlobalConfig = (configPath: string = defaultConfigPath) => {
+  // Resolve which file to read: prefer new path, fall back to legacy.
+  const resolvedPath = existsSync(configPath)
+    ? configPath
+    : existsSync(legacyConfigPath)
+      ? legacyConfigPath
+      : configPath;
+
   let globalConfig: ConfigType;
 
-  const isGlobalConfigFileExist = getIsGlobalConfigFileExist(configPath);
-  if (!isGlobalConfigFileExist) globalConfig = initGlobalConfig(configPath);
-  else {
-    const configFile = readFileSync(configPath, 'utf8');
+  if (!existsSync(resolvedPath)) {
+    globalConfig = initGlobalConfig(configPath);
+  } else {
+    const configFile = readFileSync(resolvedPath, 'utf8');
     globalConfig = iniParse(configFile) as ConfigType;
   }
 
