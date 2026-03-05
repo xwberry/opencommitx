@@ -201,9 +201,13 @@ export const getStagedFilesStatus = async (): Promise<FileStatusEntry[]> => {
     .filter((line) => line.trim())
     .map((line) => {
       const parts = line.split('\t');
-      const rawStatus = (parts[0]?.trim()[0] ?? 'M') as FileStatus;
+      const raw = parts[0]?.trim()[0] ?? 'M';
+      const status: FileStatus =
+        raw === 'A' || raw === 'M' || raw === 'D' || raw === 'R' || raw === 'C' || raw === 'U'
+          ? raw
+          : 'M';
       const file = parts[parts.length - 1]?.trim() ?? '';
-      return { file, status: rawStatus };
+      return { file, status };
     })
     .filter((e) => e.file && !ig.ignores(e.file));
 };
