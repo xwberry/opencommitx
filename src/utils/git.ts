@@ -172,3 +172,34 @@ export const getStagedFilesStats = async (): Promise<FileStats[]> => {
 export const getDiffForFiles = async (files: string[]): Promise<string> => {
   return getDiff({ files });
 };
+
+export type FileStatus = 'A' | 'M' | 'D' | 'R' | 'C' | 'U';
+
+export interface FileStatusEntry {
+  file: string;
+  status: FileStatus;
+}
+
+/** Returns the staged status (Added/Modified/Deleted/Renamed) for each staged file. */
+export const getStagedFilesStatus = async (): Promise<FileStatusEntry[]> => {
+  const gitDir = await getGitDir();
+
+  const { stdout } = await execa(
+    'git',
+    ['diff', '--staged', '--name-status'],
+    { cwd: gitDir }
+  );
+
+  if (!stdout.trim()) return [];
+
+  return stdout
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line) => {
+      const parts = line.split('\t');
+      const rawStatus = (parts[0]?.trim()[0] ?? 'M') as FileStatus;
+      const file = parts[parts.length - 1]?.trim() ?? '';
+      return { file, status: rawStatus };
+    })
+    .filter((e) => e.file);
+};
