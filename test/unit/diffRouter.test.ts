@@ -157,8 +157,7 @@ describe('diffRouter', () => {
       const result = routeDiff(stats, { ...baseConfig, OCO_MAX_LINES_PER_GROUP: 700 });
       expect(result.fileGroups.length).toBeGreaterThanOrEqual(4);
       for (const g of result.fileGroups) {
-        const groupLines = g.totalLines;
-        expect(groupLines).toBeLessThanOrEqual(700 + 300);
+        expect(g.totalLines).toBeLessThanOrEqual(700);
       }
     });
 
