@@ -153,9 +153,10 @@ export function routeDiff(
   const relevantStats = stats.filter((s) => !isBinaryOrGenerated(s.file));
 
   if (mode === 'never') {
+    const allFiles = [...relevantStats, ...lockFiles].map((s) => s.file);
     return {
       usePerFile: false,
-      fileGroups: [{ files: relevantStats.map((s) => s.file), totalLines: 0 }],
+      fileGroups: [{ files: allFiles, totalLines: 0 }],
       reason: 'per-file mode disabled'
     };
   }
