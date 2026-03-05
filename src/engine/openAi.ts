@@ -36,11 +36,12 @@ export class OpenAiEngine implements AiEngine {
   public generateCommitMessage = async (
     messages: Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>
   ): Promise<string | null> => {
+    const temperature = this.config.temperature ?? 0;
     const params = {
       model: this.config.model,
       messages,
-      temperature: 0,
-      top_p: 0.1,
+      temperature,
+      top_p: temperature === 0 ? 0.1 : undefined,
       max_tokens: this.config.maxTokensOutput
     };
 
