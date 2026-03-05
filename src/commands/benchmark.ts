@@ -71,18 +71,21 @@ async function runBenchmarkSetup(): Promise<void> {
     placeholder: '0.1',
     defaultValue: String(existing.eval_temperature)
   });
+  if (isCancel(evalTemp)) { outro('Setup cancelled'); return; }
 
   const evalMaxIn = await text({
     message: `Evaluator max input tokens (current: ${existing.eval_max_tokens_input}):`,
     placeholder: '32000',
     defaultValue: String(existing.eval_max_tokens_input)
   });
+  if (isCancel(evalMaxIn)) { outro('Setup cancelled'); return; }
 
   const evalMaxOut = await text({
     message: `Evaluator max output tokens (current: ${existing.eval_max_tokens_output}):`,
     placeholder: '8000',
     defaultValue: String(existing.eval_max_tokens_output)
   });
+  if (isCancel(evalMaxOut)) { outro('Setup cancelled'); return; }
 
   // Candidate models (up to 10)
   console.log(chalk.bold('\n── Candidate Models (up to 10) ──'));
@@ -115,11 +118,13 @@ async function runBenchmarkSetup(): Promise<void> {
       placeholder: '0',
       defaultValue: '0'
     });
+    if (isCancel(cTemp)) return;
 
+    const parsedTemp = Number(cTemp);
     candidates.push({
       model: String(cModel),
       provider: String(cProvider),
-      temperature: Number(cTemp) || 0
+      temperature: !isNaN(parsedTemp) ? parsedTemp : 0
     });
 
     await addAnother();
@@ -267,11 +272,11 @@ async function runBenchmark(): Promise<void> {
   writeFileSync(resultsFile, markdown, 'utf-8');
   console.log('\n' + chalk.dim(`  Results written to: ${resultsFile}`));
 
-  // Prompt to select winner
+  // Prompt to select winner — use index as value so duplicate model names don't collide
   const winnerOptions = [
-    ...successful.map((r) => ({
-      value: r.candidate.model,
-      label: `${r.candidate.model}${evalResults.results.find((e) => e.model === r.candidate.model) ? ` (score: ${evalResults.results.find((e) => e.model === r.candidate.model)!.score})` : ''}`
+    ...successful.map((r, idx) => ({
+      value: String(idx),
+      label: `${r.candidate.model} [${r.candidate.provider}]${evalResults.results.find((e) => e.model === r.candidate.model) ? ` (score: ${evalResults.results.find((e) => e.model === r.candidate.model)!.score})` : ''}`
     })),
     { value: '__skip__', label: "Don't change current model" }
   ];
@@ -282,14 +287,14 @@ async function runBenchmark(): Promise<void> {
   });
 
   if (!isCancel(winner) && winner !== '__skip__') {
-    const winnerCandidate = cfg.candidates.find((c) => c.model === winner)!;
+    const winnerCandidate = successful[Number(winner)].candidate;
     const existingConfig = getGlobalConfig();
     setGlobalConfig({
       ...existingConfig,
-      OCO_AI_PROVIDER: winnerCandidate.provider as any,
+      OCO_AI_PROVIDER: winnerCandidate.provider as OCO_AI_PROVIDER_ENUM,
       OCO_MODEL: winnerCandidate.model
-    } as any);
-    outro(`${chalk.green('✔')} Default model set to ${winner} (provider: ${winnerCandidate.provider})`);
+    });
+    outro(`${chalk.green('✔')} Default model set to ${winnerCandidate.model} (provider: ${winnerCandidate.provider})`);
   } else {
     outro(`${chalk.green('✔')} Benchmark complete — no config change`);
   }
