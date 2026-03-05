@@ -103,6 +103,13 @@ def main():
             sys.exit(1)
         changed_names = {n.strip() for n in args[idx + 1].split(',') if n.strip()}
 
+    known_flags = {'--changed'}
+    unknown_flags = [a for a in args if a.startswith('--') and a not in known_flags]
+    if unknown_flags:
+        print(f"Unknown flags: {', '.join(unknown_flags)}", file=sys.stderr)
+        print("Usage: extract_docstrings.py <filepath> [--changed name1,name2,...]", file=sys.stderr)
+        sys.exit(1)
+
     all_docstrings = extract_docstrings(filepath)
 
     if changed_names is not None:
