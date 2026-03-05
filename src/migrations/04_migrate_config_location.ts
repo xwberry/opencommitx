@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, renameSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { dirname, join as pathJoin } from 'path';
 
@@ -10,9 +10,13 @@ export default function migration04(): void {
   if (!existsSync(OLD_CONFIG_PATH)) return;
   if (existsSync(NEW_CONFIG_PATH)) return;
 
-  mkdirSync(NEW_CONFIG_DIR, { recursive: true });
+  try {
+    mkdirSync(NEW_CONFIG_DIR, { recursive: true });
 
-  // Copy rather than rename so the old file remains as a backup.
-  const content = readFileSync(OLD_CONFIG_PATH, 'utf8');
-  writeFileSync(NEW_CONFIG_PATH, content, { encoding: 'utf8', mode: 0o600 });
+    // Copy rather than rename so the old file remains as a backup.
+    const content = readFileSync(OLD_CONFIG_PATH, 'utf8');
+    writeFileSync(NEW_CONFIG_PATH, content, { encoding: 'utf8', mode: 0o600 });
+  } catch (err) {
+    console.error(`Migration 04 failed: could not migrate config to ${NEW_CONFIG_PATH}`, err);
+  }
 }
