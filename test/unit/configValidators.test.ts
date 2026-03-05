@@ -34,7 +34,7 @@ describe('DEFAULT_CONFIG new keys', () => {
   });
 
   it('defaults OCO_MAX_LINES_PER_GROUP to 1500', () => {
-    expect((DEFAULT_CONFIG as any).OCO_MAX_LINES_PER_GROUP).toBe(1500);
+    expect(DEFAULT_CONFIG.OCO_MAX_LINES_PER_GROUP).toBe(1500);
   });
 
   it('defaults OCO_FALLBACK_MODEL to empty string', () => {
