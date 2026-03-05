@@ -98,8 +98,10 @@ def main():
     args = sys.argv[2:]
     if '--changed' in args:
         idx = args.index('--changed')
-        if idx + 1 < len(args):
-            changed_names = {n.strip() for n in args[idx + 1].split(',') if n.strip()}
+        if idx + 1 >= len(args) or args[idx + 1].startswith('--'):
+            print("Usage: extract_docstrings.py <filepath> [--changed name1,name2,...]", file=sys.stderr)
+            sys.exit(1)
+        changed_names = {n.strip() for n in args[idx + 1].split(',') if n.strip()}
 
     all_docstrings = extract_docstrings(filepath)
 
