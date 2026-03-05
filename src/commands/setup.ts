@@ -1,4 +1,4 @@
-import { intro, outro, select, text, isCancel, spinner } from '@clack/prompts';
+import { intro, note, outro, select, text, isCancel, spinner } from '@clack/prompts';
 import chalk from 'chalk';
 import { command } from 'cleye';
 import { COMMANDS } from './ENUMS';
@@ -58,16 +58,28 @@ const NO_API_KEY_PROVIDERS = [
 ];
 
 async function selectProvider(currentProvider?: string): Promise<string | symbol> {
-  const primaryOptions: { value: string; label: string }[] = PRIMARY_PROVIDERS.map((provider) => ({
-    value: provider,
-    label:
-      provider === currentProvider
-        ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
-        : PROVIDER_DISPLAY_NAMES[provider] || provider
-  }));
+  const makeLabel = (provider: string) =>
+    provider === currentProvider
+      ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
+      : PROVIDER_DISPLAY_NAMES[provider] || provider;
 
   const otherIsCurrent =
     currentProvider && !PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM);
+
+  // If the current provider is in PRIMARY_PROVIDERS, move it to the top of the
+  // list so that @clack/prompts highlights it by default (first = highlighted).
+  let orderedPrimary = [...PRIMARY_PROVIDERS];
+  if (currentProvider && PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM)) {
+    orderedPrimary = [
+      currentProvider as OCO_AI_PROVIDER_ENUM,
+      ...orderedPrimary.filter((p) => p !== currentProvider)
+    ];
+  }
+
+  const primaryOptions: { value: string; label: string }[] = orderedPrimary.map((provider) => ({
+    value: provider,
+    label: makeLabel(provider)
+  }));
 
   primaryOptions.push({
     value: 'other',
@@ -84,12 +96,16 @@ async function selectProvider(currentProvider?: string): Promise<string | symbol
   if (isCancel(selection)) return selection;
 
   if (selection === 'other') {
-    const otherOptions = OTHER_PROVIDERS.map((provider) => ({
+    let orderedOther = [...OTHER_PROVIDERS];
+    if (otherIsCurrent && currentProvider) {
+      orderedOther = [
+        currentProvider as OCO_AI_PROVIDER_ENUM,
+        ...orderedOther.filter((p) => p !== currentProvider)
+      ];
+    }
+    const otherOptions = orderedOther.map((provider) => ({
       value: provider,
-      label:
-        provider === currentProvider
-          ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
-          : PROVIDER_DISPLAY_NAMES[provider] || provider
+      label: makeLabel(provider)
     }));
 
     return await select({
@@ -124,7 +140,7 @@ async function getApiKey(provider: string, currentKey?: string): Promise<string 
     if (keepOrUpdate === 'keep') return currentKey;
   }
 
-  return await text({
+  const keyResponse = await text({
     message,
     placeholder: 'sk-...',
     validate: (value) => {
@@ -134,6 +150,17 @@ async function getApiKey(provider: string, currentKey?: string): Promise<string 
       return undefined;
     }
   });
+
+  // Warn once that API keys are stored in plain text.
+  if (!isCancel(keyResponse) && keyResponse) {
+    note(
+      `Your API key will be stored in plain text in ~/.opencommitx-data/config.ini.\n` +
+      `  Keep this file private and never commit it to source control.`,
+      chalk.yellow('⚠  Security notice')
+    );
+  }
+
+  return keyResponse;
 }
 
 function formatCacheAge(timestamp: number | null): string {
@@ -448,7 +475,7 @@ export async function runSetup(): Promise<boolean> {
   setGlobalConfig(newConfig as any);
 
   outro(
-    `${chalk.green('✔')} Configuration saved to ~/.opencommitx\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
+    `${chalk.green('✔')} Configuration saved to ~/.opencommitx-data/config.ini\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
   );
 
   return true;
@@ -673,12 +700,96 @@ async function runFullSetup(): Promise<void> {
   });
   if (!isCancel(multiCommitStrategy)) updates.OCO_MULTI_COMMIT_STRATEGY = multiCommitStrategy;
 
+  const maxFilesPerGroup = await text({
+    message: `Max files per commit group (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP] ?? 10}):`,
+    placeholder: '10',
+    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP] ?? 10)
+  });
+  if (!isCancel(maxFilesPerGroup) && maxFilesPerGroup) {
+    try { (updates as any).OCO_MAX_FILES_PER_GROUP = toPositiveNumber(maxFilesPerGroup as string, 'OCO_MAX_FILES_PER_GROUP'); } catch { /* keep default */ }
+  }
+
+  // Commit content & style
+  console.log(chalk.bold('\n── Commit Content & Style ──'));
+  const why = await select({
+    message: `Add "Why:" section after commit message (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_WHY] ?? false}):`,
+    options: [
+      { value: false, label: 'false' },
+      { value: true, label: 'true (add motivation/reason section)' }
+    ]
+  });
+  if (!isCancel(why)) (updates as any).OCO_WHY = why;
+
+  const commitDetail = await select({
+    message: `Commit message detail level (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_COMMIT_DETAIL] ?? 'normal'}):`,
+    options: [
+      { value: 'normal', label: 'normal (default)' },
+      { value: 'concise', label: 'concise (one-liner, minimal description)' },
+      { value: 'detailed', label: 'detailed (thorough description + reasoning)' }
+    ]
+  });
+  if (!isCancel(commitDetail)) (updates as any).OCO_COMMIT_DETAIL = commitDetail;
+
+  // LLM tuning
+  console.log(chalk.bold('\n── LLM Tuning ──'));
+  const temperature = await text({
+    message: `Temperature 0.0–2.0 (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_TEMPERATURE] ?? 0}):`,
+    placeholder: '0',
+    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_TEMPERATURE] ?? 0)
+  });
+  if (!isCancel(temperature) && temperature !== undefined) {
+    const t = Number(temperature);
+    if (!isNaN(t) && t >= 0 && t <= 2) (updates as any).OCO_TEMPERATURE = t;
+  }
+
+  const genTimeout = await text({
+    message: `Generation timeout in seconds (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS] ?? 90}):`,
+    placeholder: '90',
+    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS] ?? 90)
+  });
+  if (!isCancel(genTimeout) && genTimeout) {
+    try { (updates as any).OCO_GENERATION_TIMEOUT_SECONDS = toPositiveNumber(genTimeout as string, 'OCO_GENERATION_TIMEOUT_SECONDS'); } catch { /* keep default */ }
+  }
+
+  // Fallback model
+  console.log(chalk.bold('\n── Fallback Model (optional) ──'));
+  const fallbackModel = await text({
+    message: `Fallback model ID (press Enter to skip, current: ${(currentConfig as any)[CONFIG_KEYS.OCO_FALLBACK_MODEL] ?? 'none'}):`,
+    placeholder: 'e.g. anthropic/claude-haiku-4.5 or claude-3-5-haiku-20241022',
+    defaultValue: (currentConfig as any)[CONFIG_KEYS.OCO_FALLBACK_MODEL] ?? ''
+  });
+  if (!isCancel(fallbackModel) && fallbackModel !== undefined) {
+    (updates as any).OCO_FALLBACK_MODEL = fallbackModel;
+  }
+
+  if ((updates as any).OCO_FALLBACK_MODEL) {
+    const fallbackProvider = await select({
+      message: `Fallback provider (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_FALLBACK_PROVIDER] ?? 'same as primary'}):`,
+      options: [
+        { value: '', label: 'Same as primary provider' },
+        ...Object.values(OCO_AI_PROVIDER_ENUM).filter(p => p !== 'test').map(p => ({ value: p, label: p }))
+      ]
+    });
+    if (!isCancel(fallbackProvider)) (updates as any).OCO_FALLBACK_PROVIDER = fallbackProvider;
+  }
+
+  // Debug
+  console.log(chalk.bold('\n── Debug & Advanced ──'));
+  const debugMode = await select({
+    message: `Debug mode — write LLM prompts/responses to ~/.opencommitx-data/debug/ (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_DEBUG] ?? false}):`,
+    options: [
+      { value: false, label: 'false' },
+      { value: true, label: 'true (verbose debug output)' }
+    ]
+  });
+  if (!isCancel(debugMode)) (updates as any).OCO_DEBUG = debugMode;
+
   // Save
   const newConfig = { ...currentConfig, ...updates };
   setGlobalConfig(newConfig as any);
 
   outro(
-    `${chalk.green('✔')} Full configuration saved to ~/.opencommitx\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
+    `${chalk.green('✔')} Full configuration saved to ~/.opencommitx-data/config.ini\n\n  Run ${chalk.cyan('ocox')} to generate commit messages!`
   );
 }
 
