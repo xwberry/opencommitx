@@ -65,7 +65,7 @@ export async function getCommitMsgsPromisesFromFileDiffs(
   const commitMessagePromises: Promise<string | null | undefined>[] = [];
 
   for (const fileDiff of mergedFilesDiffs) {
-    if (tokenCount(fileDiff) >= maxDiffLength) {
+    if (tokenCount(fileDiff) > maxDiffLength) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
