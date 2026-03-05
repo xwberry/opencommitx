@@ -52,6 +52,7 @@ export function getEngine(): AiEngine {
     model: config.OCO_MODEL!,
     maxTokensOutput: config.OCO_TOKENS_MAX_OUTPUT!,
     maxTokensInput: config.OCO_TOKENS_MAX_INPUT!,
+    temperature: config.OCO_TEMPERATURE ?? 0,
     baseURL: config.OCO_API_URL!,
     apiKey,
     customHeaders
