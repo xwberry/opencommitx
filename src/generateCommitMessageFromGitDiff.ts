@@ -1,14 +1,17 @@
-import { select, confirm, isCancel } from '@clack/prompts';
+import { select, confirm, isCancel, note, text } from '@clack/prompts';
 import chalk from 'chalk';
 import { OpenAI } from 'openai';
 import {
   DEFAULT_TOKEN_LIMITS,
+  OCO_AI_PROVIDER_ENUM,
+  PROVIDER_API_KEY_URLS,
   getConfig,
   setGlobalConfig,
   getGlobalConfig,
   MODEL_LIST,
   RECOMMENDED_MODELS
 } from './commands/config';
+import { getProviderApiKey } from './utils/providerKeys';
 import { getMainCommitPrompt } from './prompts';
 import { getEngine } from './utils/engine';
 import {
@@ -18,6 +21,10 @@ import {
 } from './utils/errors';
 import { mergeDiffs } from './utils/mergeDiffs';
 import { tokenCount } from './utils/tokenCount';
+import {
+  getCommitMsgsPromisesFromFileDiffs as _getCommitMsgsPromisesFromFileDiffs,
+  delay
+} from './utils/diffChunking';
 import { writeDebugLog } from './utils/debugLog';
 import {
   changedNamesFromDiff,
@@ -26,6 +33,18 @@ import {
 
 // Note: config is intentionally read inside each function call, not at module
 // load time, so that runtime config changes (e.g. --dry-run flag) are respected.
+
+// Tracks the model that actually produced the last commit message. Set to the
+// fallback model name when a fallback succeeds; callers use this to record the
+// correct model in the cache entry.
+let lastUsedModel: string | null = null;
+
+/** Returns the model used in the most recent generateCommitMessageByDiff call, then clears it. */
+export function consumeLastUsedModel(): string | null {
+  const m = lastUsedModel;
+  lastUsedModel = null;
+  return m;
+}
 
 const generateCommitMessageChatCompletionPrompt = async (
   diff: string,
@@ -190,6 +209,10 @@ export const generateCommitMessageByDiff = async (
   context: string = '',
   retryWithModel?: string
 ): Promise<string> => {
+  // Clear the fallback-model tracker on each top-level call so stale values
+  // from a previous invocation don't bleed into the next one.
+  if (!retryWithModel) lastUsedModel = null;
+
   const currentConfig = getConfig();
   const provider = currentConfig.OCO_AI_PROVIDER || 'openai';
   const currentModel = retryWithModel || currentConfig.OCO_MODEL;
@@ -362,10 +385,10 @@ export const generateCommitMessageByDiff = async (
         }
       }
 
-      const commitMessagePromises = await getCommitMsgsPromisesFromFileDiffs(
+      const commitMessagePromises = await _getCommitMsgsPromisesFromFileDiffs(
         diff,
         MAX_REQUEST_TOKENS,
-        fullGitMojiSpec
+        (d) => generateCommitMessageChatCompletionPrompt(d, fullGitMojiSpec, context)
       );
 
       const commitMessages = [] as string[];
@@ -493,15 +516,72 @@ export const generateCommitMessageByDiff = async (
         errMsg.includes('timeout') ||
         isModelNotFoundError(error);
       if (isRetriable) {
+        // Detect model naming convention mismatch before the retry
+        const isModelNameMismatch =
+          errMsg.includes('not a valid model') ||
+          errMsg.includes('model not found') ||
+          errMsg.includes('no such model') ||
+          errMsg.includes('invalid model');
+        if (isModelNameMismatch && !fallbackProvider) {
+          note(
+            `Fallback model "${fallbackModel}" was not recognized by the current provider.\n` +
+            `Different providers use different naming conventions:\n` +
+            `  Anthropic native: "claude-3-5-haiku-20241022"\n` +
+            `  OpenRouter:       "anthropic/claude-haiku-4.5"\n` +
+            `Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
+            chalk.yellow('⚠  Model naming mismatch')
+          );
+
+          // Prompt to set OCO_FALLBACK_PROVIDER now.
+          const providerInput = await select({
+            message: 'Select the provider for your fallback model:',
+            options: [
+              { value: '', label: 'Skip (keep current provider)' },
+              ...Object.values(OCO_AI_PROVIDER_ENUM)
+                .filter(p => p !== 'test')
+                .map(p => ({ value: p, label: p }))
+            ]
+          });
+          if (!isCancel(providerInput) && providerInput) {
+            const cfgToUpdate = getGlobalConfig();
+            setGlobalConfig({ ...cfgToUpdate, OCO_FALLBACK_PROVIDER: providerInput } as any);
+            // Use the newly selected provider for this retry.
+            Object.assign(currentConfig, { OCO_FALLBACK_PROVIDER: providerInput });
+          }
+        }
+
+        // Determine effective fallback provider for this retry.
+        const effectiveFallbackProvider = (currentConfig.OCO_FALLBACK_PROVIDER as string) || fallbackProvider || '';
+
+        // Check if the fallback provider has an API key set; if not, prompt for one.
+        if (effectiveFallbackProvider && effectiveFallbackProvider !== provider) {
+          const cfgNow = getGlobalConfig();
+          const existingKey = getProviderApiKey(cfgNow as any, effectiveFallbackProvider);
+          if (!existingKey) {
+            const keyUrl = PROVIDER_API_KEY_URLS[effectiveFallbackProvider as keyof typeof PROVIDER_API_KEY_URLS];
+            const keyMessage = keyUrl
+              ? `API key for ${effectiveFallbackProvider}:\n  Get your key at: ${keyUrl}`
+              : `API key for ${effectiveFallbackProvider}:`;
+            const keyInput = await text({ message: keyMessage, placeholder: 'sk-...' });
+            if (!isCancel(keyInput) && keyInput) {
+              const providerKeyName = `OCO_${effectiveFallbackProvider.toUpperCase()}_KEY`;
+              setGlobalConfig({ ...cfgNow, OCO_API_KEY: keyInput, [providerKeyName]: keyInput } as any);
+            }
+          }
+        }
+
         console.log(chalk.yellow(`Primary model failed. Retrying with fallback: ${fallbackModel}\n`));
         const existingConfig = getGlobalConfig();
         setGlobalConfig({
           ...existingConfig,
           OCO_MODEL: fallbackModel,
-          ...(fallbackProvider ? { OCO_AI_PROVIDER: fallbackProvider as any } : {})
+          ...(effectiveFallbackProvider ? { OCO_AI_PROVIDER: effectiveFallbackProvider as any } : {})
         } as any);
         try {
-          return await generateCommitMessageByDiff(diff, fullGitMojiSpec, context, fallbackModel);
+          const result = await generateCommitMessageByDiff(diff, fullGitMojiSpec, context, fallbackModel);
+          // Record that the fallback model was used so callers can pass it to setCachedCommitMessage.
+          lastUsedModel = fallbackModel;
+          return result;
         } finally {
           // Restore original model/provider so subsequent calls use the user's config.
           setGlobalConfig(existingConfig);
@@ -513,128 +593,7 @@ export const generateCommitMessageByDiff = async (
   }
 };
 
-function getMessagesPromisesByChangesInFile(
-  fileDiff: string,
-  separator: string,
-  maxChangeLength: number,
-  fullGitMojiSpec: boolean
-) {
-  const hunkHeaderSeparator = '@@ ';
-  const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
-
-  // merge multiple line-diffs into 1 to save tokens
-  const mergedChanges = mergeDiffs(
-    fileDiffByLines.map((line) => hunkHeaderSeparator + line),
-    maxChangeLength
-  );
-
-  const lineDiffsWithHeader = [] as string[];
-  for (const change of mergedChanges) {
-    const totalChange = fileHeader + change;
-    if (tokenCount(totalChange) > maxChangeLength) {
-      // If the totalChange is too large, split it into smaller pieces
-      const splitChanges = splitDiff(totalChange, maxChangeLength);
-      lineDiffsWithHeader.push(...splitChanges);
-    } else {
-      lineDiffsWithHeader.push(totalChange);
-    }
-  }
-
-  const engine = getEngine();
-  const commitMsgsFromFileLineDiffs = lineDiffsWithHeader.map(
-    async (lineDiff) => {
-      const messages = await generateCommitMessageChatCompletionPrompt(
-        separator + lineDiff,
-        fullGitMojiSpec
-      );
-
-      return engine.generateCommitMessage(messages);
-    }
-  );
-
-  return commitMsgsFromFileLineDiffs;
-}
-
-function splitDiff(diff: string, maxChangeLength: number) {
-  const lines = diff.split('\n');
-  const splitDiffs = [] as string[];
-  let currentDiff = '';
-
-  if (maxChangeLength <= 0) {
-    throw new Error(GenerateCommitMessageErrorEnum.outputTokensTooHigh);
-  }
-
-  for (let line of lines) {
-    // If a single line exceeds maxChangeLength, split it into multiple lines.
-    // maxChangeLength is in tokens; substring operates on characters.
-    // Using ~4 chars/token as an approximate conversion (conservative).
-    while (tokenCount(line) > maxChangeLength) {
-      const charBudget = maxChangeLength * 4;
-      const subLine = line.substring(0, charBudget);
-      line = line.substring(charBudget);
-      splitDiffs.push(subLine);
-    }
-
-    // Check the tokenCount of the currentDiff and the line separately
-    if (tokenCount(currentDiff) + tokenCount('\n' + line) > maxChangeLength) {
-      // If adding the next line would exceed the maxChangeLength, start a new diff
-      splitDiffs.push(currentDiff);
-      currentDiff = line;
-    } else {
-      // Otherwise, add the line to the current diff
-      currentDiff += '\n' + line;
-    }
-  }
-
-  // Add the last diff
-  if (currentDiff) {
-    splitDiffs.push(currentDiff);
-  }
-
-  return splitDiffs;
-}
-
 export const generateCommitMessagesPerFile = generateCommitMessageByDiff;
 
-export const getCommitMsgsPromisesFromFileDiffs = async (
-  diff: string,
-  maxDiffLength: number,
-  fullGitMojiSpec: boolean
-) => {
-  const separator = 'diff --git ';
-
-  const diffByFiles = diff.split(separator).slice(1);
-
-  // merge multiple files-diffs into 1 prompt to save tokens
-  const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
-
-  const commitMessagePromises = [] as Promise<string | null | undefined>[];
-
-  for (const fileDiff of mergedFilesDiffs) {
-    if (tokenCount(fileDiff) >= maxDiffLength) {
-      // if file-diff is bigger than gpt context — split fileDiff into lineDiff
-      const messagesPromises = getMessagesPromisesByChangesInFile(
-        fileDiff,
-        separator,
-        maxDiffLength,
-        fullGitMojiSpec
-      );
-
-      commitMessagePromises.push(...messagesPromises);
-    } else {
-      const messages = await generateCommitMessageChatCompletionPrompt(
-        separator + fileDiff,
-        fullGitMojiSpec
-      );
-
-      const engine = getEngine();
-      commitMessagePromises.push(engine.generateCommitMessage(messages));
-    }
-  }
-
-  return commitMessagePromises;
-};
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// Re-export for backward compatibility.
+export { delay } from './utils/diffChunking';
