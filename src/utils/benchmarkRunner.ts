@@ -143,8 +143,11 @@ export async function runEvaluator(
       ? 'https://openrouter.ai/api/v1'
       : undefined;
 
+    if (!rawApiKey) {
+      throw new Error(`Missing API key for evaluator provider: ${cfg.eval_provider}`);
+    }
     const client = new OpenAI({
-      apiKey: rawApiKey ?? 'none',
+      apiKey: rawApiKey,
       baseURL,
       defaultHeaders: cfg.eval_provider === 'openrouter'
         ? { 'HTTP-Referer': 'https://github.com/xwberry/opencommitx', 'X-Title': 'OpenCommitX Benchmark' }
