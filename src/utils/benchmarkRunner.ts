@@ -131,7 +131,7 @@ export async function runEvaluator(
   try {
     const candidates = candidateResults
       .filter((r) => !r.error && r.message)
-      .map((r) => ({ model: r.candidate.model, message: r.message }));
+      .map((r) => ({ model: `${r.candidate.model}@${r.candidate.provider}`, message: r.message }));
 
     const messages = buildEvaluatorMessages(diff, candidates);
     const engine = getEngine();
@@ -190,21 +190,22 @@ export function formatBenchmarkMarkdown(
   const evalMap = new Map<string, BenchmarkEvalResult>(
     evalResults.results.map((r) => [r.model, r])
   );
+  const candidateKey = (r: CandidateResult) => `${r.candidate.model}@${r.candidate.provider}`;
 
   // Sort by score descending
   const sorted = [...candidateResults].sort((a, b) => {
-    const sa = evalMap.get(a.candidate.model)?.score ?? 0;
-    const sb = evalMap.get(b.candidate.model)?.score ?? 0;
+    const sa = evalMap.get(candidateKey(a))?.score ?? 0;
+    const sb = evalMap.get(candidateKey(b))?.score ?? 0;
     return sb - sa;
   });
 
   const summaryRows = sorted.map((r, i) => {
-    const ev = evalMap.get(r.candidate.model);
+    const ev = evalMap.get(candidateKey(r));
     return `| ${i + 1} | ${r.candidate.model} | ${ev?.score ?? 'N/A'} | ${ev?.accuracy ?? '-'}/10 | ${ev?.completeness ?? '-'}/10 | ${ev?.hallucinations ? 'Yes' : 'No'} | ${(r.latencyMs / 1000).toFixed(1)}s | ${r.promptTokens}/${r.completionTokens} | ${r.cost != null ? `$${r.cost.toFixed(5)}` : 'N/A'} |`;
   }).join('\n');
 
   const modelSections = sorted.map((r) => {
-    const ev = evalMap.get(r.candidate.model);
+    const ev = evalMap.get(candidateKey(r));
     const missing = ev?.missing_key_details?.length
       ? ev.missing_key_details.map((d) => `  - ${d}`).join('\n')
       : '  none';
