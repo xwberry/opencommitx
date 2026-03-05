@@ -34,7 +34,7 @@ function isBinaryOrGenerated(file: string): boolean {
   );
 }
 
-/** Files that are always boilerplate (grouped together even in individual mode). */
+/** Files that are always boilerplate (grouped together even in always/individual mode). */
 const BOILERPLATE_BASENAMES = new Set([
   '__init__.py', '__init__.pyi',
   'index.ts', 'index.tsx', 'index.js', 'index.jsx',
@@ -77,13 +77,56 @@ function getLockManifestPath(lockFile: string): string | null {
   return dir + manifest;
 }
 
-/** Split a flat array of files into chunks of at most `maxSize`. */
-function chunkFiles(files: string[], maxSize: number): string[][] {
-  const chunks: string[][] = [];
-  for (let i = 0; i < files.length; i += maxSize) {
-    chunks.push(files.slice(i, i + maxSize));
+/** Return the directory portion of a file path (empty string for root-level files). */
+function fileDir(file: string): string {
+  const idx = file.lastIndexOf('/');
+  return idx >= 0 ? file.substring(0, idx) : '';
+}
+
+/**
+ * Group files by directory affinity using greedy bin-packing.
+ *
+ * Files are sorted by their directory path so that files within the same
+ * sub-tree are naturally adjacent. Each group is closed when it would exceed
+ * either the file-count cap or the line-count cap.
+ */
+function groupByDirectory(
+  stats: FileStats[],
+  maxFiles: number,
+  maxLines: number
+): string[][] {
+  // Sort by directory first so siblings cluster together.
+  const sorted = [...stats].sort((a, b) => {
+    const da = fileDir(a.file);
+    const db = fileDir(b.file);
+    if (da !== db) return da.localeCompare(db);
+    return a.file.localeCompare(b.file);
+  });
+
+  const groups: string[][] = [];
+  let currentFiles: string[] = [];
+  let currentLines = 0;
+
+  for (const stat of sorted) {
+    const statLines = stat.added + stat.deleted;
+    const wouldExceedFiles = currentFiles.length >= maxFiles;
+    const wouldExceedLines = currentLines + statLines > maxLines && currentFiles.length > 0;
+
+    if (wouldExceedFiles || wouldExceedLines) {
+      groups.push(currentFiles);
+      currentFiles = [];
+      currentLines = 0;
+    }
+
+    currentFiles.push(stat.file);
+    currentLines += statLines;
   }
-  return chunks;
+
+  if (currentFiles.length > 0) {
+    groups.push(currentFiles);
+  }
+
+  return groups;
 }
 
 /**
@@ -102,7 +145,7 @@ export function routeDiff(
   const mode = config.OCO_PER_FILE_COMMIT_MODE || 'auto';
   const threshold = config.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
   const maxFilesPerGroup = config.OCO_MAX_FILES_PER_GROUP ?? 10;
-  const individualFiles = config.OCO_DIFF_INDIVIDUAL_FILES ?? false;
+  const maxLinesPerGroup = (config as any).OCO_MAX_LINES_PER_GROUP ?? 1500;
 
   // Lock files are excluded from diff by git (binary/generated) but we want
   // them committed alongside their manifest. Collect them separately.
@@ -117,8 +160,9 @@ export function routeDiff(
     };
   }
 
-  // Individual-file mode: every file gets its own group except boilerplate.
-  if (individualFiles || mode === 'always') {
+  // always mode: every file gets its own group except boilerplate files,
+  // which are grouped together.
+  if (mode === 'always') {
     const boilerplateFiles = relevantStats.filter((s) => isBoilerplateFile(s.file));
     const normalFiles = relevantStats.filter((s) => !isBoilerplateFile(s.file));
 
@@ -139,11 +183,12 @@ export function routeDiff(
     return {
       usePerFile: true,
       fileGroups: groups,
-      reason: individualFiles ? 'OCO_DIFF_INDIVIDUAL_FILES=true' : 'per-file mode forced'
+      reason: 'per-file mode forced (always)'
     };
   }
 
-  // auto mode: group files that exceed threshold individually, merge small files.
+  // auto mode: group files that exceed threshold individually, merge small files
+  // respecting both the file-count cap and the line-count cap.
   const largeFiles = relevantStats.filter(
     (s) => s.added + s.deleted > threshold
   );
@@ -152,8 +197,8 @@ export function routeDiff(
   );
 
   if (largeFiles.length === 0) {
-    // All files are small — keep as a single group, but respect max group size.
-    const chunks = chunkFiles(relevantStats.map((s) => s.file), maxFilesPerGroup);
+    // All files are small — group by directory with caps.
+    const chunks = groupByDirectory(relevantStats, maxFilesPerGroup, maxLinesPerGroup);
     const groups: FileGroupResult[] = chunks.map((files) => ({
       files,
       totalLines: files.reduce((acc, f) => {
@@ -173,6 +218,7 @@ export function routeDiff(
 
   const groups: FileGroupResult[] = largeFiles.map((s) => {
     const totalLines = s.added + s.deleted;
+    // Pass only s.added — deleted lines must not inflate the ratio.
     const docstringOverride = _shouldUse(s.file, s.added)
       ? _extract(s.file) ?? undefined
       : undefined;
@@ -184,8 +230,8 @@ export function routeDiff(
   });
 
   if (smallFiles.length > 0) {
-    // Split oversized small-file groups to respect OCO_MAX_FILES_PER_GROUP.
-    const chunks = chunkFiles(smallFiles.map((s) => s.file), maxFilesPerGroup);
+    // Group small files by directory with both caps.
+    const chunks = groupByDirectory(smallFiles, maxFilesPerGroup, maxLinesPerGroup);
     chunks.forEach((files) => {
       groups.push({
         files,
