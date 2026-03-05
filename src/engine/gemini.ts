@@ -67,8 +67,8 @@ export class GeminiEngine implements AiEngine {
         ],
         generationConfig: {
           maxOutputTokens: this.config.maxTokensOutput,
-          temperature: 0,
-          topP: 0.1
+          temperature: this.config.temperature ?? 0,
+          topP: (this.config.temperature ?? 0) === 0 ? 0.1 : undefined
         }
       });
 
