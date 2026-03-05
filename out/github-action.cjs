@@ -13249,7 +13249,7 @@ var require_snapshot_recorder = __commonJS({
   "node_modules/undici/lib/mock/snapshot-recorder.js"(exports2, module2) {
     "use strict";
     var { writeFile, readFile, mkdir } = require("node:fs/promises");
-    var { dirname, resolve } = require("node:path");
+    var { dirname: dirname2, resolve } = require("node:path");
     var { setTimeout: setTimeout2, clearTimeout: clearTimeout2 } = require("node:timers");
     var { InvalidArgumentError, UndiciError } = require_errors();
     var { hashId, isUrlExcludedFactory, normalizeHeaders, createHeaderFilters } = require_snapshot_utils();
@@ -13480,7 +13480,7 @@ var require_snapshot_recorder = __commonJS({
           throw new InvalidArgumentError("Snapshot path is required");
         }
         const resolvedPath = resolve(path3);
-        await mkdir(dirname(resolvedPath), { recursive: true });
+        await mkdir(dirname2(resolvedPath), { recursive: true });
         const data = Array.from(this.#snapshots.entries()).map(([hash, snapshot]) => ({
           hash,
           snapshot
@@ -92106,10 +92106,11 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
   CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
-  CONFIG_KEYS2["OCO_DIFF_INDIVIDUAL_FILES"] = "OCO_DIFF_INDIVIDUAL_FILES";
   CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
+  CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
   CONFIG_KEYS2["OCO_TEMPERATURE"] = "OCO_TEMPERATURE";
   CONFIG_KEYS2["OCO_COMMIT_DETAIL"] = "OCO_COMMIT_DETAIL";
+  CONFIG_KEYS2["OCO_GENERATION_TIMEOUT_SECONDS"] = "OCO_GENERATION_TIMEOUT_SECONDS";
   CONFIG_KEYS2["OCO_FALLBACK_MODEL"] = "OCO_FALLBACK_MODEL";
   CONFIG_KEYS2["OCO_FALLBACK_PROVIDER"] = "OCO_FALLBACK_PROVIDER";
   CONFIG_KEYS2["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
@@ -92981,14 +92982,19 @@ var configValidators = {
     validateConfig("OCO_AZURE_KEY" /* OCO_AZURE_KEY */, typeof value === "string", "Must be a string");
     return value;
   },
-  ["OCO_DIFF_INDIVIDUAL_FILES" /* OCO_DIFF_INDIVIDUAL_FILES */](value) {
-    const parsed = typeof value === "boolean" ? value : value === "true" || value === true;
-    return parsed;
-  },
   ["OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */](value) {
     const n2 = Number(value);
     validateConfig(
       "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */,
+      !isNaN(n2) && n2 >= 1,
+      "Must be a positive integer (minimum 1)"
+    );
+    return n2;
+  },
+  ["OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */,
       !isNaN(n2) && n2 >= 1,
       "Must be a positive integer (minimum 1)"
     );
@@ -93010,6 +93016,15 @@ var configValidators = {
       "Must be 'concise', 'normal', or 'detailed'"
     );
     return value;
+  },
+  ["OCO_GENERATION_TIMEOUT_SECONDS" /* OCO_GENERATION_TIMEOUT_SECONDS */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_GENERATION_TIMEOUT_SECONDS" /* OCO_GENERATION_TIMEOUT_SECONDS */,
+      !isNaN(n2) && n2 >= 10,
+      "Must be a positive integer >= 10 (seconds)"
+    );
+    return n2;
   },
   ["OCO_FALLBACK_MODEL" /* OCO_FALLBACK_MODEL */](value) {
     return typeof value === "string" ? value : "";
@@ -93034,6 +93049,21 @@ var OCO_AI_PROVIDER_ENUM = /* @__PURE__ */ ((OCO_AI_PROVIDER_ENUM2) => {
   OCO_AI_PROVIDER_ENUM2["OPENROUTER"] = "openrouter";
   return OCO_AI_PROVIDER_ENUM2;
 })(OCO_AI_PROVIDER_ENUM || {});
+var PROVIDER_API_KEY_URLS = {
+  ["openai" /* OPENAI */]: "https://platform.openai.com/api-keys",
+  ["anthropic" /* ANTHROPIC */]: "https://console.anthropic.com/settings/keys",
+  ["gemini" /* GEMINI */]: "https://aistudio.google.com/app/apikey",
+  ["groq" /* GROQ */]: "https://console.groq.com/keys",
+  ["mistral" /* MISTRAL */]: "https://console.mistral.ai/api-keys/",
+  ["deepseek" /* DEEPSEEK */]: "https://platform.deepseek.com/api_keys",
+  ["openrouter" /* OPENROUTER */]: "https://openrouter.ai/keys",
+  ["aimlapi" /* AIMLAPI */]: "https://aimlapi.com/app/keys",
+  ["azure" /* AZURE */]: "https://portal.azure.com/",
+  ["ollama" /* OLLAMA */]: null,
+  ["mlx" /* MLX */]: null,
+  ["flowise" /* FLOWISE */]: null,
+  ["test" /* TEST */]: null
+};
 var RECOMMENDED_MODELS = {
   ["openai" /* OPENAI */]: "gpt-4o-mini",
   ["anthropic" /* ANTHROPIC */]: "claude-sonnet-4-20250514",
@@ -93085,11 +93115,12 @@ var DEFAULT_CONFIG = {
   // Debug mode (off by default)
   OCO_DEBUG: false,
   // Diff routing extras
-  OCO_DIFF_INDIVIDUAL_FILES: false,
   OCO_MAX_FILES_PER_GROUP: 10,
+  OCO_MAX_LINES_PER_GROUP: 1500,
   // LLM generation
   OCO_TEMPERATURE: 0,
   OCO_COMMIT_DETAIL: "normal",
+  OCO_GENERATION_TIMEOUT_SECONDS: 90,
   // Fallback model (empty = disabled)
   OCO_FALLBACK_MODEL: "",
   OCO_FALLBACK_PROVIDER: ""
@@ -93153,30 +93184,31 @@ var getEnvConfig = (envPath) => {
     OCO_AIMLAPI_KEY: process.env.OCO_AIMLAPI_KEY,
     OCO_AZURE_KEY: process.env.OCO_AZURE_KEY,
     // Diff routing extras
-    OCO_DIFF_INDIVIDUAL_FILES: parseConfigVarValue(process.env.OCO_DIFF_INDIVIDUAL_FILES),
     OCO_MAX_FILES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_FILES_PER_GROUP),
+    OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_LINES_PER_GROUP),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
     OCO_COMMIT_DETAIL: process.env.OCO_COMMIT_DETAIL,
+    OCO_GENERATION_TIMEOUT_SECONDS: parseConfigVarValue(process.env.OCO_GENERATION_TIMEOUT_SECONDS),
     // Fallback model
     OCO_FALLBACK_MODEL: process.env.OCO_FALLBACK_MODEL,
     OCO_FALLBACK_PROVIDER: process.env.OCO_FALLBACK_PROVIDER
   };
 };
 var setGlobalConfig = (config4, configPath = defaultConfigPath) => {
-  const { mkdirSync: mkdirSyncFs } = require("fs");
-  const { dirname } = require("path");
   try {
-    mkdirSyncFs(dirname(configPath), { recursive: true });
+    (0, import_fs.mkdirSync)((0, import_path.dirname)(configPath), { recursive: true });
   } catch {
   }
   (0, import_fs.writeFileSync)(configPath, (0, import_ini.stringify)(config4), "utf8");
 };
 var getIsGlobalConfigFileExist = (configPath = defaultConfigPath) => {
-  return (0, import_fs.existsSync)(configPath) || (0, import_fs.existsSync)(legacyConfigPath);
+  if ((0, import_fs.existsSync)(configPath)) return true;
+  if (configPath === defaultConfigPath) return (0, import_fs.existsSync)(legacyConfigPath);
+  return false;
 };
 var getGlobalConfig = (configPath = defaultConfigPath) => {
-  const resolvedPath = (0, import_fs.existsSync)(configPath) ? configPath : (0, import_fs.existsSync)(legacyConfigPath) ? legacyConfigPath : configPath;
+  const resolvedPath = (0, import_fs.existsSync)(configPath) ? configPath : configPath === defaultConfigPath && (0, import_fs.existsSync)(legacyConfigPath) ? legacyConfigPath : configPath;
   let globalConfig;
   if (!(0, import_fs.existsSync)(resolvedPath)) {
     globalConfig = initGlobalConfig(configPath);
@@ -93402,6 +93434,41 @@ function getConfigKeyDetails(key) {
       return { description: "API key for AI/ML API (overrides OCO_API_KEY when provider is aimlapi)", values: ["String"] };
     case "OCO_AZURE_KEY" /* OCO_AZURE_KEY */:
       return { description: "API key for Azure OpenAI (overrides OCO_API_KEY when provider is azure)", values: ["String"] };
+    case "OCO_TEMPERATURE" /* OCO_TEMPERATURE */:
+      return {
+        description: "LLM sampling temperature. 0 = deterministic; higher = more creative (0\u20132)",
+        values: ["Number 0.0\u20132.0 (default: 0)"]
+      };
+    case "OCO_COMMIT_DETAIL" /* OCO_COMMIT_DETAIL */:
+      return {
+        description: "Controls prompt verbosity: concise forces a one-liner, detailed asks for description + reasoning",
+        values: ["concise", "normal (default)", "detailed"]
+      };
+    case "OCO_GENERATION_TIMEOUT_SECONDS" /* OCO_GENERATION_TIMEOUT_SECONDS */:
+      return {
+        description: "Per-group LLM generation timeout. Increase for slow models or networks",
+        values: ["Positive integer \u2265 10 (default: 90)"]
+      };
+    case "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */:
+      return {
+        description: "Maximum number of files in a single commit group (auto mode)",
+        values: ["Positive integer (default: 10)"]
+      };
+    case "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */:
+      return {
+        description: "Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.",
+        values: ["Positive integer (default: 1500)"]
+      };
+    case "OCO_FALLBACK_MODEL" /* OCO_FALLBACK_MODEL */:
+      return {
+        description: "Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.",
+        values: ["Model ID string (e.g. anthropic/claude-3-5-haiku or claude-3-5-haiku-20241022)"]
+      };
+    case "OCO_FALLBACK_PROVIDER" /* OCO_FALLBACK_PROVIDER */:
+      return {
+        description: 'Provider for OCO_FALLBACK_MODEL. Needed when the fallback model naming convention differs from the primary provider (e.g. OpenRouter uses "provider/model").',
+        values: Object.values(OCO_AI_PROVIDER_ENUM)
+      };
     default:
       return {
         description: "String value",
@@ -93429,7 +93496,7 @@ ${param}:`));
     console.log(source_default.gray(`  Default: ${defaultValue}`));
   }
   if (currentValue !== void 0 && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? "~/.opencommitx" : ".env";
+    const source = getIsGlobalConfigFileExist() ? "~/.opencommitx-data/config.ini" : ".env";
     console.log(source_default.cyan(`  Current: ${currentValue}`) + source_default.dim(` (from ${source})`));
   } else {
     console.log(source_default.dim("  Current: (not set)"));
@@ -93449,13 +93516,73 @@ ${param}:`));
     });
   }
 }
+var THEMATIC_KEY_ORDER = [
+  // Provider & Model
+  "OCO_AI_PROVIDER" /* OCO_AI_PROVIDER */,
+  "OCO_MODEL" /* OCO_MODEL */,
+  "OCO_API_KEY" /* OCO_API_KEY */,
+  "OCO_API_URL" /* OCO_API_URL */,
+  "OCO_API_CUSTOM_HEADERS" /* OCO_API_CUSTOM_HEADERS */,
+  "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */,
+  "OCO_ANTHROPIC_KEY" /* OCO_ANTHROPIC_KEY */,
+  "OCO_OPENROUTER_KEY" /* OCO_OPENROUTER_KEY */,
+  "OCO_GEMINI_KEY" /* OCO_GEMINI_KEY */,
+  "OCO_GROQ_KEY" /* OCO_GROQ_KEY */,
+  "OCO_MISTRAL_KEY" /* OCO_MISTRAL_KEY */,
+  "OCO_DEEPSEEK_KEY" /* OCO_DEEPSEEK_KEY */,
+  "OCO_AIMLAPI_KEY" /* OCO_AIMLAPI_KEY */,
+  "OCO_AZURE_KEY" /* OCO_AZURE_KEY */,
+  // Fallback
+  "OCO_FALLBACK_MODEL" /* OCO_FALLBACK_MODEL */,
+  "OCO_FALLBACK_PROVIDER" /* OCO_FALLBACK_PROVIDER */,
+  // Token limits
+  "OCO_TOKENS_MAX_INPUT" /* OCO_TOKENS_MAX_INPUT */,
+  "OCO_TOKENS_MAX_OUTPUT" /* OCO_TOKENS_MAX_OUTPUT */,
+  // Generation
+  "OCO_TEMPERATURE" /* OCO_TEMPERATURE */,
+  "OCO_COMMIT_DETAIL" /* OCO_COMMIT_DETAIL */,
+  "OCO_GENERATION_TIMEOUT_SECONDS" /* OCO_GENERATION_TIMEOUT_SECONDS */,
+  // Commit format
+  "OCO_PROMPT_MODULE" /* OCO_PROMPT_MODULE */,
+  "OCO_DESCRIPTION" /* OCO_DESCRIPTION */,
+  "OCO_WHY" /* OCO_WHY */,
+  "OCO_EMOJI" /* OCO_EMOJI */,
+  "OCO_ONE_LINE_COMMIT" /* OCO_ONE_LINE_COMMIT */,
+  "OCO_OMIT_SCOPE" /* OCO_OMIT_SCOPE */,
+  "OCO_LANGUAGE" /* OCO_LANGUAGE */,
+  "OCO_MESSAGE_TEMPLATE_PLACEHOLDER" /* OCO_MESSAGE_TEMPLATE_PLACEHOLDER */,
+  // Diff routing
+  "OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */,
+  "OCO_PER_FILE_THRESHOLD_LINES" /* OCO_PER_FILE_THRESHOLD_LINES */,
+  "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */,
+  "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */,
+  // Multi-commit
+  "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */,
+  // Python docstrings
+  "OCO_PYTHON_DOCSTRING_MODE" /* OCO_PYTHON_DOCSTRING_MODE */,
+  "OCO_PYTHON_DOCSTRING_THRESHOLD" /* OCO_PYTHON_DOCSTRING_THRESHOLD */,
+  "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO" /* OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO */,
+  // Cache
+  "OCO_CACHE_ENABLED" /* OCO_CACHE_ENABLED */,
+  "OCO_CACHE_TTL_SECONDS" /* OCO_CACHE_TTL_SECONDS */,
+  // Debug & Advanced
+  "OCO_DEBUG" /* OCO_DEBUG */,
+  "OCO_HOOK_AUTO_UNCOMMENT" /* OCO_HOOK_AUTO_UNCOMMENT */,
+  "OCO_GITPUSH" /* OCO_GITPUSH */,
+  "OCO_TEST_MOCK_TYPE" /* OCO_TEST_MOCK_TYPE */
+];
 function printAllConfigHelp() {
   const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {};
-  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommitx" : "(no config file)";
+  const configFileSource = getIsGlobalConfigFileExist() ? "~/.opencommitx-data/config.ini" : "(no config file)";
   console.log(source_default.bold("Available config parameters:"));
   console.log(source_default.dim(`  Current values loaded from: ${configFileSource}
 `));
-  for (const key of Object.values(CONFIG_KEYS).sort()) {
+  const allKeys = new Set(Object.values(CONFIG_KEYS));
+  const orderedKeys = [
+    ...THEMATIC_KEY_ORDER.filter((k4) => allKeys.has(k4)),
+    ...Object.values(CONFIG_KEYS).filter((k4) => !THEMATIC_KEY_ORDER.includes(k4)).sort()
+  ];
+  for (const key of orderedKeys) {
     const details = getConfigKeyDetails(key);
     let defaultValue = void 0;
     if (key in DEFAULT_CONFIG) {
@@ -93541,12 +93668,6 @@ var configCommand = G3(
   }
 );
 
-// src/prompts.ts
-init_dist2();
-
-// src/modules/commitlint/config.ts
-init_dist2();
-
 // src/utils/providerKeys.ts
 function getProviderApiKey(config4, provider) {
   const providerKeyMap = {
@@ -93562,6 +93683,12 @@ function getProviderApiKey(config4, provider) {
   };
   return providerKeyMap[provider] || config4.OCO_API_KEY || "";
 }
+
+// src/prompts.ts
+init_dist2();
+
+// src/modules/commitlint/config.ts
+init_dist2();
 
 // node_modules/@anthropic-ai/sdk/internal/tslib.mjs
 function __classPrivateFieldSet(receiver, state2, value, kind2, f2) {
@@ -114626,7 +114753,7 @@ var OpenAiEngine = class {
 };
 
 // src/engine/mistral.ts
-var Mistral = require_mistralai().Mistral;
+var import_mistralai = __toESM(require_mistralai(), 1);
 var MistralAiEngine = class {
   // Using any type for Mistral client to avoid TS errors
   constructor(config4) {
@@ -114654,9 +114781,9 @@ var MistralAiEngine = class {
     };
     this.config = config4;
     if (!config4.baseURL) {
-      this.client = new Mistral({ apiKey: config4.apiKey });
+      this.client = new import_mistralai.Mistral({ apiKey: config4.apiKey });
     } else {
-      this.client = new Mistral({
+      this.client = new import_mistralai.Mistral({
         apiKey: config4.apiKey,
         serverURL: config4.baseURL
       });
@@ -115466,6 +115593,87 @@ function mergeDiffs(arr, maxStringLength) {
   return mergedArr;
 }
 
+// src/utils/splitDiff.ts
+function splitDiff(diff, maxChangeLength) {
+  if (maxChangeLength <= 0) {
+    throw new Error(
+      `OCO_TOKENS_MAX_OUTPUT is set too high \u2014 no tokens left for the diff after the output budget.
+  Try reducing OCO_TOKENS_MAX_OUTPUT: ocox config set OCO_TOKENS_MAX_OUTPUT 500`
+    );
+  }
+  const lines = diff.split("\n");
+  const splitDiffs = [];
+  let currentDiff = "";
+  for (let line of lines) {
+    while (tokenCount(line) > maxChangeLength) {
+      const charBudget = maxChangeLength * 4;
+      const subLine = line.substring(0, charBudget);
+      line = line.substring(charBudget);
+      splitDiffs.push(subLine);
+    }
+    if (tokenCount(currentDiff) + tokenCount("\n" + line) > maxChangeLength) {
+      splitDiffs.push(currentDiff);
+      currentDiff = line;
+    } else {
+      currentDiff += "\n" + line;
+    }
+  }
+  if (currentDiff) {
+    splitDiffs.push(currentDiff);
+  }
+  return splitDiffs;
+}
+
+// src/utils/diffChunking.ts
+function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, buildMessages) {
+  const hunkHeaderSeparator = "@@ ";
+  const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
+  const mergedChanges = mergeDiffs(
+    fileDiffByLines.map((line) => hunkHeaderSeparator + line),
+    maxChangeLength
+  );
+  const lineDiffsWithHeader = [];
+  for (const change of mergedChanges) {
+    const totalChange = fileHeader + change;
+    if (tokenCount(totalChange) > maxChangeLength) {
+      const splitChanges = splitDiff(totalChange, maxChangeLength);
+      lineDiffsWithHeader.push(...splitChanges);
+    } else {
+      lineDiffsWithHeader.push(totalChange);
+    }
+  }
+  const engine = getEngine();
+  return lineDiffsWithHeader.map(async (lineDiff) => {
+    const messages = await buildMessages(separator + lineDiff);
+    return engine.generateCommitMessage(messages);
+  });
+}
+async function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, buildMessages) {
+  const separator = "diff --git ";
+  const diffByFiles = diff.split(separator).slice(1);
+  const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
+  const commitMessagePromises = [];
+  for (const fileDiff of mergedFilesDiffs) {
+    if (tokenCount(fileDiff) >= maxDiffLength) {
+      const messagesPromises = getMessagesPromisesByChangesInFile(
+        fileDiff,
+        separator,
+        maxDiffLength,
+        buildMessages
+      );
+      commitMessagePromises.push(...messagesPromises);
+    } else {
+      const messages = await buildMessages(separator + fileDiff);
+      const engine = getEngine();
+      commitMessagePromises.push(engine.generateCommitMessage(messages));
+    }
+  }
+  return commitMessagePromises;
+}
+function delay3(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // src/utils/pythonDocstringExtractor.ts
 var import_child_process = require("child_process");
 var import_fs4 = require("fs");
@@ -115520,6 +115728,7 @@ function extractPythonDocstrings(filepath, changedNames) {
 }
 
 // src/generateCommitMessageFromGitDiff.ts
+var lastUsedModel = null;
 var generateCommitMessageChatCompletionPrompt = async (diff, fullGitMojiSpec, context4 = "") => {
   const INIT_MESSAGES_PROMPT = await getMainCommitPrompt(
     fullGitMojiSpec,
@@ -115626,6 +115835,7 @@ function enrichDiffWithPythonDocstrings(diff, tokenBudget, docstringMode) {
   return diff;
 }
 var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4 = "", retryWithModel) => {
+  if (!retryWithModel) lastUsedModel = null;
   const currentConfig = getConfig();
   const provider = currentConfig.OCO_AI_PROVIDER || "openai";
   const currentModel = retryWithModel || currentConfig.OCO_MODEL;
@@ -115766,7 +115976,7 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4
       const commitMessagePromises = await getCommitMsgsPromisesFromFileDiffs(
         diff,
         MAX_REQUEST_TOKENS,
-        fullGitMojiSpec
+        (d5) => generateCommitMessageChatCompletionPrompt(d5, fullGitMojiSpec, context4)
       );
       const commitMessages = [];
       for (const [i3, promise] of commitMessagePromises.entries()) {
@@ -115868,16 +116078,56 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4
       const errMsg = error instanceof Error ? error.message : String(error);
       const isRetriable = errMsg.includes("rate limit") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("unavailable") || errMsg.includes("timeout") || isModelNotFoundError(error);
       if (isRetriable) {
+        const isModelNameMismatch = errMsg.includes("not a valid model") || errMsg.includes("model not found") || errMsg.includes("no such model") || errMsg.includes("invalid model");
+        if (isModelNameMismatch && !fallbackProvider) {
+          Me(
+            `Fallback model "${fallbackModel}" was not recognized by the current provider.
+Different providers use different naming conventions:
+  Anthropic native: "claude-3-5-haiku-20241022"
+  OpenRouter:       "anthropic/claude-haiku-4.5"
+Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
+            source_default.yellow("\u26A0  Model naming mismatch")
+          );
+          const providerInput = await ve({
+            message: "Select the provider for your fallback model:",
+            options: [
+              { value: "", label: "Skip (keep current provider)" },
+              ...Object.values(OCO_AI_PROVIDER_ENUM).filter((p3) => p3 !== "test").map((p3) => ({ value: p3, label: p3 }))
+            ]
+          });
+          if (!pD(providerInput) && providerInput) {
+            const cfgToUpdate = getGlobalConfig();
+            setGlobalConfig({ ...cfgToUpdate, OCO_FALLBACK_PROVIDER: providerInput });
+            Object.assign(currentConfig, { OCO_FALLBACK_PROVIDER: providerInput });
+          }
+        }
+        const effectiveFallbackProvider = currentConfig.OCO_FALLBACK_PROVIDER || fallbackProvider || "";
+        if (effectiveFallbackProvider && effectiveFallbackProvider !== provider) {
+          const cfgNow = getGlobalConfig();
+          const existingKey = getProviderApiKey(cfgNow, effectiveFallbackProvider);
+          if (!existingKey) {
+            const keyUrl = PROVIDER_API_KEY_URLS[effectiveFallbackProvider];
+            const keyMessage = keyUrl ? `API key for ${effectiveFallbackProvider}:
+  Get your key at: ${keyUrl}` : `API key for ${effectiveFallbackProvider}:`;
+            const keyInput = await he({ message: keyMessage, placeholder: "sk-..." });
+            if (!pD(keyInput) && keyInput) {
+              const providerKeyName = `OCO_${effectiveFallbackProvider.toUpperCase()}_KEY`;
+              setGlobalConfig({ ...cfgNow, OCO_API_KEY: keyInput, [providerKeyName]: keyInput });
+            }
+          }
+        }
         console.log(source_default.yellow(`Primary model failed. Retrying with fallback: ${fallbackModel}
 `));
         const existingConfig = getGlobalConfig();
         setGlobalConfig({
           ...existingConfig,
           OCO_MODEL: fallbackModel,
-          ...fallbackProvider ? { OCO_AI_PROVIDER: fallbackProvider } : {}
+          ...effectiveFallbackProvider ? { OCO_AI_PROVIDER: effectiveFallbackProvider } : {}
         });
         try {
-          return await generateCommitMessageByDiff(diff, fullGitMojiSpec, context4, fallbackModel);
+          const result = await generateCommitMessageByDiff(diff, fullGitMojiSpec, context4, fallbackModel);
+          lastUsedModel = fallbackModel;
+          return result;
         } finally {
           setGlobalConfig(existingConfig);
         }
@@ -115886,89 +116136,6 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context4
     throw error;
   }
 };
-function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, fullGitMojiSpec) {
-  const hunkHeaderSeparator = "@@ ";
-  const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
-  const mergedChanges = mergeDiffs(
-    fileDiffByLines.map((line) => hunkHeaderSeparator + line),
-    maxChangeLength
-  );
-  const lineDiffsWithHeader = [];
-  for (const change of mergedChanges) {
-    const totalChange = fileHeader + change;
-    if (tokenCount(totalChange) > maxChangeLength) {
-      const splitChanges = splitDiff(totalChange, maxChangeLength);
-      lineDiffsWithHeader.push(...splitChanges);
-    } else {
-      lineDiffsWithHeader.push(totalChange);
-    }
-  }
-  const engine = getEngine();
-  const commitMsgsFromFileLineDiffs = lineDiffsWithHeader.map(
-    async (lineDiff) => {
-      const messages = await generateCommitMessageChatCompletionPrompt(
-        separator + lineDiff,
-        fullGitMojiSpec
-      );
-      return engine.generateCommitMessage(messages);
-    }
-  );
-  return commitMsgsFromFileLineDiffs;
-}
-function splitDiff(diff, maxChangeLength) {
-  const lines = diff.split("\n");
-  const splitDiffs = [];
-  let currentDiff = "";
-  if (maxChangeLength <= 0) {
-    throw new Error(GenerateCommitMessageErrorEnum.outputTokensTooHigh);
-  }
-  for (let line of lines) {
-    while (tokenCount(line) > maxChangeLength) {
-      const charBudget = maxChangeLength * 4;
-      const subLine = line.substring(0, charBudget);
-      line = line.substring(charBudget);
-      splitDiffs.push(subLine);
-    }
-    if (tokenCount(currentDiff) + tokenCount("\n" + line) > maxChangeLength) {
-      splitDiffs.push(currentDiff);
-      currentDiff = line;
-    } else {
-      currentDiff += "\n" + line;
-    }
-  }
-  if (currentDiff) {
-    splitDiffs.push(currentDiff);
-  }
-  return splitDiffs;
-}
-var getCommitMsgsPromisesFromFileDiffs = async (diff, maxDiffLength, fullGitMojiSpec) => {
-  const separator = "diff --git ";
-  const diffByFiles = diff.split(separator).slice(1);
-  const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
-  const commitMessagePromises = [];
-  for (const fileDiff of mergedFilesDiffs) {
-    if (tokenCount(fileDiff) >= maxDiffLength) {
-      const messagesPromises = getMessagesPromisesByChangesInFile(
-        fileDiff,
-        separator,
-        maxDiffLength,
-        fullGitMojiSpec
-      );
-      commitMessagePromises.push(...messagesPromises);
-    } else {
-      const messages = await generateCommitMessageChatCompletionPrompt(
-        separator + fileDiff,
-        fullGitMojiSpec
-      );
-      const engine = getEngine();
-      commitMessagePromises.push(engine.generateCommitMessage(messages));
-    }
-  }
-  return commitMessagePromises;
-};
-function delay3(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // src/utils/randomIntFromInterval.ts
 function randomIntFromInterval(min, max) {
