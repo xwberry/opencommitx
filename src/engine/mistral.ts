@@ -9,9 +9,7 @@ import { AiEngine, AiEngineConfig } from './Engine';
 export interface MistralAiConfig extends AiEngineConfig {}
 export type MistralCompletionMessageParam = Array<any>;
 
-// Import Mistral dynamically to avoid TS errors
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Mistral = require('@mistralai/mistralai').Mistral;
+import { Mistral } from '@mistralai/mistralai';
 
 export class MistralAiEngine implements AiEngine {
   config: MistralAiConfig;
