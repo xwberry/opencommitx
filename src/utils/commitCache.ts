@@ -91,7 +91,7 @@ function normalizeForHashing(diff: string): string {
         (line.startsWith('+') && !line.startsWith('+++')) ||
         (line.startsWith('-') && !line.startsWith('---'))
       ) {
-        return line[0] + line.slice(1).replace(/[ \t]+/g, ' ').trimEnd();
+        return line[0] + line.slice(1).trimEnd();
       }
       return line;
     })
