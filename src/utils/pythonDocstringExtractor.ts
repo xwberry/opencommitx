@@ -46,7 +46,9 @@ function getPythonCommand(): string {
 export function changedNamesFromDiff(diff: string): string[] {
   const names = new Set<string>();
   // Match: @@ ... @@ <optional whitespace> <keyword> <name>
-  for (const m of diff.matchAll(/^@@[^@]*@@\s*(?:(?:async\s+)?def|class)\s+(\w+)/gm)) {
+  for (const m of diff.matchAll(
+    /^@@[^@]*@@\s*(?:(?:async\s+)?def|class)\s+(\w+)/gm
+  )) {
     names.add(m[1]);
   }
   return [...names];
