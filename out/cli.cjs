@@ -77557,7 +77557,7 @@ function G3(t2, e3) {
 // package.json
 var package_default = {
   name: "opencommitx",
-  version: "1.0.2",
+  version: "1.0.3",
   description: "AI-powered commit message generator with smart diff routing, caching, and per-provider API keys. Fork of opencommit.",
   keywords: [
     "git",
@@ -77610,7 +77610,7 @@ var package_default = {
     deploy: "bun publish --tag latest",
     "deploy:npm": "bun run local:build-push && git push --tags && bun run deploy",
     "deploy:patch": "bun run version:patch && bun run deploy:npm",
-    "version:patch": "npm version patch",
+    "version:patch": "bun pm version patch",
     lint: "cross-env ESLINT_USE_FLAT_CONFIG=false eslint src --ext ts && tsc --noEmit",
     format: "prettier --write src",
     "format:check": "prettier --check src",
