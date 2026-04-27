@@ -2,15 +2,25 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 import OpenAI from 'openai';
-import { getConfig, setGlobalConfig, getGlobalConfig, OCO_AI_PROVIDER_ENUM } from '../commands/config';
+import { z } from 'zod';
+import {
+  getConfig,
+  setGlobalConfig,
+  getGlobalConfig,
+  OCO_AI_PROVIDER_ENUM
+} from '../commands/config';
 import { getEngine } from './engine';
 import { getMainCommitPrompt } from '../prompts';
-import { buildEvaluatorMessages, BenchmarkEvalResponse, BenchmarkEvalResult } from '../prompts/benchmark';
+import {
+  buildEvaluatorMessages,
+  BenchmarkEvalResponse,
+  BenchmarkEvalResult
+} from '../prompts/benchmark';
 import { getProviderApiKey } from './providerKeys';
 
 export interface BenchmarkCandidate {
   model: string;
-  provider: string;
+  provider: OCO_AI_PROVIDER_ENUM;
   temperature?: number;
   max_tokens_input?: number;
   max_tokens_output?: number;
@@ -18,7 +28,7 @@ export interface BenchmarkCandidate {
 
 export interface BenchmarkConfig {
   eval_model: string;
-  eval_provider: string;
+  eval_provider: OCO_AI_PROVIDER_ENUM;
   eval_temperature: number;
   eval_max_tokens_input: number;
   eval_max_tokens_output: number;
@@ -35,11 +45,42 @@ export interface CandidateResult {
   error?: string;
 }
 
-const BENCHMARK_CONFIG_PATH = pathJoin(homedir(), '.opencommitx-data', 'benchmark.json');
+const BENCHMARK_CONFIG_PATH = pathJoin(
+  homedir(),
+  '.opencommitx-data',
+  'benchmark.json'
+);
+const OPENAI_COMPATIBLE_EVALUATOR_PROVIDERS = new Set<OCO_AI_PROVIDER_ENUM>([
+  OCO_AI_PROVIDER_ENUM.OPENAI,
+  OCO_AI_PROVIDER_ENUM.OPENROUTER
+]);
+
+const BenchmarkEvalResultSchema = z.object({
+  model: z.string(),
+  score: z.number(),
+  accuracy: z.number(),
+  completeness: z.number(),
+  missing_key_details: z.array(z.string()).default([]),
+  hallucinations: z.boolean(),
+  hallucination_details: z.string().default(''),
+  conventional_commit_compliance: z.boolean(),
+  pros: z.array(z.string()).default([]),
+  cons: z.array(z.string()).default([]),
+  suggested_improvement: z.string().default(''),
+  overall: z.string().default('')
+});
+
+const BenchmarkEvalResponseSchema = z.object({
+  results: z.array(BenchmarkEvalResultSchema)
+});
+
+type BenchmarkEvalResponseWithRaw = BenchmarkEvalResponse & {
+  _rawContent?: string;
+};
 
 export const DEFAULT_BENCHMARK_CONFIG: BenchmarkConfig = {
   eval_model: 'anthropic/claude-opus-4-20250514',
-  eval_provider: 'openrouter',
+  eval_provider: OCO_AI_PROVIDER_ENUM.OPENROUTER,
   eval_temperature: 0.1,
   eval_max_tokens_input: 32000,
   eval_max_tokens_output: 8000,
@@ -71,16 +112,17 @@ export async function runCandidate(
   const startMs = Date.now();
   const existingConfig = getGlobalConfig();
   const maxIn = candidate.max_tokens_input ?? getConfig().OCO_TOKENS_MAX_INPUT;
-  const maxOut = candidate.max_tokens_output ?? getConfig().OCO_TOKENS_MAX_OUTPUT;
+  const maxOut =
+    candidate.max_tokens_output ?? getConfig().OCO_TOKENS_MAX_OUTPUT;
 
   setGlobalConfig({
     ...existingConfig,
-    OCO_AI_PROVIDER: candidate.provider as any,
+    OCO_AI_PROVIDER: candidate.provider,
     OCO_MODEL: candidate.model,
     OCO_TOKENS_MAX_INPUT: maxIn,
     OCO_TOKENS_MAX_OUTPUT: maxOut,
     OCO_TEMPERATURE: candidate.temperature ?? 0
-  } as any);
+  });
 
   try {
     const engine = getEngine();
@@ -121,59 +163,76 @@ export async function runEvaluator(
 
   setGlobalConfig({
     ...existingConfig,
-    OCO_AI_PROVIDER: cfg.eval_provider as any,
+    OCO_AI_PROVIDER: cfg.eval_provider,
     OCO_MODEL: cfg.eval_model,
     OCO_TOKENS_MAX_INPUT: cfg.eval_max_tokens_input,
     OCO_TOKENS_MAX_OUTPUT: cfg.eval_max_tokens_output,
     OCO_TEMPERATURE: cfg.eval_temperature
-  } as any);
+  });
 
   try {
     const candidates = candidateResults
       .filter((r) => !r.error && r.message)
-      .map((r) => ({ model: `${r.candidate.model}@${r.candidate.provider}`, message: r.message }));
+      .map((r) => ({
+        model: `${r.candidate.model}@${r.candidate.provider}`,
+        message: r.message
+      }));
 
     const messages = buildEvaluatorMessages(diff, candidates);
-    const engine = getEngine();
+    if (!OPENAI_COMPATIBLE_EVALUATOR_PROVIDERS.has(cfg.eval_provider)) {
+      throw new Error(
+        `Benchmark evaluator provider "${cfg.eval_provider}" is not supported yet. ` +
+          `Use "${OCO_AI_PROVIDER_ENUM.OPENAI}" or "${OCO_AI_PROVIDER_ENUM.OPENROUTER}".`
+      );
+    }
 
     // Get raw response — do NOT strip <think> blocks for benchmark output.
     const evalConfig = getConfig();
-    let rawApiKey = getProviderApiKey(evalConfig, cfg.eval_provider);
-    const baseURL = cfg.eval_provider === 'openrouter'
-      ? 'https://openrouter.ai/api/v1'
-      : undefined;
+    const rawApiKey = getProviderApiKey(evalConfig, cfg.eval_provider);
+    const baseURL =
+      cfg.eval_provider === 'openrouter'
+        ? 'https://openrouter.ai/api/v1'
+        : undefined;
 
     if (!rawApiKey) {
-      throw new Error(`Missing API key for evaluator provider: ${cfg.eval_provider}`);
+      throw new Error(
+        `Missing API key for evaluator provider: ${cfg.eval_provider}`
+      );
     }
+
     const client = new OpenAI({
       apiKey: rawApiKey,
       baseURL,
-      defaultHeaders: cfg.eval_provider === 'openrouter'
-        ? { 'HTTP-Referer': 'https://github.com/xwberry/opencommitx', 'X-Title': 'OpenCommitX Benchmark' }
-        : {}
+      defaultHeaders:
+        cfg.eval_provider === 'openrouter'
+          ? {
+              'HTTP-Referer': 'https://github.com/xwberry/opencommitx',
+              'X-Title': 'OpenCommitX Benchmark'
+            }
+          : {}
     });
 
     const response = await client.chat.completions.create({
       model: cfg.eval_model,
-      messages: messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+      messages:
+        messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       temperature: cfg.eval_temperature,
       max_tokens: cfg.eval_max_tokens_output
     });
 
-    const rawContent = response.choices[0]?.message?.content ?? '{"results":[]}';
+    const rawContent =
+      response.choices[0]?.message?.content ?? '{"results":[]}';
 
     // Try to parse JSON from the content (may be wrapped in <think> blocks)
     const jsonMatch = rawContent.match(/\{[\s\S]*"results"[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : rawContent;
 
     try {
-      const parsed = JSON.parse(jsonStr) as BenchmarkEvalResponse;
-      // Attach any think block as a property for downstream use
-      (parsed as any)._rawContent = rawContent;
-      return parsed;
+      const parsed = BenchmarkEvalResponseSchema.safeParse(JSON.parse(jsonStr));
+      if (!parsed.success) return { results: [], _rawContent: rawContent };
+      return { ...parsed.data, _rawContent: rawContent };
     } catch {
-      return { results: [] };
+      return { results: [], _rawContent: rawContent };
     }
   } finally {
     setGlobalConfig(existingConfig);
@@ -190,7 +249,8 @@ export function formatBenchmarkMarkdown(
   const evalMap = new Map<string, BenchmarkEvalResult>(
     evalResults.results.map((r) => [r.model, r])
   );
-  const candidateKey = (r: CandidateResult) => `${r.candidate.model}@${r.candidate.provider}`;
+  const candidateKey = (r: CandidateResult) =>
+    `${r.candidate.model}@${r.candidate.provider}`;
 
   // Sort by score descending
   const sorted = [...candidateResults].sort((a, b) => {
@@ -199,18 +259,21 @@ export function formatBenchmarkMarkdown(
     return sb - sa;
   });
 
-  const summaryRows = sorted.map((r, i) => {
-    const ev = evalMap.get(candidateKey(r));
-    return `| ${i + 1} | ${r.candidate.model} | ${ev?.score ?? 'N/A'} | ${ev?.accuracy ?? '-'}/10 | ${ev?.completeness ?? '-'}/10 | ${ev?.hallucinations ? 'Yes' : 'No'} | ${(r.latencyMs / 1000).toFixed(1)}s | ${r.promptTokens}/${r.completionTokens} | ${r.cost != null ? `$${r.cost.toFixed(5)}` : 'N/A'} |`;
-  }).join('\n');
+  const summaryRows = sorted
+    .map((r, i) => {
+      const ev = evalMap.get(candidateKey(r));
+      return `| ${i + 1} | ${r.candidate.model} | ${ev?.score ?? 'N/A'} | ${ev?.accuracy ?? '-'}/10 | ${ev?.completeness ?? '-'}/10 | ${ev?.hallucinations ? 'Yes' : 'No'} | ${(r.latencyMs / 1000).toFixed(1)}s | ${r.promptTokens}/${r.completionTokens} | ${r.cost != null ? `$${r.cost.toFixed(5)}` : 'N/A'} |`;
+    })
+    .join('\n');
 
-  const modelSections = sorted.map((r) => {
-    const ev = evalMap.get(candidateKey(r));
-    const missing = ev?.missing_key_details?.length
-      ? ev.missing_key_details.map((d) => `  - ${d}`).join('\n')
-      : '  none';
+  const modelSections = sorted
+    .map((r) => {
+      const ev = evalMap.get(candidateKey(r));
+      const missing = ev?.missing_key_details?.length
+        ? ev.missing_key_details.map((d) => `  - ${d}`).join('\n')
+        : '  none';
 
-    return `## Model: ${r.candidate.model}${ev ? ` — Score: ${ev.score}/100` : ''}
+      return `## Model: ${r.candidate.model}${ev ? ` — Score: ${ev.score}/100` : ''}
 ${r.error ? `**Error:** ${r.error}` : `**Commit message:**\n\`\`\`\n${r.message}\n\`\`\``}
 
 **Accuracy:** ${ev?.accuracy ?? 'N/A'}/10
@@ -227,12 +290,15 @@ ${missing}
 **E2E latency:** ${(r.latencyMs / 1000).toFixed(1)}s
 **Tokens (in/out):** ${r.promptTokens} / ${r.completionTokens}
 **Cost:** ${r.cost != null ? `$${r.cost.toFixed(5)}` : 'N/A'}`;
-  }).join('\n\n---\n\n');
+    })
+    .join('\n\n---\n\n');
 
-  const rawEval = (evalResults as any)._rawContent ?? '';
-  const thinkBlock = rawEval !== JSON.stringify(evalResults)
-    ? `\n\n## Evaluator Raw Response (including reasoning)\n\n\`\`\`\n${rawEval}\n\`\`\``
-    : '';
+  const rawEval =
+    (evalResults as BenchmarkEvalResponseWithRaw)._rawContent ?? '';
+  const thinkBlock =
+    rawEval.trim().length > 0
+      ? `\n\n## Evaluator Raw Response (including reasoning)\n\n\`\`\`\n${rawEval}\n\`\`\``
+      : '';
 
   return `# Benchmark Results — ${timestamp}
 
