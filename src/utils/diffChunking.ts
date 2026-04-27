@@ -59,7 +59,10 @@ export async function getCommitMsgsPromisesFromFileDiffs(
   buildMessages: (diff: string) => Promise<ChatMessage[]>
 ): Promise<Promise<string | null | undefined>[]> {
   const separator = 'diff --git ';
-  const diffByFiles = diff.split(separator).slice(1).map((s) => separator + s);
+  const diffByFiles = diff
+    .split(separator)
+    .slice(1)
+    .map((s) => separator + s);
   const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
 
   const commitMessagePromises: Promise<string | null | undefined>[] = [];
