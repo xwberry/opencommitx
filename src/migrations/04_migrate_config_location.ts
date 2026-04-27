@@ -17,6 +17,9 @@ export default function migration04(): void {
     const content = readFileSync(OLD_CONFIG_PATH, 'utf8');
     writeFileSync(NEW_CONFIG_PATH, content, { encoding: 'utf8', mode: 0o600 });
   } catch (err) {
-    console.error(`Migration 04 failed: could not migrate config to ${NEW_CONFIG_PATH}`, err);
+    console.error(
+      `Migration 04 failed: could not migrate config to ${NEW_CONFIG_PATH}`,
+      err
+    );
   }
 }
