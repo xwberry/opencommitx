@@ -2,11 +2,7 @@ import { intro, outro, spinner } from '@clack/prompts';
 import chalk from 'chalk';
 import { command } from 'cleye';
 import { COMMANDS } from './ENUMS';
-import {
-  MODEL_LIST,
-  OCO_AI_PROVIDER_ENUM,
-  getConfig
-} from './config';
+import { MODEL_LIST, OCO_AI_PROVIDER_ENUM, getConfig } from './config';
 import { getProviderApiKey } from '../utils/engine';
 import {
   fetchModelsForProvider,
@@ -34,7 +30,10 @@ function formatCacheAge(timestamp: number | null): string {
   return 'just now';
 }
 
-async function listModels(provider: string, useCache: boolean = true): Promise<void> {
+async function listModels(
+  provider: string,
+  useCache: boolean = true
+): Promise<void> {
   const config = getConfig();
   const apiKey = getProviderApiKey(config, provider);
   const currentModel = config.OCO_MODEL;
@@ -53,10 +52,14 @@ async function listModels(provider: string, useCache: boolean = true): Promise<v
 
   const customModels = getCustomModels(provider);
 
-  console.log(`\n${chalk.bold('Available models for')} ${chalk.cyan(provider)}:\n`);
+  console.log(
+    `\n${chalk.bold('Available models for')} ${chalk.cyan(provider)}:\n`
+  );
 
   if (customModels.length > 0) {
-    console.log(chalk.dim('  Custom models (from ~/.opencommitx-custom-models.json):'));
+    console.log(
+      chalk.dim('  Custom models (from ~/.opencommitx-custom-models.json):')
+    );
     customModels.forEach((model) => {
       const isCurrent = model === currentModel;
       const prefix = isCurrent ? chalk.green('* ') : '  + ';
@@ -91,12 +94,21 @@ async function refreshModels(provider: string): Promise<void> {
   clearModelCache();
 
   try {
-    const models = await fetchModelsForProvider(provider, apiKey, undefined, true);
+    const models = await fetchModelsForProvider(
+      provider,
+      apiKey,
+      undefined,
+      true
+    );
     loadingSpinner.stop(`${chalk.green('+')} Fetched ${models.length} models`);
     await listModels(provider, true);
   } catch (error) {
     loadingSpinner.stop(chalk.red('Failed to fetch models'));
-    console.error(chalk.red(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    console.error(
+      chalk.red(
+        `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    );
   }
 }
 
@@ -139,13 +151,21 @@ export const modelsCommand = command(
       const model = _.model;
 
       if (!provider || !model) {
-        console.log(chalk.red('Usage: ocox models add <provider> <model-name>'));
-        console.log(chalk.dim('Example: ocox models add openrouter google/gemma-3-27b-it:free'));
+        console.log(
+          chalk.red('Usage: ocox models add <provider> <model-name>')
+        );
+        console.log(
+          chalk.dim(
+            'Example: ocox models add openrouter google/gemma-3-27b-it:free'
+          )
+        );
         process.exit(1);
       }
 
       addCustomModel(provider, model);
-      outro(`${chalk.green('✔')} Added model ${chalk.cyan(model)} for provider ${chalk.cyan(provider)}`);
+      outro(
+        `${chalk.green('✔')} Added model ${chalk.cyan(model)} for provider ${chalk.cyan(provider)}`
+      );
       return;
     }
 
@@ -154,30 +174,45 @@ export const modelsCommand = command(
       const model = _.model;
 
       if (!provider || !model) {
-        console.log(chalk.red('Usage: ocox models remove <provider> <model-name>'));
+        console.log(
+          chalk.red('Usage: ocox models remove <provider> <model-name>')
+        );
         process.exit(1);
       }
 
       const removed = removeCustomModel(provider, model);
       if (removed) {
-        outro(`${chalk.green('✔')} Removed model ${chalk.cyan(model)} for provider ${chalk.cyan(provider)}`);
+        outro(
+          `${chalk.green('✔')} Removed model ${chalk.cyan(model)} for provider ${chalk.cyan(provider)}`
+        );
       } else {
-        outro(chalk.yellow(`Model ${model} not found in custom models for ${provider}`));
+        outro(
+          chalk.yellow(
+            `Model ${model} not found in custom models for ${provider}`
+          )
+        );
       }
       return;
     }
 
     // list / default
-    const provider = (action === 'list' ? _.provider : action)
-      || flags.provider
-      || config.OCO_AI_PROVIDER
-      || OCO_AI_PROVIDER_ENUM.OPENAI;
+    const provider =
+      (action === 'list' ? _.provider : action) ||
+      flags.provider ||
+      config.OCO_AI_PROVIDER ||
+      OCO_AI_PROVIDER_ENUM.OPENAI;
 
     const cacheInfo = getCacheInfo();
     if (cacheInfo.timestamp) {
-      console.log(chalk.dim(`  Cache last updated: ${formatCacheAge(cacheInfo.timestamp)}`));
+      console.log(
+        chalk.dim(
+          `  Cache last updated: ${formatCacheAge(cacheInfo.timestamp)}`
+        )
+      );
       if (cacheInfo.providers.length > 0) {
-        console.log(chalk.dim(`  Cached providers: ${cacheInfo.providers.join(', ')}`));
+        console.log(
+          chalk.dim(`  Cached providers: ${cacheInfo.providers.join(', ')}`)
+        );
       }
     } else {
       console.log(chalk.dim('  No cached models'));
@@ -186,7 +221,9 @@ export const modelsCommand = command(
     const customAll = getAllCustomModels();
     const customProviders = Object.keys(customAll);
     if (customProviders.length > 0) {
-      console.log(chalk.dim(`  Custom model providers: ${customProviders.join(', ')}`));
+      console.log(
+        chalk.dim(`  Custom model providers: ${customProviders.join(', ')}`)
+      );
     }
 
     if (flags.refresh) {
@@ -197,7 +234,7 @@ export const modelsCommand = command(
 
     outro(
       `Run ${chalk.cyan('ocox models --refresh')} to update the model list\n` +
-      `Add custom models: ${chalk.cyan('ocox models add <provider> <model>')}`
+        `Add custom models: ${chalk.cyan('ocox models add <provider> <model>')}`
     );
   }
 );
