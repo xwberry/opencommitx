@@ -30,7 +30,14 @@ cli(
   {
     version: packageJSON.version,
     name: 'opencommitx',
-    commands: [configCommand, hookCommand, commitlintConfigCommand, setupCommand, modelsCommand, benchmarkCommand],
+    commands: [
+      configCommand,
+      hookCommand,
+      commitlintConfigCommand,
+      setupCommand,
+      modelsCommand,
+      benchmarkCommand
+    ],
     flags: {
       fgm: {
         type: Boolean,
@@ -52,7 +59,8 @@ cli(
       dryRun: {
         type: Boolean,
         alias: 'd',
-        description: 'Dry run: generate and display commit message without committing',
+        description:
+          'Dry run: generate and display commit message without committing',
         default: false
       }
     },
@@ -88,7 +96,13 @@ cli(
         }
       }
 
-      commit(extraArgs, flags.context, false, flags.fgm, flags.yes || flags.dryRun);
+      commit(
+        extraArgs,
+        flags.context,
+        false,
+        flags.fgm,
+        flags.yes || flags.dryRun
+      );
     }
   },
   extraArgs
