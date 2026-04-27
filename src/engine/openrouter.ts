@@ -92,7 +92,9 @@ export class OpenRouterEngine implements AiEngine {
     } catch (error) {
       if (debugEnabled) {
         const errMeta: OpenRouterErrorMeta =
-          typeof error === 'object' && error !== null ? (error as OpenRouterErrorMeta) : {};
+          typeof error === 'object' && error !== null
+            ? (error as OpenRouterErrorMeta)
+            : {};
         writeDebugLog({
           event: 'api-error',
           provider: 'openrouter',
