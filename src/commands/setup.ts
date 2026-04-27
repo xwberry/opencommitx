@@ -1,4 +1,12 @@
-import { intro, note, outro, select, text, isCancel, spinner } from '@clack/prompts';
+import {
+  intro,
+  note,
+  outro,
+  select,
+  text,
+  isCancel,
+  spinner
+} from '@clack/prompts';
 import chalk from 'chalk';
 import { command } from 'cleye';
 import { COMMANDS } from './ENUMS';
@@ -57,29 +65,37 @@ const NO_API_KEY_PROVIDERS = [
   OCO_AI_PROVIDER_ENUM.MLX
 ];
 
-async function selectProvider(currentProvider?: string): Promise<string | symbol> {
+async function selectProvider(
+  currentProvider?: string
+): Promise<string | symbol> {
   const makeLabel = (provider: string) =>
     provider === currentProvider
       ? `${PROVIDER_DISPLAY_NAMES[provider] || provider} ${chalk.dim('(current)')}`
       : PROVIDER_DISPLAY_NAMES[provider] || provider;
 
   const otherIsCurrent =
-    currentProvider && !PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM);
+    currentProvider &&
+    !PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM);
 
   // If the current provider is in PRIMARY_PROVIDERS, move it to the top of the
   // list so that @clack/prompts highlights it by default (first = highlighted).
   let orderedPrimary = [...PRIMARY_PROVIDERS];
-  if (currentProvider && PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM)) {
+  if (
+    currentProvider &&
+    PRIMARY_PROVIDERS.includes(currentProvider as OCO_AI_PROVIDER_ENUM)
+  ) {
     orderedPrimary = [
       currentProvider as OCO_AI_PROVIDER_ENUM,
       ...orderedPrimary.filter((p) => p !== currentProvider)
     ];
   }
 
-  const primaryOptions: { value: string; label: string }[] = orderedPrimary.map((provider) => ({
-    value: provider,
-    label: makeLabel(provider)
-  }));
+  const primaryOptions: { value: string; label: string }[] = orderedPrimary.map(
+    (provider) => ({
+      value: provider,
+      label: makeLabel(provider)
+    })
+  );
 
   primaryOptions.push({
     value: 'other',
@@ -117,8 +133,12 @@ async function selectProvider(currentProvider?: string): Promise<string | symbol
   return selection;
 }
 
-async function getApiKey(provider: string, currentKey?: string): Promise<string | symbol> {
-  const url = PROVIDER_API_KEY_URLS[provider as keyof typeof PROVIDER_API_KEY_URLS];
+async function getApiKey(
+  provider: string,
+  currentKey?: string
+): Promise<string | symbol> {
+  const url =
+    PROVIDER_API_KEY_URLS[provider as keyof typeof PROVIDER_API_KEY_URLS];
 
   let message = `Enter your ${provider} API key:`;
   if (url) {
@@ -131,7 +151,10 @@ async function getApiKey(provider: string, currentKey?: string): Promise<string 
     const keepOrUpdate = await select({
       message: `API key for ${provider}:`,
       options: [
-        { value: 'keep', label: `Keep current key ${chalk.dim(`(${maskedKey})`)}` },
+        {
+          value: 'keep',
+          label: `Keep current key ${chalk.dim(`(${maskedKey})`)}`
+        },
         { value: 'update', label: 'Enter a new key' }
       ]
     });
@@ -155,7 +178,7 @@ async function getApiKey(provider: string, currentKey?: string): Promise<string 
   if (!isCancel(keyResponse) && keyResponse) {
     note(
       `Your API key will be stored in plain text in ~/.opencommitx-data/config.ini.\n` +
-      `  Keep this file private and never commit it to source control.`,
+        `  Keep this file private and never commit it to source control.`,
       chalk.yellow('⚠  Security notice')
     );
   }
@@ -181,7 +204,8 @@ async function selectModel(
   provider: string,
   apiKey?: string
 ): Promise<string | symbol> {
-  const providerDisplayName = PROVIDER_DISPLAY_NAMES[provider]?.split(' (')[0] || provider;
+  const providerDisplayName =
+    PROVIDER_DISPLAY_NAMES[provider]?.split(' (')[0] || provider;
   const loadingSpinner = spinner();
   loadingSpinner.start(`Fetching models from ${providerDisplayName}...`);
 
@@ -232,7 +256,8 @@ async function selectModel(
   }
 
   // Get recommended model for this provider
-  const recommended = RECOMMENDED_MODELS[provider as keyof typeof RECOMMENDED_MODELS];
+  const recommended =
+    RECOMMENDED_MODELS[provider as keyof typeof RECOMMENDED_MODELS];
 
   // Build options with recommended first
   const options: Array<{ value: string; label: string }> = [];
@@ -245,9 +270,7 @@ async function selectModel(
   }
 
   // Add other models (first 10, excluding recommended)
-  const otherModels = models
-    .filter((m) => m !== recommended)
-    .slice(0, 10);
+  const otherModels = models.filter((m) => m !== recommended).slice(0, 10);
 
   otherModels.forEach((model) => {
     options.push({ value: model, label: model });
@@ -389,7 +412,9 @@ export async function runSetup(): Promise<boolean> {
   const existingConfig = getIsGlobalConfigFileExist()
     ? getGlobalConfig()
     : { ...DEFAULT_CONFIG };
-  const currentProvider = (existingConfig as any).OCO_AI_PROVIDER as string | undefined;
+  const currentProvider = (existingConfig as any).OCO_AI_PROVIDER as
+    | string
+    | undefined;
 
   // Select provider
   const provider = await selectProvider(currentProvider);
@@ -419,7 +444,9 @@ export async function runSetup(): Promise<boolean> {
     console.log(chalk.dim('  MLX runs locally on Apple Silicon Macs.'));
     console.log(chalk.dim('  No API key required.\n'));
 
-    const currentModel = (existingConfig as any).OCO_MODEL as string | undefined;
+    const currentModel = (existingConfig as any).OCO_MODEL as
+      | string
+      | undefined;
     const model = await text({
       message: 'Enter model name:',
       placeholder: 'mlx-community/Llama-3-8B-Instruct-4bit',
@@ -515,9 +542,7 @@ export async function promptForMissingApiKey(): Promise<boolean> {
   }
 
   console.log(
-    chalk.yellow(
-      `\nAPI key missing for ${provider}. Let's set it up.\n`
-    )
+    chalk.yellow(`\nAPI key missing for ${provider}. Let's set it up.\n`)
   );
 
   const apiKey = await getApiKey(provider);
@@ -540,14 +565,20 @@ export async function promptForMissingApiKey(): Promise<boolean> {
 function toPositiveNumber(raw: string, key: string): number {
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) {
-    throw new Error(`Invalid value for ${key}: "${raw}" — must be a positive number`);
+    throw new Error(
+      `Invalid value for ${key}: "${raw}" — must be a positive number`
+    );
   }
   return n;
 }
 
 async function runFullSetup(): Promise<void> {
   intro(chalk.bgCyan(' OpenCommitX Full Setup '));
-  console.log(chalk.dim('  Walk through all configuration keys. Press Enter to keep the current/default value.\n'));
+  console.log(
+    chalk.dim(
+      '  Walk through all configuration keys. Press Enter to keep the current/default value.\n'
+    )
+  );
 
   const currentConfig = getIsGlobalConfigFileExist()
     ? getGlobalConfig()
@@ -571,7 +602,10 @@ async function runFullSetup(): Promise<void> {
         updates[providerKeyName] = apiKey;
       }
     }
-    const model = await selectModel(provider as string, updates.OCO_API_KEY as string | undefined);
+    const model = await selectModel(
+      provider as string,
+      updates.OCO_API_KEY as string | undefined
+    );
     if (!isCancel(model)) updates.OCO_MODEL = model;
   }
 
@@ -580,19 +614,37 @@ async function runFullSetup(): Promise<void> {
   const maxInput = await text({
     message: `Max input tokens (current: ${currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096}):`,
     placeholder: '4096',
-    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096)
+    defaultValue: String(
+      currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_INPUT] ?? 4096
+    )
   });
   if (!isCancel(maxInput) && maxInput) {
-    try { updates.OCO_TOKENS_MAX_INPUT = toPositiveNumber(maxInput as string, 'OCO_TOKENS_MAX_INPUT'); } catch { /* keep default */ }
+    try {
+      updates.OCO_TOKENS_MAX_INPUT = toPositiveNumber(
+        maxInput as string,
+        'OCO_TOKENS_MAX_INPUT'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   const maxOutput = await text({
     message: `Max output tokens (current: ${currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500}):`,
     placeholder: '500',
-    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500)
+    defaultValue: String(
+      currentConfig[CONFIG_KEYS.OCO_TOKENS_MAX_OUTPUT] ?? 500
+    )
   });
   if (!isCancel(maxOutput) && maxOutput) {
-    try { updates.OCO_TOKENS_MAX_OUTPUT = toPositiveNumber(maxOutput as string, 'OCO_TOKENS_MAX_OUTPUT'); } catch { /* keep default */ }
+    try {
+      updates.OCO_TOKENS_MAX_OUTPUT = toPositiveNumber(
+        maxOutput as string,
+        'OCO_TOKENS_MAX_OUTPUT'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   // Commit format
@@ -602,7 +654,10 @@ async function runFullSetup(): Promise<void> {
     message: `Prompt module (current: ${currentConfig[CONFIG_KEYS.OCO_PROMPT_MODULE] ?? 'conventional-commit'}):`,
     options: [
       { value: 'conventional-commit', label: 'conventional-commit (default)' },
-      { value: '@commitlint', label: '@commitlint (use project commitlint config)' }
+      {
+        value: '@commitlint',
+        label: '@commitlint (use project commitlint config)'
+      }
     ]
   });
   if (!isCancel(promptModule)) updates.OCO_PROMPT_MODULE = promptModule;
@@ -655,7 +710,10 @@ async function runFullSetup(): Promise<void> {
   const cacheEnabled = await select({
     message: `Enable LLM result cache (current: ${currentConfig[CONFIG_KEYS.OCO_CACHE_ENABLED] ?? true}):`,
     options: [
-      { value: true, label: 'true (cache results to survive pre-commit failures)' },
+      {
+        value: true,
+        label: 'true (cache results to survive pre-commit failures)'
+      },
       { value: false, label: 'false (always regenerate)' }
     ]
   });
@@ -664,10 +722,19 @@ async function runFullSetup(): Promise<void> {
   const cacheTtl = await text({
     message: `Cache TTL in seconds (current: ${currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600}):`,
     placeholder: '3600',
-    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600)
+    defaultValue: String(
+      currentConfig[CONFIG_KEYS.OCO_CACHE_TTL_SECONDS] ?? 3600
+    )
   });
   if (!isCancel(cacheTtl) && cacheTtl) {
-    try { updates.OCO_CACHE_TTL_SECONDS = toPositiveNumber(cacheTtl as string, 'OCO_CACHE_TTL_SECONDS'); } catch { /* keep default */ }
+    try {
+      updates.OCO_CACHE_TTL_SECONDS = toPositiveNumber(
+        cacheTtl as string,
+        'OCO_CACHE_TTL_SECONDS'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   // Diff routing
@@ -685,10 +752,19 @@ async function runFullSetup(): Promise<void> {
   const perFileThreshold = await text({
     message: `Per-file line threshold (current: ${currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300}):`,
     placeholder: '300',
-    defaultValue: String(currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300)
+    defaultValue: String(
+      currentConfig[CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES] ?? 300
+    )
   });
   if (!isCancel(perFileThreshold) && perFileThreshold) {
-    try { updates.OCO_PER_FILE_THRESHOLD_LINES = toPositiveNumber(perFileThreshold as string, 'OCO_PER_FILE_THRESHOLD_LINES'); } catch { /* keep default */ }
+    try {
+      updates.OCO_PER_FILE_THRESHOLD_LINES = toPositiveNumber(
+        perFileThreshold as string,
+        'OCO_PER_FILE_THRESHOLD_LINES'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   const multiCommitStrategy = await select({
@@ -698,15 +774,25 @@ async function runFullSetup(): Promise<void> {
       { value: 'sequential', label: 'sequential (one commit per file group)' }
     ]
   });
-  if (!isCancel(multiCommitStrategy)) updates.OCO_MULTI_COMMIT_STRATEGY = multiCommitStrategy;
+  if (!isCancel(multiCommitStrategy))
+    updates.OCO_MULTI_COMMIT_STRATEGY = multiCommitStrategy;
 
   const maxFilesPerGroup = await text({
     message: `Max files per commit group (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP] ?? 10}):`,
     placeholder: '10',
-    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP] ?? 10)
+    defaultValue: String(
+      (currentConfig as any)[CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP] ?? 10
+    )
   });
   if (!isCancel(maxFilesPerGroup) && maxFilesPerGroup) {
-    try { (updates as any).OCO_MAX_FILES_PER_GROUP = toPositiveNumber(maxFilesPerGroup as string, 'OCO_MAX_FILES_PER_GROUP'); } catch { /* keep default */ }
+    try {
+      (updates as any).OCO_MAX_FILES_PER_GROUP = toPositiveNumber(
+        maxFilesPerGroup as string,
+        'OCO_MAX_FILES_PER_GROUP'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   // Commit content & style
@@ -725,17 +811,23 @@ async function runFullSetup(): Promise<void> {
     options: [
       { value: 'normal', label: 'normal (default)' },
       { value: 'concise', label: 'concise (one-liner, minimal description)' },
-      { value: 'detailed', label: 'detailed (thorough description + reasoning)' }
+      {
+        value: 'detailed',
+        label: 'detailed (thorough description + reasoning)'
+      }
     ]
   });
-  if (!isCancel(commitDetail)) (updates as any).OCO_COMMIT_DETAIL = commitDetail;
+  if (!isCancel(commitDetail))
+    (updates as any).OCO_COMMIT_DETAIL = commitDetail;
 
   // LLM tuning
   console.log(chalk.bold('\n── LLM Tuning ──'));
   const temperature = await text({
     message: `Temperature 0.0–2.0 (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_TEMPERATURE] ?? 0}):`,
     placeholder: '0',
-    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_TEMPERATURE] ?? 0)
+    defaultValue: String(
+      (currentConfig as any)[CONFIG_KEYS.OCO_TEMPERATURE] ?? 0
+    )
   });
   if (!isCancel(temperature) && temperature !== undefined) {
     const t = Number(temperature);
@@ -745,10 +837,19 @@ async function runFullSetup(): Promise<void> {
   const genTimeout = await text({
     message: `Generation timeout in seconds (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS] ?? 90}):`,
     placeholder: '90',
-    defaultValue: String((currentConfig as any)[CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS] ?? 90)
+    defaultValue: String(
+      (currentConfig as any)[CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS] ?? 90
+    )
   });
   if (!isCancel(genTimeout) && genTimeout) {
-    try { (updates as any).OCO_GENERATION_TIMEOUT_SECONDS = toPositiveNumber(genTimeout as string, 'OCO_GENERATION_TIMEOUT_SECONDS'); } catch { /* keep default */ }
+    try {
+      (updates as any).OCO_GENERATION_TIMEOUT_SECONDS = toPositiveNumber(
+        genTimeout as string,
+        'OCO_GENERATION_TIMEOUT_SECONDS'
+      );
+    } catch {
+      /* keep default */
+    }
   }
 
   // Fallback model
@@ -767,10 +868,13 @@ async function runFullSetup(): Promise<void> {
       message: `Fallback provider (current: ${(currentConfig as any)[CONFIG_KEYS.OCO_FALLBACK_PROVIDER] ?? 'same as primary'}):`,
       options: [
         { value: '', label: 'Same as primary provider' },
-        ...Object.values(OCO_AI_PROVIDER_ENUM).filter(p => p !== 'test').map(p => ({ value: p, label: p }))
+        ...Object.values(OCO_AI_PROVIDER_ENUM)
+          .filter((p) => p !== 'test')
+          .map((p) => ({ value: p, label: p }))
       ]
     });
-    if (!isCancel(fallbackProvider)) (updates as any).OCO_FALLBACK_PROVIDER = fallbackProvider;
+    if (!isCancel(fallbackProvider))
+      (updates as any).OCO_FALLBACK_PROVIDER = fallbackProvider;
   }
 
   // Debug
