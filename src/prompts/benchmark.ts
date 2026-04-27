@@ -25,7 +25,10 @@ export function buildEvaluatorMessages(
   candidates: Array<{ model: string; message: string }>
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   const candidateList = candidates
-    .map((c, i) => `### Candidate ${i + 1}: ${c.model}\n\`\`\`\n${c.message}\n\`\`\``)
+    .map(
+      (c, i) =>
+        `### Candidate ${i + 1}: ${c.model}\n\`\`\`\n${c.message}\n\`\`\``
+    )
     .join('\n\n');
 
   const systemPrompt = `You are an expert code reviewer evaluating AI-generated git commit messages.
