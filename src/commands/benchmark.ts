@@ -36,6 +36,14 @@ import {
 import { getDiff, getStagedFiles, assertGitRepo } from '../utils/git';
 import { getProviderApiKey } from '../utils/providerKeys';
 
+const parseNumberOrDefault = (value: unknown, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const benchmarkCandidateKey = (candidate: BenchmarkCandidate): string =>
+  `${candidate.model}@${candidate.provider}`;
+
 // ── Setup wizard ────────────────────────────────────────────────────────────
 
 async function runBenchmarkSetup(): Promise<void> {
@@ -45,15 +53,24 @@ async function runBenchmarkSetup(): Promise<void> {
 
   // Evaluator model
   console.log(chalk.bold('\n── Evaluator Model ──'));
-  console.log(chalk.dim('  The evaluator grades all candidate messages in one request.'));
-  console.log(chalk.dim('  Use a capable model (e.g. claude-opus, gpt-4o). Costs more tokens.\n'));
+  console.log(
+    chalk.dim('  The evaluator grades all candidate messages in one request.')
+  );
+  console.log(
+    chalk.dim(
+      '  Use a capable model (e.g. claude-opus, gpt-4o). Costs more tokens.\n'
+    )
+  );
 
   const evalModel = await text({
     message: `Evaluator model (current: ${existing.eval_model}):`,
     placeholder: 'anthropic/claude-opus-4-20250514',
     defaultValue: existing.eval_model
   });
-  if (isCancel(evalModel)) { outro('Setup cancelled'); return; }
+  if (isCancel(evalModel)) {
+    outro('Setup cancelled');
+    return;
+  }
 
   const evalProvider = await select({
     message: `Evaluator provider (current: ${existing.eval_provider}):`,
@@ -61,31 +78,44 @@ async function runBenchmarkSetup(): Promise<void> {
       .filter((p) => p !== 'test')
       .map((p) => ({
         value: p,
-        label: p === existing.eval_provider ? `${p} ${chalk.dim('(current)')}` : p
+        label:
+          p === existing.eval_provider ? `${p} ${chalk.dim('(current)')}` : p
       }))
   });
-  if (isCancel(evalProvider)) { outro('Setup cancelled'); return; }
+  if (isCancel(evalProvider)) {
+    outro('Setup cancelled');
+    return;
+  }
 
   const evalTemp = await text({
     message: `Evaluator temperature (current: ${existing.eval_temperature}):`,
     placeholder: '0.1',
     defaultValue: String(existing.eval_temperature)
   });
-  if (isCancel(evalTemp)) { outro('Setup cancelled'); return; }
+  if (isCancel(evalTemp)) {
+    outro('Setup cancelled');
+    return;
+  }
 
   const evalMaxIn = await text({
     message: `Evaluator max input tokens (current: ${existing.eval_max_tokens_input}):`,
     placeholder: '32000',
     defaultValue: String(existing.eval_max_tokens_input)
   });
-  if (isCancel(evalMaxIn)) { outro('Setup cancelled'); return; }
+  if (isCancel(evalMaxIn)) {
+    outro('Setup cancelled');
+    return;
+  }
 
   const evalMaxOut = await text({
     message: `Evaluator max output tokens (current: ${existing.eval_max_tokens_output}):`,
     placeholder: '8000',
     defaultValue: String(existing.eval_max_tokens_output)
   });
-  if (isCancel(evalMaxOut)) { outro('Setup cancelled'); return; }
+  if (isCancel(evalMaxOut)) {
+    outro('Setup cancelled');
+    return;
+  }
 
   // Candidate models (up to 10)
   console.log(chalk.bold('\n── Candidate Models (up to 10) ──'));
@@ -123,7 +153,7 @@ async function runBenchmarkSetup(): Promise<void> {
     const parsedTemp = Number(cTemp);
     candidates.push({
       model: String(cModel),
-      provider: String(cProvider),
+      provider: cProvider as OCO_AI_PROVIDER_ENUM,
       temperature: !isNaN(parsedTemp) ? parsedTemp : 0
     });
 
@@ -133,7 +163,11 @@ async function runBenchmarkSetup(): Promise<void> {
   if (candidates.length === 0) {
     await addAnother();
   } else {
-    console.log(chalk.dim(`\n  Existing candidates: ${candidates.map((c) => c.model).join(', ')}`));
+    console.log(
+      chalk.dim(
+        `\n  Existing candidates: ${candidates.map((c) => c.model).join(', ')}`
+      )
+    );
     const keepOrReset = await select({
       message: 'Candidates:',
       options: [
@@ -150,15 +184,17 @@ async function runBenchmarkSetup(): Promise<void> {
 
   const cfg: BenchmarkConfig = {
     eval_model: String(evalModel),
-    eval_provider: String(evalProvider),
-    eval_temperature: Number(evalTemp) || 0.1,
-    eval_max_tokens_input: Number(evalMaxIn) || 32000,
-    eval_max_tokens_output: Number(evalMaxOut) || 8000,
+    eval_provider: evalProvider as OCO_AI_PROVIDER_ENUM,
+    eval_temperature: parseNumberOrDefault(evalTemp, 0.1),
+    eval_max_tokens_input: parseNumberOrDefault(evalMaxIn, 32000),
+    eval_max_tokens_output: parseNumberOrDefault(evalMaxOut, 8000),
     candidates
   };
 
   writeBenchmarkConfig(cfg);
-  outro(`${chalk.green('✔')} Benchmark config saved to ~/.opencommitx-data/benchmark.json`);
+  outro(
+    `${chalk.green('✔')} Benchmark config saved to ~/.opencommitx-data/benchmark.json`
+  );
 }
 
 // ── Benchmark run ────────────────────────────────────────────────────────────
@@ -175,13 +211,15 @@ async function runBenchmark(): Promise<void> {
     return;
   }
 
-  intro(chalk.bgMagenta(` OpenCommitX Benchmark — ${cfg.candidates.length} candidates `));
+  intro(
+    chalk.bgMagenta(
+      ` OpenCommitX Benchmark — ${cfg.candidates.length} candidates `
+    )
+  );
 
   // Get diff
   const staged = await getStagedFiles();
-  const diff = staged.length > 0
-    ? await getDiff({ files: staged })
-    : '';
+  const diff = staged.length > 0 ? await getDiff({ files: staged }) : '';
 
   if (!diff.trim()) {
     outro(chalk.yellow('No staged diff found. Stage some files first.'));
@@ -195,14 +233,17 @@ async function runBenchmark(): Promise<void> {
 
   note(
     `Diff: ~${diffLines} lines\n` +
-    `Candidates: ${cfg.candidates.length} models × ~${Math.ceil(diffLines * 4)} tokens each\n` +
-    `Evaluator call: ~${evalEstimate} input tokens\n` +
-    `This will use real API tokens and incur costs.`,
+      `Candidates: ${cfg.candidates.length} models × ~${Math.ceil(diffLines * 4)} tokens each\n` +
+      `Evaluator call: ~${evalEstimate} input tokens\n` +
+      `This will use real API tokens and incur costs.`,
     chalk.yellow('⚠  Token usage estimate')
   );
 
   const proceed = await confirm({ message: 'Proceed with benchmark?' });
-  if (isCancel(proceed) || !proceed) { outro('Benchmark cancelled'); return; }
+  if (isCancel(proceed) || !proceed) {
+    outro('Benchmark cancelled');
+    return;
+  }
 
   // Run each candidate
   const candidateResults: CandidateResult[] = [];
@@ -214,9 +255,13 @@ async function runBenchmark(): Promise<void> {
     candidateResults.push(result);
 
     if (result.error) {
-      runSpinner.stop(chalk.red(`✖ ${candidate.model}: ${result.error.slice(0, 60)}`));
+      runSpinner.stop(
+        chalk.red(`✖ ${candidate.model}: ${result.error.slice(0, 60)}`)
+      );
     } else {
-      runSpinner.stop(`${chalk.green('✔')} ${candidate.model} (${(result.latencyMs / 1000).toFixed(1)}s)`);
+      runSpinner.stop(
+        `${chalk.green('✔')} ${candidate.model} (${(result.latencyMs / 1000).toFixed(1)}s)`
+      );
     }
   }
 
@@ -244,7 +289,9 @@ async function runBenchmark(): Promise<void> {
     evalResults = await runEvaluator(cfg, diff, candidateResults);
     evalSpinner.stop(`${chalk.green('✔')} Evaluation complete`);
   } catch (err: unknown) {
-    evalSpinner.stop(chalk.red(`✖ Evaluator failed: ${String(err).slice(0, 80)}`));
+    evalSpinner.stop(
+      chalk.red(`✖ Evaluator failed: ${String(err).slice(0, 80)}`)
+    );
     evalResults = { results: [] };
   }
 
@@ -255,11 +302,15 @@ async function runBenchmark(): Promise<void> {
     for (const [i, ev] of ranked.entries()) {
       console.log(
         chalk.bold(`\n  ${i + 1}. ${ev.model}`) +
-        chalk.cyan(` — Score: ${ev.score}/100`) +
-        chalk.dim(` (accuracy: ${ev.accuracy}/10, completeness: ${ev.completeness}/10)`)
+          chalk.cyan(` — Score: ${ev.score}/100`) +
+          chalk.dim(
+            ` (accuracy: ${ev.accuracy}/10, completeness: ${ev.completeness}/10)`
+          )
       );
       if (ev.missing_key_details?.length) {
-        console.log(chalk.yellow(`     Missing: ${ev.missing_key_details.join(', ')}`));
+        console.log(
+          chalk.yellow(`     Missing: ${ev.missing_key_details.join(', ')}`)
+        );
       }
       console.log(chalk.grey(`     ${ev.overall}`));
     }
@@ -267,8 +318,16 @@ async function runBenchmark(): Promise<void> {
 
   // Write results file
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const resultsFile = pathJoin(process.cwd(), `benchmark_results_${timestamp}.md`);
-  const markdown = formatBenchmarkMarkdown(diff, candidateResults, evalResults, new Date().toISOString());
+  const resultsFile = pathJoin(
+    process.cwd(),
+    `benchmark_results_${timestamp}.md`
+  );
+  const markdown = formatBenchmarkMarkdown(
+    diff,
+    candidateResults,
+    evalResults,
+    new Date().toISOString()
+  );
   writeFileSync(resultsFile, markdown, 'utf-8');
   console.log('\n' + chalk.dim(`  Results written to: ${resultsFile}`));
 
@@ -276,7 +335,7 @@ async function runBenchmark(): Promise<void> {
   const winnerOptions = [
     ...successful.map((r, idx) => ({
       value: String(idx),
-      label: `${r.candidate.model} [${r.candidate.provider}]${evalResults.results.find((e) => e.model === r.candidate.model) ? ` (score: ${evalResults.results.find((e) => e.model === r.candidate.model)!.score})` : ''}`
+      label: `${r.candidate.model} [${r.candidate.provider}]${evalResults.results.find((e) => e.model === benchmarkCandidateKey(r.candidate)) ? ` (score: ${evalResults.results.find((e) => e.model === benchmarkCandidateKey(r.candidate))!.score})` : ''}`
     })),
     { value: '__skip__', label: "Don't change current model" }
   ];
@@ -294,7 +353,9 @@ async function runBenchmark(): Promise<void> {
       OCO_AI_PROVIDER: winnerCandidate.provider as OCO_AI_PROVIDER_ENUM,
       OCO_MODEL: winnerCandidate.model
     });
-    outro(`${chalk.green('✔')} Default model set to ${winnerCandidate.model} (provider: ${winnerCandidate.provider})`);
+    outro(
+      `${chalk.green('✔')} Default model set to ${winnerCandidate.model} (provider: ${winnerCandidate.provider})`
+    );
   } else {
     outro(`${chalk.green('✔')} Benchmark complete — no config change`);
   }
