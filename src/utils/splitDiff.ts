@@ -14,7 +14,7 @@ export function splitDiff(diff: string, maxChangeLength: number): string[] {
   if (maxChangeLength <= 0) {
     throw new Error(
       `OCO_TOKENS_MAX_OUTPUT is set too high — no tokens left for the diff after the output budget.\n` +
-      `  Try reducing OCO_TOKENS_MAX_OUTPUT: ocox config set OCO_TOKENS_MAX_OUTPUT 500`
+        `  Try reducing OCO_TOKENS_MAX_OUTPUT: ocox config set OCO_TOKENS_MAX_OUTPUT 500`
     );
   }
 
@@ -28,13 +28,19 @@ export function splitDiff(diff: string, maxChangeLength: number): string[] {
     // token-dense content (CJK, minified code, etc.) accurately.
     while (tokenCount(line) > maxChangeLength) {
       const lineTokens = tokenCount(line);
-      const charBudget = Math.max(Math.floor(line.length * maxChangeLength / lineTokens), 1);
+      const charBudget = Math.max(
+        Math.floor((line.length * maxChangeLength) / lineTokens),
+        1
+      );
       const subLine = line.substring(0, charBudget);
       line = line.substring(charBudget);
       splitDiffs.push(subLine);
     }
 
-    if (currentDiff && tokenCount(currentDiff) + tokenCount('\n' + line) > maxChangeLength) {
+    if (
+      currentDiff &&
+      tokenCount(currentDiff) + tokenCount('\n' + line) > maxChangeLength
+    ) {
       splitDiffs.push(currentDiff);
       currentDiff = line;
     } else {
