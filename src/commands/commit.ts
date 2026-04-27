@@ -11,15 +11,15 @@ import {
 } from '@clack/prompts';
 import chalk from 'chalk';
 import { execa } from 'execa';
-import { generateCommitMessageByDiff, consumeLastUsedModel } from '../generateCommitMessageFromGitDiff';
+import {
+  generateCommitMessageByDiff,
+  consumeLastUsedModel
+} from '../generateCommitMessageFromGitDiff';
 import {
   buildCommitPlan,
   combineCommitMessages
 } from '../utils/commitStrategy';
-import {
-  formatUserFriendlyError,
-  printFormattedError
-} from '../utils/errors';
+import { formatUserFriendlyError, printFormattedError } from '../utils/errors';
 import { existsSync } from 'fs';
 import { join as pathJoin } from 'path';
 import {
@@ -150,7 +150,10 @@ async function handleGitPush(): Promise<void> {
   }
 }
 
-type RegenerateFn = (opts: { detail?: string; feedback?: string }) => Promise<string>;
+type RegenerateFn = (opts: {
+  detail?: string;
+  feedback?: string;
+}) => Promise<string>;
 
 async function performCommit(
   commitMessage: string,
@@ -181,7 +184,10 @@ async function performCommit(
 
     const userAction = skipCommitConfirmation
       ? 'Yes'
-      : await select({ message: 'Confirm the commit message?', options: baseOptions });
+      : await select({
+          message: 'Confirm the commit message?',
+          options: baseOptions
+        });
 
     if (isCancel(userAction)) process.exit(1);
 
@@ -247,7 +253,9 @@ async function performCommit(
       if (existsSync(pathJoin(gitDir, '.pre-commit-config.yaml'))) {
         note('Pre-commit hooks are configured and will run now.');
       }
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
 
     committingChangesSpinner.start('Committing...');
 
@@ -259,7 +267,11 @@ async function performCommit(
       if (proc.stderr) {
         proc.stderr.setEncoding('utf-8');
         proc.stderr.on('data', (chunk: string) => {
-          const lastLine = chunk.split('\n').filter((l) => l.trim()).pop() ?? '';
+          const lastLine =
+            chunk
+              .split('\n')
+              .filter((l) => l.trim())
+              .pop() ?? '';
           if (lastLine) {
             committingChangesSpinner.message(
               `Committing... ${chalk.dim(lastLine.slice(0, 60))}`
@@ -271,14 +283,19 @@ async function performCommit(
       const result = await proc;
 
       if (result.exitCode === 0) {
-        committingChangesSpinner.stop(`${chalk.green('✔')} Successfully committed`);
+        committingChangesSpinner.stop(
+          `${chalk.green('✔')} Successfully committed`
+        );
         if (result.stdout) outro(result.stdout);
         return true;
       }
 
       committingChangesSpinner.stop(`${chalk.red('✖')} Commit failed`);
 
-      const hookOutput = [result.stderr, result.stdout].filter(Boolean).join('\n').trim();
+      const hookOutput = [result.stderr, result.stdout]
+        .filter(Boolean)
+        .join('\n')
+        .trim();
       if (hookOutput) process.stderr.write(hookOutput + '\n');
 
       const isHookFailure =
@@ -321,7 +338,8 @@ const generateCommitMessageFromGitDiff = async ({
     const age = formatCacheAge(cached.timestamp);
     const currentModel = getConfig().OCO_MODEL ?? '';
     const cachedModel = cached.model ?? '';
-    const modelMismatch = cachedModel && currentModel && cachedModel !== currentModel;
+    const modelMismatch =
+      cachedModel && currentModel && cachedModel !== currentModel;
 
     outro(
       `Cached commit message found (generated ${age}):\n${chalk.grey('——————————————————')}\n${cached.message}\n${chalk.grey('——————————————————')}`
@@ -340,12 +358,19 @@ const generateCommitMessageFromGitDiff = async ({
           message: 'Use cached message or regenerate?',
           options: [
             { value: 'UseCached', label: 'Use cached' },
-            { value: 'Regenerate', label: `Regenerate${modelMismatch ? ` with ${currentModel}` : ''}` }
+            {
+              value: 'Regenerate',
+              label: `Regenerate${modelMismatch ? ` with ${currentModel}` : ''}`
+            }
           ]
         });
 
     if (!isCancel(cacheAction) && cacheAction === 'UseCached') {
-      const committed = await performCommit(cached.message, extraArgs, skipCommitConfirmation);
+      const committed = await performCommit(
+        cached.message,
+        extraArgs,
+        skipCommitConfirmation
+      );
       if (committed) {
         archiveCacheEntry(diff);
         await handleGitPush();
@@ -397,7 +422,12 @@ const generateCommitMessageFromGitDiff = async ({
 
     commitGenerationSpinner.stop('📝 Commit message generated');
 
-    setCachedCommitMessage(diff, commitMessage, undefined, consumeLastUsedModel() ?? undefined);
+    setCachedCommitMessage(
+      diff,
+      commitMessage,
+      undefined,
+      consumeLastUsedModel() ?? undefined
+    );
 
     const regenFn: RegenerateFn = async ({ detail, feedback }) => {
       const detailInstruction =
@@ -410,9 +440,20 @@ const generateCommitMessageFromGitDiff = async ({
         detailInstruction,
         feedback ? `User feedback: ${feedback}` : '',
         context
-      ].filter(Boolean).join('\n');
-      const newMsg = await generateCommitMessageByDiff(diff, fullGitMojiSpec, regenContext);
-      setCachedCommitMessage(diff, newMsg);
+      ]
+        .filter(Boolean)
+        .join('\n');
+      const newMsg = await generateCommitMessageByDiff(
+        diff,
+        fullGitMojiSpec,
+        regenContext
+      );
+      setCachedCommitMessage(
+        diff,
+        newMsg,
+        undefined,
+        consumeLastUsedModel() ?? undefined
+      );
       return newMsg;
     };
 
@@ -477,7 +518,8 @@ async function generatePerFileCommits(
   const genSpinner = spinner();
   // Per-group generation timeout. Defaults to 90s; configurable via
   // OCO_GENERATION_TIMEOUT_SECONDS for slow models or slow networks.
-  const GROUP_TIMEOUT_MS = (currentConfig.OCO_GENERATION_TIMEOUT_SECONDS ?? 90) * 1000;
+  const GROUP_TIMEOUT_MS =
+    (currentConfig.OCO_GENERATION_TIMEOUT_SECONDS ?? 90) * 1000;
 
   const stopAndExit = (label: string) => {
     genSpinner.stop(label);
@@ -493,7 +535,9 @@ async function generatePerFileCommits(
     process.once('SIGBREAK', sigbreakHandler);
   }
 
-  genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
+  genSpinner.start(
+    `Generating commit messages for ${fileGroups.length} file group(s)...`
+  );
 
   let rawMessages: string[];
   // Store the payload (diff text) per group so we can archive cache entries
@@ -509,7 +553,8 @@ async function generatePerFileCommits(
         const prefix = 'Generating: ';
         genSpinner.message(prefix + truncateFileList(group.files, prefix));
       }
-      const payload = group.docstringOverride ?? (await getDiffForFiles(group.files));
+      const payload =
+        group.docstringOverride ?? (await getDiffForFiles(group.files));
       groupPayloads.push(payload);
 
       // Check cache before calling the LLM — skip API call on hit.
@@ -518,12 +563,15 @@ async function generatePerFileCommits(
         const age = formatCacheAge(cached.timestamp);
         const cachedModel = cached.model ?? '';
         const currentModel = currentConfig.OCO_MODEL ?? '';
-        const modelMismatch = cachedModel && currentModel && cachedModel !== currentModel;
+        const modelMismatch =
+          cachedModel && currentModel && cachedModel !== currentModel;
         genSpinner.message(
           `Cache hit (${age})${modelMismatch ? chalk.yellow(` — cached from ${cachedModel}`) : ''}: ${truncateFileList(group.files, 'Cache hit: ')}`
         );
         if (modelMismatch) {
-          genSpinner.stop(chalk.yellow(`⚠  Cache hit from different model (${cachedModel})`));
+          genSpinner.stop(
+            chalk.yellow(`⚠  Cache hit from different model (${cachedModel})`)
+          );
           const reuseAction = await select({
             message: `Cached message was generated by ${cachedModel}; current model is ${currentModel}. Use cached?`,
             options: [
@@ -535,11 +583,15 @@ async function generatePerFileCommits(
           if (reuseAction === 'use') {
             rawMessages.push(cached.message);
             if (fileGroups.indexOf(group) < fileGroups.length - 1) {
-              genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
+              genSpinner.start(
+                `Generating commit messages for ${fileGroups.length} file group(s)...`
+              );
             }
             continue;
           }
-          genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
+          genSpinner.start(
+            `Generating commit messages for ${fileGroups.length} file group(s)...`
+          );
         } else {
           rawMessages.push(cached.message);
           continue;
@@ -569,7 +621,12 @@ async function generatePerFileCommits(
       // Cache each group message immediately so a pre-commit failure on a later
       // group doesn't lose already-generated messages. Pass the actual model
       // used (may be the fallback model if the primary failed).
-      setCachedCommitMessage(payload, msg, group.files, consumeLastUsedModel() ?? undefined);
+      setCachedCommitMessage(
+        payload,
+        msg,
+        group.files,
+        consumeLastUsedModel() ?? undefined
+      );
       rawMessages.push(msg);
     }
     genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
@@ -587,10 +644,16 @@ async function generatePerFileCommits(
   const commitPlan = buildCommitPlan(fileGroups, rawMessages);
 
   if (strategy === 'single') {
-    const combinedMessage = combineCommitMessages(commitPlan.map((c) => c.message));
+    const combinedMessage = combineCommitMessages(
+      commitPlan.map((c) => c.message)
+    );
     const fullDiff = await getDiffForFiles(stagedFiles);
     setCachedCommitMessage(fullDiff, combinedMessage, stagedFiles);
-    const committed = await performCommit(combinedMessage, extraArgs, skipCommitConfirmation);
+    const committed = await performCommit(
+      combinedMessage,
+      extraArgs,
+      skipCommitConfirmation
+    );
     if (committed) {
       // Archive all per-group cache entries now that the commit succeeded.
       for (const payload of groupPayloads) archiveCacheEntry(payload);
@@ -635,7 +698,9 @@ async function generatePerFileCommits(
         committingSpinner.stop(`${chalk.green('✔')} Committed group ${i + 1}`);
         if (groupPayloads[i]) archiveCacheEntry(groupPayloads[i]);
       } catch (err: unknown) {
-        committingSpinner.stop(`${chalk.red('✖')} Failed to commit group ${i + 1}`);
+        committingSpinner.stop(
+          `${chalk.red('✖')} Failed to commit group ${i + 1}`
+        );
         throw err;
       }
       accepted.push(message);
@@ -680,11 +745,20 @@ async function generatePerFileCommits(
       finalMessage = textResponse.toString();
     }
 
-    if (userAction === 'Accept' || userAction === 'Edit' || userAction === 'AcceptAll') {
+    if (
+      userAction === 'Accept' ||
+      userAction === 'Edit' ||
+      userAction === 'AcceptAll'
+    ) {
       const committingSpinner = spinner();
       committingSpinner.start('Committing the changes');
       try {
-        const { stdout } = await execa('git', ['commit', '-m', finalMessage, ...extraArgs]);
+        const { stdout } = await execa('git', [
+          'commit',
+          '-m',
+          finalMessage,
+          ...extraArgs
+        ]);
         committingSpinner.stop(`${chalk.green('✔')} Successfully committed`);
         outro(stdout);
         if (groupPayloads[i]) archiveCacheEntry(groupPayloads[i]);
@@ -752,7 +826,13 @@ export async function commit(
     if (isCancel(isStageAllAndCommitConfirmedByUser)) process.exit(1);
 
     if (isStageAllAndCommitConfirmedByUser) {
-      await commit(extraArgs, context, true, fullGitMojiSpec, skipCommitConfirmation);
+      await commit(
+        extraArgs,
+        context,
+        true,
+        fullGitMojiSpec,
+        skipCommitConfirmation
+      );
       process.exit(0);
     }
 
@@ -770,7 +850,13 @@ export async function commit(
       await gitAdd({ files });
     }
 
-    await commit(extraArgs, context, false, fullGitMojiSpec, skipCommitConfirmation);
+    await commit(
+      extraArgs,
+      context,
+      false,
+      fullGitMojiSpec,
+      skipCommitConfirmation
+    );
     process.exit(0);
   }
 
@@ -787,7 +873,9 @@ export async function commit(
   if (partiallyStaged.length > 0) {
     note(
       partiallyStaged.join('\n'),
-      chalk.yellow('⚠  These files have both staged and unstaged changes — a pre-commit formatter may alter them')
+      chalk.yellow(
+        '⚠  These files have both staged and unstaged changes — a pre-commit formatter may alter them'
+      )
     );
   }
 
@@ -816,15 +904,25 @@ export async function commit(
   // waiting for LLM generation.
   try {
     const statusEntries = await getStagedFilesStatus();
-    const statusMap = new Map<string, string>(statusEntries.map((e) => [e.file, e.status] as [string, string]));
-    const statsMap = new Map<string, typeof stats[number]>(stats.map((s) => [s.file, s] as [string, typeof stats[number]]));
+    const statusMap = new Map<string, string>(
+      statusEntries.map((e) => [e.file, e.status] as [string, string])
+    );
+    const statsMap = new Map<string, (typeof stats)[number]>(
+      stats.map((s) => [s.file, s] as [string, (typeof stats)[number]])
+    );
 
     // Build file → group# lookup (1-indexed for display).
     const groupIndexMap = new Map<string, number>();
     if (usePerFileMode && fileGroups.length > 0) {
-      fileGroups.forEach((g, i) => g.files.forEach((f) => groupIndexMap.set(f, i + 1)));
+      fileGroups.forEach((g, i) => {
+        g.files.forEach((f) => {
+          groupIndexMap.set(f, i + 1);
+        });
+      });
     } else {
-      stagedFiles.forEach((f) => groupIndexMap.set(f, 1));
+      stagedFiles.forEach((f) => {
+        groupIndexMap.set(f, 1);
+      });
     }
 
     // Build file → docstring mode lookup using the detection function directly
@@ -840,8 +938,7 @@ export async function commit(
     const colWidths = { file: 40, lines: 10, status: 4, ds: 3, grp: 4 };
     const pad = (s: string, n: number) => s.slice(0, n).padEnd(n);
 
-    const header =
-      `${pad('File', colWidths.file)}  ${pad('+/-', colWidths.lines)}  New  DS  Grp`;
+    const header = `${pad('File', colWidths.file)}  ${pad('+/-', colWidths.lines)}  New  DS  Grp`;
     const divider = '─'.repeat(header.length);
 
     const rows = stagedFiles.map((f) => {
