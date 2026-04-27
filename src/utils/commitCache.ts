@@ -57,7 +57,10 @@ export function getRepoCacheDir(): string {
   }
 
   const repoName = basename(repoRoot);
-  const repoHash = createHash('sha256').update(repoRoot).digest('hex').slice(0, 8);
+  const repoHash = createHash('sha256')
+    .update(repoRoot)
+    .digest('hex')
+    .slice(0, 8);
   const dir = pathJoin(CACHE_BASE_DIR, `${repoName}-${repoHash}`);
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -99,7 +102,10 @@ function normalizeForHashing(diff: string): string {
 }
 
 export function hashDiff(diff: string): string {
-  return createHash('sha256').update(normalizeForHashing(diff)).digest('hex').slice(0, 16);
+  return createHash('sha256')
+    .update(normalizeForHashing(diff))
+    .digest('hex')
+    .slice(0, 16);
 }
 
 function readEntry(diffHash: string): CacheEntry | null {
@@ -141,7 +147,9 @@ export function getCachedCommitMessage(diff: string): CacheEntry | null {
         const archiveFile = pathJoin(getArchiveDir(), `${key}.json`);
         renameSync(file, archiveFile);
       }
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
     return null;
   }
 
@@ -188,7 +196,9 @@ export function archiveCacheEntry(diff: string): void {
     if (!existsSync(file)) return;
     const archiveFile = pathJoin(getArchiveDir(), `${key}.json`);
     renameSync(file, archiveFile);
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 /**
@@ -209,9 +219,13 @@ export function pruneArchivedCache(retentionDays: number = 7): void {
           // Use unlinkSync via dynamic import to avoid direct fs import
           unlinkSync(filePath);
         }
-      } catch { /* skip unreadable files */ }
+      } catch {
+        /* skip unreadable files */
+      }
     }
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 export function clearCommitCache(): void {
@@ -221,7 +235,9 @@ export function clearCommitCache(): void {
       if (!file.endsWith('.json')) continue;
       try {
         unlinkSync(pathJoin(cacheDir, file));
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
 
     const archiveDir = pathJoin(cacheDir, 'archived');
@@ -230,10 +246,14 @@ export function clearCommitCache(): void {
         if (!file.endsWith('.json')) continue;
         try {
           unlinkSync(pathJoin(archiveDir, file));
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
     }
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 export function formatCacheAge(timestamp: number): string {
