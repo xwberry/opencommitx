@@ -644,9 +644,7 @@ const validateConfig = (
   if (!condition) {
     outro(`${chalk.red('✖')} wrong value for ${key}: ${validationMessage}.`);
 
-    outro(
-      'For more help refer to docs https://github.com/xwberry/opencommitx'
-    );
+    outro('For more help refer to docs https://github.com/xwberry/opencommitx');
 
     process.exit(1);
   }
@@ -950,47 +948,83 @@ export const configValidators = {
   },
 
   [CONFIG_KEYS.OCO_OPENAI_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_OPENAI_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_OPENAI_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_ANTHROPIC_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_ANTHROPIC_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_ANTHROPIC_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_OPENROUTER_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_OPENROUTER_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_OPENROUTER_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_GEMINI_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_GEMINI_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_GEMINI_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_GROQ_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_GROQ_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_GROQ_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_MISTRAL_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_MISTRAL_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_MISTRAL_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_DEEPSEEK_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_DEEPSEEK_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_DEEPSEEK_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_AIMLAPI_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_AIMLAPI_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_AIMLAPI_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
   [CONFIG_KEYS.OCO_AZURE_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OCO_AZURE_KEY, typeof value === 'string', 'Must be a string');
+    validateConfig(
+      CONFIG_KEYS.OCO_AZURE_KEY,
+      typeof value === 'string',
+      'Must be a string'
+    );
     return value;
   },
 
@@ -1037,7 +1071,7 @@ export const configValidators = {
     const n = Number(value);
     validateConfig(
       CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS,
-      !isNaN(n) && n >= 10,
+      !isNaN(n) && Number.isInteger(n) && n >= 10,
       'Must be a positive integer >= 10 (seconds)'
     );
     return n;
@@ -1048,7 +1082,16 @@ export const configValidators = {
   },
 
   [CONFIG_KEYS.OCO_FALLBACK_PROVIDER](value: any) {
-    return typeof value === 'string' ? value : '';
+    if (value === '' || value === undefined || value === null) return '';
+    validateConfig(
+      CONFIG_KEYS.OCO_FALLBACK_PROVIDER,
+      typeof value === 'string' &&
+        Object.values(OCO_AI_PROVIDER_ENUM).includes(
+          value as OCO_AI_PROVIDER_ENUM
+        ),
+      `Must be one of: ${Object.values(OCO_AI_PROVIDER_ENUM).join(', ')}`
+    );
+    return value;
   }
 };
 
@@ -1070,7 +1113,8 @@ export enum OCO_AI_PROVIDER_ENUM {
 
 export const PROVIDER_API_KEY_URLS: Record<string, string | null> = {
   [OCO_AI_PROVIDER_ENUM.OPENAI]: 'https://platform.openai.com/api-keys',
-  [OCO_AI_PROVIDER_ENUM.ANTHROPIC]: 'https://console.anthropic.com/settings/keys',
+  [OCO_AI_PROVIDER_ENUM.ANTHROPIC]:
+    'https://console.anthropic.com/settings/keys',
   [OCO_AI_PROVIDER_ENUM.GEMINI]: 'https://aistudio.google.com/app/apikey',
   [OCO_AI_PROVIDER_ENUM.GROQ]: 'https://console.groq.com/keys',
   [OCO_AI_PROVIDER_ENUM.MISTRAL]: 'https://console.mistral.ai/api-keys/',
@@ -1093,7 +1137,7 @@ export const RECOMMENDED_MODELS: Record<string, string> = {
   [OCO_AI_PROVIDER_ENUM.DEEPSEEK]: 'deepseek-chat',
   [OCO_AI_PROVIDER_ENUM.OPENROUTER]: 'openai/gpt-4o-mini',
   [OCO_AI_PROVIDER_ENUM.AIMLAPI]: 'gpt-4o-mini'
-}
+};
 
 export type ConfigType = {
   [CONFIG_KEYS.OCO_API_KEY]?: string;
@@ -1150,7 +1194,11 @@ export type ConfigType = {
 };
 
 /** Preferred config location inside the data directory. */
-export const defaultConfigPath = pathJoin(homedir(), '.opencommitx-data', 'config.ini');
+export const defaultConfigPath = pathJoin(
+  homedir(),
+  '.opencommitx-data',
+  'config.ini'
+);
 /** Legacy config location — kept for backward-compat read fallback. */
 export const legacyConfigPath = pathJoin(homedir(), '.opencommitx');
 export const defaultEnvPath = pathResolve(process.cwd(), '.env');
@@ -1268,11 +1316,17 @@ const getEnvConfig = (envPath: string) => {
     OCO_GITPUSH: parseConfigVarValue(process.env.OCO_GITPUSH), // todo: deprecate
     // Cache
     OCO_CACHE_ENABLED: parseConfigVarValue(process.env.OCO_CACHE_ENABLED),
-    OCO_CACHE_TTL_SECONDS: parseConfigVarValue(process.env.OCO_CACHE_TTL_SECONDS),
+    OCO_CACHE_TTL_SECONDS: parseConfigVarValue(
+      process.env.OCO_CACHE_TTL_SECONDS
+    ),
     // Diff routing
-    OCO_PER_FILE_THRESHOLD_LINES: parseConfigVarValue(process.env.OCO_PER_FILE_THRESHOLD_LINES),
+    OCO_PER_FILE_THRESHOLD_LINES: parseConfigVarValue(
+      process.env.OCO_PER_FILE_THRESHOLD_LINES
+    ),
     OCO_PER_FILE_COMMIT_MODE: process.env.OCO_PER_FILE_COMMIT_MODE,
-    OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(process.env.OCO_PYTHON_DOCSTRING_THRESHOLD),
+    OCO_PYTHON_DOCSTRING_THRESHOLD: parseConfigVarValue(
+      process.env.OCO_PYTHON_DOCSTRING_THRESHOLD
+    ),
     OCO_PYTHON_DOCSTRING_MODE: process.env.OCO_PYTHON_DOCSTRING_MODE,
     OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO: parseConfigVarValue(
       process.env.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO
@@ -1292,12 +1346,18 @@ const getEnvConfig = (envPath: string) => {
     OCO_AIMLAPI_KEY: process.env.OCO_AIMLAPI_KEY,
     OCO_AZURE_KEY: process.env.OCO_AZURE_KEY,
     // Diff routing extras
-    OCO_MAX_FILES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_FILES_PER_GROUP),
-    OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(process.env.OCO_MAX_LINES_PER_GROUP),
+    OCO_MAX_FILES_PER_GROUP: parseConfigVarValue(
+      process.env.OCO_MAX_FILES_PER_GROUP
+    ),
+    OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(
+      process.env.OCO_MAX_LINES_PER_GROUP
+    ),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
     OCO_COMMIT_DETAIL: process.env.OCO_COMMIT_DETAIL,
-    OCO_GENERATION_TIMEOUT_SECONDS: parseConfigVarValue(process.env.OCO_GENERATION_TIMEOUT_SECONDS),
+    OCO_GENERATION_TIMEOUT_SECONDS: parseConfigVarValue(
+      process.env.OCO_GENERATION_TIMEOUT_SECONDS
+    ),
     // Fallback model
     OCO_FALLBACK_MODEL: process.env.OCO_FALLBACK_MODEL,
     OCO_FALLBACK_PROVIDER: process.env.OCO_FALLBACK_PROVIDER
@@ -1309,7 +1369,11 @@ export const setGlobalConfig = (
   configPath: string = defaultConfigPath
 ) => {
   // Ensure the parent directory exists (e.g. ~/.opencommitx-data/).
-  try { mkdirSync(dirname(configPath), { recursive: true }); } catch { /* ignore */ }
+  try {
+    mkdirSync(dirname(configPath), { recursive: true });
+  } catch {
+    /* ignore */
+  }
   writeFileSync(configPath, iniStringify(config), 'utf8');
 };
 
@@ -1329,6 +1393,22 @@ export const getIsGlobalConfigFileExist = (
   return false;
 };
 
+export const getGlobalConfigPath = (
+  configPath: string = defaultConfigPath
+): string | null => {
+  if (existsSync(configPath)) return configPath;
+  if (configPath === defaultConfigPath && existsSync(legacyConfigPath)) {
+    return legacyConfigPath;
+  }
+  return null;
+};
+
+const formatConfigSource = (configPath: string | null): string => {
+  if (configPath === defaultConfigPath) return '~/.opencommitx-data/config.ini';
+  if (configPath === legacyConfigPath) return '~/.opencommitx';
+  return '.env';
+};
+
 /**
  * Read the global config. When called with the default path, falls back to the
  * legacy path (~/.opencommitx) so existing installs work before migration.
@@ -1339,7 +1419,7 @@ export const getGlobalConfig = (configPath: string = defaultConfigPath) => {
   // Only check the legacy path when using the default production location.
   const resolvedPath = existsSync(configPath)
     ? configPath
-    : (configPath === defaultConfigPath && existsSync(legacyConfigPath))
+    : configPath === defaultConfigPath && existsSync(legacyConfigPath)
       ? legacyConfigPath
       : configPath;
 
@@ -1543,32 +1623,42 @@ function getConfigKeyDetails(key) {
       };
     case CONFIG_KEYS.OCO_CACHE_ENABLED:
       return {
-        description: 'Cache LLM commit message results to avoid re-generating on pre-commit hook failures',
+        description:
+          'Cache LLM commit message results to avoid re-generating on pre-commit hook failures',
         values: ['true', 'false']
       };
     case CONFIG_KEYS.OCO_CACHE_TTL_SECONDS:
       return {
-        description: 'How long (in seconds) to keep cached commit messages before expiring',
+        description:
+          'How long (in seconds) to keep cached commit messages before expiring',
         values: ['Any positive integer (default: 3600)']
       };
     case CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES:
       return {
-        description: 'Line change threshold above which a file gets its own separate commit message',
+        description:
+          'Line change threshold above which a file gets its own separate commit message',
         values: ['Any positive integer (default: 300)']
       };
     case CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE:
       return {
-        description: 'Controls whether files are committed individually or aggregated',
-        values: ['auto (smart routing)', 'always (always per-file)', 'never (always aggregate)']
+        description:
+          'Controls whether files are committed individually or aggregated',
+        values: [
+          'auto (smart routing)',
+          'always (always per-file)',
+          'never (always aggregate)'
+        ]
       };
     case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_THRESHOLD:
       return {
-        description: 'For Python files: line change count above which only docstrings are extracted instead of full diff',
+        description:
+          'For Python files: line change count above which only docstrings are extracted instead of full diff',
         values: ['Any positive integer (default: 500)']
       };
     case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_MODE:
       return {
-        description: 'Controls docstring-only extraction for large Python files',
+        description:
+          'Controls docstring-only extraction for large Python files',
         values: ['auto', 'always', 'never']
       };
     case CONFIG_KEYS.OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO:
@@ -1579,65 +1669,115 @@ function getConfigKeyDetails(key) {
       };
     case CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY:
       return {
-        description: 'When multiple commit messages are generated, controls how they are committed',
-        values: ['single (join all into one commit)', 'sequential (one commit per message)']
+        description:
+          'When multiple commit messages are generated, controls how they are committed',
+        values: [
+          'single (join all into one commit)',
+          'sequential (one commit per message)'
+        ]
       };
     case CONFIG_KEYS.OCO_DEBUG:
       return {
-        description: 'Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting',
+        description:
+          'Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting',
         values: ['true', 'false (default)']
       };
     case CONFIG_KEYS.OCO_OPENAI_KEY:
-      return { description: 'API key for OpenAI (overrides OCO_API_KEY when provider is openai)', values: ['sk-...'] };
+      return {
+        description:
+          'API key for OpenAI (overrides OCO_API_KEY when provider is openai)',
+        values: ['sk-...']
+      };
     case CONFIG_KEYS.OCO_ANTHROPIC_KEY:
-      return { description: 'API key for Anthropic (overrides OCO_API_KEY when provider is anthropic)', values: ['sk-ant-...'] };
+      return {
+        description:
+          'API key for Anthropic (overrides OCO_API_KEY when provider is anthropic)',
+        values: ['sk-ant-...']
+      };
     case CONFIG_KEYS.OCO_OPENROUTER_KEY:
-      return { description: 'API key for OpenRouter (overrides OCO_API_KEY when provider is openrouter)', values: ['sk-or-...'] };
+      return {
+        description:
+          'API key for OpenRouter (overrides OCO_API_KEY when provider is openrouter)',
+        values: ['sk-or-...']
+      };
     case CONFIG_KEYS.OCO_GEMINI_KEY:
-      return { description: 'API key for Google Gemini (overrides OCO_API_KEY when provider is gemini)', values: ['String'] };
+      return {
+        description:
+          'API key for Google Gemini (overrides OCO_API_KEY when provider is gemini)',
+        values: ['String']
+      };
     case CONFIG_KEYS.OCO_GROQ_KEY:
-      return { description: 'API key for Groq (overrides OCO_API_KEY when provider is groq)', values: ['gsk_...'] };
+      return {
+        description:
+          'API key for Groq (overrides OCO_API_KEY when provider is groq)',
+        values: ['gsk_...']
+      };
     case CONFIG_KEYS.OCO_MISTRAL_KEY:
-      return { description: 'API key for Mistral AI (overrides OCO_API_KEY when provider is mistral)', values: ['String'] };
+      return {
+        description:
+          'API key for Mistral AI (overrides OCO_API_KEY when provider is mistral)',
+        values: ['String']
+      };
     case CONFIG_KEYS.OCO_DEEPSEEK_KEY:
-      return { description: 'API key for DeepSeek (overrides OCO_API_KEY when provider is deepseek)', values: ['String'] };
+      return {
+        description:
+          'API key for DeepSeek (overrides OCO_API_KEY when provider is deepseek)',
+        values: ['String']
+      };
     case CONFIG_KEYS.OCO_AIMLAPI_KEY:
-      return { description: 'API key for AI/ML API (overrides OCO_API_KEY when provider is aimlapi)', values: ['String'] };
+      return {
+        description:
+          'API key for AI/ML API (overrides OCO_API_KEY when provider is aimlapi)',
+        values: ['String']
+      };
     case CONFIG_KEYS.OCO_AZURE_KEY:
-      return { description: 'API key for Azure OpenAI (overrides OCO_API_KEY when provider is azure)', values: ['String'] };
+      return {
+        description:
+          'API key for Azure OpenAI (overrides OCO_API_KEY when provider is azure)',
+        values: ['String']
+      };
     case CONFIG_KEYS.OCO_TEMPERATURE:
       return {
-        description: 'LLM sampling temperature. 0 = deterministic; higher = more creative (0–2)',
+        description:
+          'LLM sampling temperature. 0 = deterministic; higher = more creative (0–2)',
         values: ['Number 0.0–2.0 (default: 0)']
       };
     case CONFIG_KEYS.OCO_COMMIT_DETAIL:
       return {
-        description: 'Controls prompt verbosity: concise forces a one-liner, detailed asks for description + reasoning',
+        description:
+          'Controls prompt verbosity: concise forces a one-liner, detailed asks for description + reasoning',
         values: ['concise', 'normal (default)', 'detailed']
       };
     case CONFIG_KEYS.OCO_GENERATION_TIMEOUT_SECONDS:
       return {
-        description: 'Per-group LLM generation timeout. Increase for slow models or networks',
+        description:
+          'Per-group LLM generation timeout. Increase for slow models or networks',
         values: ['Positive integer ≥ 10 (default: 90)']
       };
     case CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP:
       return {
-        description: 'Maximum number of files in a single commit group (auto mode)',
+        description:
+          'Maximum number of files in a single commit group (auto mode)',
         values: ['Positive integer (default: 10)']
       };
     case CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP:
       return {
-        description: 'Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.',
+        description:
+          'Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.',
         values: ['Positive integer (default: 1500)']
       };
     case CONFIG_KEYS.OCO_FALLBACK_MODEL:
       return {
-        description: 'Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.',
-        values: ['Model ID string (e.g. anthropic/claude-3-5-haiku or claude-3-5-haiku-20241022)']
+        description:
+          'Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.',
+        values: [
+          'Model ID string (e.g. anthropic/claude-3-5-haiku or claude-3-5-haiku-20241022)'
+        ]
       };
     case CONFIG_KEYS.OCO_FALLBACK_PROVIDER:
       return {
-        description: 'Provider for OCO_FALLBACK_MODEL. Needed when the fallback model naming convention differs from the primary provider (e.g. OpenRouter uses "provider/model").',
+        description:
+          'Provider for OCO_FALLBACK_MODEL. Needed when the fallback model naming convention differs from the primary provider (e.g. OpenRouter uses "provider/model").',
         values: Object.values(OCO_AI_PROVIDER_ENUM)
       };
     default:
@@ -1672,8 +1812,10 @@ function printConfigKeyHelp(param) {
   }
 
   if (currentValue !== undefined && currentValue !== null) {
-    const source = getIsGlobalConfigFileExist() ? '~/.opencommitx-data/config.ini' : '.env';
-    console.log(chalk.cyan(`  Current: ${currentValue}`) + chalk.dim(` (from ${source})`));
+    const source = formatConfigSource(getGlobalConfigPath());
+    console.log(
+      chalk.cyan(`  Current: ${currentValue}`) + chalk.dim(` (from ${source})`)
+    );
   } else {
     console.log(chalk.dim('  Current: (not set)'));
   }
@@ -1748,12 +1890,15 @@ const THEMATIC_KEY_ORDER: CONFIG_KEYS[] = [
   CONFIG_KEYS.OCO_DEBUG,
   CONFIG_KEYS.OCO_HOOK_AUTO_UNCOMMENT,
   CONFIG_KEYS.OCO_GITPUSH,
-  CONFIG_KEYS.OCO_TEST_MOCK_TYPE,
+  CONFIG_KEYS.OCO_TEST_MOCK_TYPE
 ];
 
 function printAllConfigHelp() {
-  const currentConfig = getIsGlobalConfigFileExist() ? getGlobalConfig() : {} as any;
-  const configFileSource = getIsGlobalConfigFileExist() ? '~/.opencommitx-data/config.ini' : '(no config file)';
+  const resolvedConfigPath = getGlobalConfigPath();
+  const currentConfig = resolvedConfigPath ? getGlobalConfig() : ({} as any);
+  const configFileSource = resolvedConfigPath
+    ? formatConfigSource(resolvedConfigPath)
+    : '(no config file)';
 
   console.log(chalk.bold('Available config parameters:'));
   console.log(chalk.dim(`  Current values loaded from: ${configFileSource}\n`));
@@ -1762,7 +1907,9 @@ function printAllConfigHelp() {
   const allKeys = new Set(Object.values(CONFIG_KEYS));
   const orderedKeys = [
     ...THEMATIC_KEY_ORDER.filter((k) => allKeys.has(k)),
-    ...Object.values(CONFIG_KEYS).filter((k) => !THEMATIC_KEY_ORDER.includes(k)).sort()
+    ...Object.values(CONFIG_KEYS)
+      .filter((k) => !THEMATIC_KEY_ORDER.includes(k))
+      .sort()
   ];
 
   for (const key of orderedKeys) {
