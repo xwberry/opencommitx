@@ -53,7 +53,7 @@
     "deploy": "bun publish --tag latest",
     "deploy:npm": "bun run local:build-push && git push --tags && bun run deploy",
     "deploy:patch": "bun run version:patch && bun run deploy:npm",
-    "version:patch": "npm version patch",
+    "version:patch": "bun pm version patch",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint src --ext ts && tsc --noEmit",
     "format": "prettier --write src",
     "format:check": "prettier --check src",
