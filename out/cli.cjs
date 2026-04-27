@@ -12458,7 +12458,7 @@ var require_form_data = __commonJS({
     var path6 = require("path");
     var http4 = require("http");
     var https3 = require("https");
-    var parseUrl = require("url").parse;
+    var parseUrl2 = require("url").parse;
     var fs7 = require("fs");
     var Stream3 = require("stream").Stream;
     var crypto4 = require("crypto");
@@ -12711,7 +12711,7 @@ var require_form_data = __commonJS({
       var options;
       var defaults3 = { method: "post" };
       if (typeof params === "string") {
-        params = parseUrl(params);
+        params = parseUrl2(params);
         options = populate({
           port: params.port,
           path: params.pathname,
@@ -12765,76 +12765,6 @@ var require_form_data = __commonJS({
     };
     setToStringTag(FormData5.prototype, "FormData");
     module2.exports = FormData5;
-  }
-});
-
-// node_modules/proxy-from-env/index.js
-var require_proxy_from_env = __commonJS({
-  "node_modules/proxy-from-env/index.js"(exports2) {
-    "use strict";
-    var parseUrl = require("url").parse;
-    var DEFAULT_PORTS = {
-      ftp: 21,
-      gopher: 70,
-      http: 80,
-      https: 443,
-      ws: 80,
-      wss: 443
-    };
-    var stringEndsWith = String.prototype.endsWith || function(s2) {
-      return s2.length <= this.length && this.indexOf(s2, this.length - s2.length) !== -1;
-    };
-    function getProxyForUrl(url2) {
-      var parsedUrl = typeof url2 === "string" ? parseUrl(url2) : url2 || {};
-      var proto2 = parsedUrl.protocol;
-      var hostname = parsedUrl.host;
-      var port = parsedUrl.port;
-      if (typeof hostname !== "string" || !hostname || typeof proto2 !== "string") {
-        return "";
-      }
-      proto2 = proto2.split(":", 1)[0];
-      hostname = hostname.replace(/:\d*$/, "");
-      port = parseInt(port) || DEFAULT_PORTS[proto2] || 0;
-      if (!shouldProxy(hostname, port)) {
-        return "";
-      }
-      var proxy = getEnv2("npm_config_" + proto2 + "_proxy") || getEnv2(proto2 + "_proxy") || getEnv2("npm_config_proxy") || getEnv2("all_proxy");
-      if (proxy && proxy.indexOf("://") === -1) {
-        proxy = proto2 + "://" + proxy;
-      }
-      return proxy;
-    }
-    function shouldProxy(hostname, port) {
-      var NO_PROXY2 = (getEnv2("npm_config_no_proxy") || getEnv2("no_proxy")).toLowerCase();
-      if (!NO_PROXY2) {
-        return true;
-      }
-      if (NO_PROXY2 === "*") {
-        return false;
-      }
-      return NO_PROXY2.split(/[,\s]/).every(function(proxy) {
-        if (!proxy) {
-          return true;
-        }
-        var parsedProxy = proxy.match(/^(.+):(\d+)$/);
-        var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
-        var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
-        if (parsedProxyPort && parsedProxyPort !== port) {
-          return true;
-        }
-        if (!/^[.*]/.test(parsedProxyHostname)) {
-          return hostname !== parsedProxyHostname;
-        }
-        if (parsedProxyHostname.charAt(0) === "*") {
-          parsedProxyHostname = parsedProxyHostname.slice(1);
-        }
-        return !stringEndsWith.call(hostname, parsedProxyHostname);
-      });
-    }
-    function getEnv2(key) {
-      return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
-    }
-    exports2.getProxyForUrl = getProxyForUrl;
   }
 });
 
@@ -13943,7 +13873,7 @@ var require_follow_redirects = __commonJS({
         removeMatchingHeaders(/^content-/i, this._options.headers);
       }
       var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
-      var currentUrlParts = parseUrl(this._currentUrl);
+      var currentUrlParts = parseUrl2(this._currentUrl);
       var currentHost = currentHostHeader || currentUrlParts.host;
       var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url2.format(Object.assign(currentUrlParts, { host: currentHost }));
       var redirectUrl = resolveUrl(location, currentUrl);
@@ -13982,7 +13912,7 @@ var require_follow_redirects = __commonJS({
           if (isURL(input)) {
             input = spreadUrlObject(input);
           } else if (isString2(input)) {
-            input = spreadUrlObject(parseUrl(input));
+            input = spreadUrlObject(parseUrl2(input));
           } else {
             callback = options;
             options = validateUrl(input);
@@ -14018,7 +13948,7 @@ var require_follow_redirects = __commonJS({
     }
     function noop3() {
     }
-    function parseUrl(input) {
+    function parseUrl2(input) {
       var parsed;
       if (useNativeURL) {
         parsed = new URL2(input);
@@ -14031,7 +13961,7 @@ var require_follow_redirects = __commonJS({
       return parsed;
     }
     function resolveUrl(relative, base) {
-      return useNativeURL ? new URL2(relative, base) : parseUrl(url2.resolve(base, relative));
+      return useNativeURL ? new URL2(relative, base) : parseUrl2(url2.resolve(base, relative));
     }
     function validateUrl(input) {
       if (/^\[/.test(input.hostname) && !/^\[[:0-9a-f]+\]$/i.test(input.hostname)) {
@@ -19956,7 +19886,7 @@ var require_lib2 = __commonJS({
   }
 });
 
-// node_modules/formdata-node/node_modules/web-streams-polyfill/dist/ponyfill.mjs
+// node_modules/web-streams-polyfill/dist/ponyfill.mjs
 function t() {
 }
 function r2(e3) {
@@ -20940,7 +20870,7 @@ function Cr(e3) {
 }
 var e2, o2, a, i2, l2, s, y5, S4, v4, R5, T6, q5, C4, z4, L6, ReadableStreamDefaultReader, te, re, ae2, ReadableStreamBYOBRequest, ReadableByteStreamController, ReadableStreamBYOBReader, Ue, WritableStream, WritableStreamDefaultWriter, lt, WritableStreamDefaultController, Pt, Wt, ReadableStreamDefaultController, ReadableStream4, er, ByteLengthQueuingStrategy, or, CountQueuingStrategy, TransformStream2, TransformStreamDefaultController;
 var init_ponyfill = __esm({
-  "node_modules/formdata-node/node_modules/web-streams-polyfill/dist/ponyfill.mjs"() {
+  "node_modules/web-streams-polyfill/dist/ponyfill.mjs"() {
     e2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? Symbol : (e3) => `Symbol(${e3})`;
     o2 = t;
     a = Promise;
@@ -23174,11 +23104,11 @@ async function fileFromPath2(path6, filenameOrOptions, options) {
   const stats = await import_fs2.promises.stat(path6);
   return createFileFromPath(path6, stats, filenameOrOptions, options);
 }
-var import_fs2, import_path9, import_node_domexception, __classPrivateFieldSet5, __classPrivateFieldGet6, _FileFromPath_path, _FileFromPath_start, MESSAGE, FileFromPath;
+var import_fs2, import_path10, import_node_domexception, __classPrivateFieldSet5, __classPrivateFieldGet6, _FileFromPath_path, _FileFromPath_start, MESSAGE, FileFromPath;
 var init_fileFromPath = __esm({
   "node_modules/formdata-node/lib/esm/fileFromPath.js"() {
     import_fs2 = require("fs");
-    import_path9 = require("path");
+    import_path10 = require("path");
     import_node_domexception = __toESM(require_node_domexception(), 1);
     init_File();
     init_isPlainObject();
@@ -23201,7 +23131,7 @@ var init_fileFromPath = __esm({
         _FileFromPath_start.set(this, void 0);
         __classPrivateFieldSet5(this, _FileFromPath_path, input.path, "f");
         __classPrivateFieldSet5(this, _FileFromPath_start, input.start || 0, "f");
-        this.name = (0, import_path9.basename)(__classPrivateFieldGet6(this, _FileFromPath_path, "f"));
+        this.name = (0, import_path10.basename)(__classPrivateFieldGet6(this, _FileFromPath_path, "f"));
         this.size = input.size;
         this.lastModified = input.lastModified;
       }
@@ -23282,9 +23212,9 @@ var require_config = __commonJS({
     exports2.SDK_METADATA = {
       language: "typescript",
       openapiDocVersion: "1.0.0",
-      sdkVersion: "1.14.1",
+      sdkVersion: "1.15.1",
       genVersion: "2.797.1",
-      userAgent: "speakeasy-sdk/typescript 1.14.1 2.797.1 1.0.0 @mistralai/mistralai"
+      userAgent: "speakeasy-sdk/typescript 1.15.1 2.797.1 1.0.0 @mistralai/mistralai"
     };
   }
 });
@@ -30499,6 +30429,309 @@ var require_functiontool = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/moderationllmv1action.js
+var require_moderationllmv1action = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/moderationllmv1action.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ModerationLlmv1Action$outboundSchema = exports2.ModerationLlmv1Action$inboundSchema = exports2.ModerationLlmv1Action = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.ModerationLlmv1Action = {
+      None: "none",
+      Block: "block"
+    };
+    exports2.ModerationLlmv1Action$inboundSchema = z5.nativeEnum(exports2.ModerationLlmv1Action);
+    exports2.ModerationLlmv1Action$outboundSchema = exports2.ModerationLlmv1Action$inboundSchema;
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/moderationllmv1categorythresholds.js
+var require_moderationllmv1categorythresholds = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/moderationllmv1categorythresholds.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ModerationLlmv1CategoryThresholds$outboundSchema = exports2.ModerationLlmv1CategoryThresholds$inboundSchema = void 0;
+    exports2.moderationLlmv1CategoryThresholdsToJSON = moderationLlmv1CategoryThresholdsToJSON;
+    exports2.moderationLlmv1CategoryThresholdsFromJSON = moderationLlmv1CategoryThresholdsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.ModerationLlmv1CategoryThresholds$inboundSchema = z5.object({
+      sexual: z5.nullable(z5.number()).optional(),
+      hate_and_discrimination: z5.nullable(z5.number()).optional(),
+      violence_and_threats: z5.nullable(z5.number()).optional(),
+      dangerous_and_criminal_content: z5.nullable(z5.number()).optional(),
+      selfharm: z5.nullable(z5.number()).optional(),
+      health: z5.nullable(z5.number()).optional(),
+      financial: z5.nullable(z5.number()).optional(),
+      law: z5.nullable(z5.number()).optional(),
+      pii: z5.nullable(z5.number()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "hate_and_discrimination": "hateAndDiscrimination",
+        "violence_and_threats": "violenceAndThreats",
+        "dangerous_and_criminal_content": "dangerousAndCriminalContent"
+      });
+    });
+    exports2.ModerationLlmv1CategoryThresholds$outboundSchema = z5.object({
+      sexual: z5.nullable(z5.number()).optional(),
+      hateAndDiscrimination: z5.nullable(z5.number()).optional(),
+      violenceAndThreats: z5.nullable(z5.number()).optional(),
+      dangerousAndCriminalContent: z5.nullable(z5.number()).optional(),
+      selfharm: z5.nullable(z5.number()).optional(),
+      health: z5.nullable(z5.number()).optional(),
+      financial: z5.nullable(z5.number()).optional(),
+      law: z5.nullable(z5.number()).optional(),
+      pii: z5.nullable(z5.number()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        hateAndDiscrimination: "hate_and_discrimination",
+        violenceAndThreats: "violence_and_threats",
+        dangerousAndCriminalContent: "dangerous_and_criminal_content"
+      });
+    });
+    function moderationLlmv1CategoryThresholdsToJSON(moderationLlmv1CategoryThresholds) {
+      return JSON.stringify(exports2.ModerationLlmv1CategoryThresholds$outboundSchema.parse(moderationLlmv1CategoryThresholds));
+    }
+    function moderationLlmv1CategoryThresholdsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ModerationLlmv1CategoryThresholds$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ModerationLlmv1CategoryThresholds' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/moderationllmv1config.js
+var require_moderationllmv1config = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/moderationllmv1config.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ModerationLlmv1Config$outboundSchema = exports2.ModerationLlmv1Config$inboundSchema = void 0;
+    exports2.moderationLlmv1ConfigToJSON = moderationLlmv1ConfigToJSON;
+    exports2.moderationLlmv1ConfigFromJSON = moderationLlmv1ConfigFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var moderationllmv1action_js_1 = require_moderationllmv1action();
+    var moderationllmv1categorythresholds_js_1 = require_moderationllmv1categorythresholds();
+    exports2.ModerationLlmv1Config$inboundSchema = z5.object({
+      model_name: z5.string().default("mistral-moderation-2411"),
+      custom_category_thresholds: z5.nullable(moderationllmv1categorythresholds_js_1.ModerationLlmv1CategoryThresholds$inboundSchema).optional(),
+      ignore_other_categories: z5.boolean().default(false),
+      action: moderationllmv1action_js_1.ModerationLlmv1Action$inboundSchema.optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "model_name": "modelName",
+        "custom_category_thresholds": "customCategoryThresholds",
+        "ignore_other_categories": "ignoreOtherCategories"
+      });
+    });
+    exports2.ModerationLlmv1Config$outboundSchema = z5.object({
+      modelName: z5.string().default("mistral-moderation-2411"),
+      customCategoryThresholds: z5.nullable(moderationllmv1categorythresholds_js_1.ModerationLlmv1CategoryThresholds$outboundSchema).optional(),
+      ignoreOtherCategories: z5.boolean().default(false),
+      action: moderationllmv1action_js_1.ModerationLlmv1Action$outboundSchema.optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        modelName: "model_name",
+        customCategoryThresholds: "custom_category_thresholds",
+        ignoreOtherCategories: "ignore_other_categories"
+      });
+    });
+    function moderationLlmv1ConfigToJSON(moderationLlmv1Config) {
+      return JSON.stringify(exports2.ModerationLlmv1Config$outboundSchema.parse(moderationLlmv1Config));
+    }
+    function moderationLlmv1ConfigFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ModerationLlmv1Config$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ModerationLlmv1Config' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/guardrailconfig.js
+var require_guardrailconfig = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/guardrailconfig.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GuardrailConfig$outboundSchema = exports2.GuardrailConfig$inboundSchema = void 0;
+    exports2.guardrailConfigToJSON = guardrailConfigToJSON;
+    exports2.guardrailConfigFromJSON = guardrailConfigFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var moderationllmv1config_js_1 = require_moderationllmv1config();
+    exports2.GuardrailConfig$inboundSchema = z5.object({
+      block_on_error: z5.boolean().default(false),
+      moderation_llm_v1: z5.nullable(moderationllmv1config_js_1.ModerationLlmv1Config$inboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "block_on_error": "blockOnError",
+        "moderation_llm_v1": "moderationLlmV1"
+      });
+    });
+    exports2.GuardrailConfig$outboundSchema = z5.object({
+      blockOnError: z5.boolean().default(false),
+      moderationLlmV1: z5.nullable(moderationllmv1config_js_1.ModerationLlmv1Config$outboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        blockOnError: "block_on_error",
+        moderationLlmV1: "moderation_llm_v1"
+      });
+    });
+    function guardrailConfigToJSON(guardrailConfig) {
+      return JSON.stringify(exports2.GuardrailConfig$outboundSchema.parse(guardrailConfig));
+    }
+    function guardrailConfigFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.GuardrailConfig$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'GuardrailConfig' from JSON`);
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/imagegenerationtool.js
 var require_imagegenerationtool = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/imagegenerationtool.js"(exports2) {
@@ -30788,6 +31021,7 @@ var require_agent2 = __commonJS({
     var completionargs_js_1 = require_completionargs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -30813,6 +31047,7 @@ var require_agent2 = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$inboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completion_args: completionargs_js_1.CompletionArgs$inboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$inboundSchema)).optional(),
       model: z5.string(),
       name: z5.string(),
       description: z5.nullable(z5.string()).optional(),
@@ -31033,6 +31268,7 @@ var require_agentcreationrequest = __commonJS({
     var completionargs_js_1 = require_completionargs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -31058,6 +31294,7 @@ var require_agentcreationrequest = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$outboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completionArgs: completionargs_js_1.CompletionArgs$outboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       model: z5.string(),
       name: z5.string(),
       description: z5.nullable(z5.string()).optional(),
@@ -31378,6 +31615,152 @@ var require_audiochunk = __commonJS({
     }
     function audioChunkFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.AudioChunk$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'AudioChunk' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/audiourl.js
+var require_audiourl = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/audiourl.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AudioURL$outboundSchema = exports2.AudioURL$inboundSchema = void 0;
+    exports2.audioURLToJSON = audioURLToJSON;
+    exports2.audioURLFromJSON = audioURLFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.AudioURL$inboundSchema = z5.object({
+      url: z5.string()
+    });
+    exports2.AudioURL$outboundSchema = z5.object({
+      url: z5.string()
+    });
+    function audioURLToJSON(audioURL) {
+      return JSON.stringify(exports2.AudioURL$outboundSchema.parse(audioURL));
+    }
+    function audioURLFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.AudioURL$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'AudioURL' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/audiourlchunk.js
+var require_audiourlchunk = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/audiourlchunk.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AudioURLChunk$outboundSchema = exports2.AudioURLChunk$inboundSchema = exports2.AudioURLChunkAudioURL$outboundSchema = exports2.AudioURLChunkAudioURL$inboundSchema = void 0;
+    exports2.audioURLChunkAudioURLToJSON = audioURLChunkAudioURLToJSON;
+    exports2.audioURLChunkAudioURLFromJSON = audioURLChunkAudioURLFromJSON;
+    exports2.audioURLChunkToJSON = audioURLChunkToJSON;
+    exports2.audioURLChunkFromJSON = audioURLChunkFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var audiourl_js_1 = require_audiourl();
+    exports2.AudioURLChunkAudioURL$inboundSchema = z5.union([audiourl_js_1.AudioURL$inboundSchema, z5.string()]);
+    exports2.AudioURLChunkAudioURL$outboundSchema = z5.union([audiourl_js_1.AudioURL$outboundSchema, z5.string()]);
+    function audioURLChunkAudioURLToJSON(audioURLChunkAudioURL) {
+      return JSON.stringify(exports2.AudioURLChunkAudioURL$outboundSchema.parse(audioURLChunkAudioURL));
+    }
+    function audioURLChunkAudioURLFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.AudioURLChunkAudioURL$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'AudioURLChunkAudioURL' from JSON`);
+    }
+    exports2.AudioURLChunk$inboundSchema = z5.object({
+      type: z5.literal("audio_url").default("audio_url"),
+      audio_url: z5.union([audiourl_js_1.AudioURL$inboundSchema, z5.string()])
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "audio_url": "audioUrl"
+      });
+    });
+    exports2.AudioURLChunk$outboundSchema = z5.object({
+      type: z5.literal("audio_url").default("audio_url"),
+      audioUrl: z5.union([audiourl_js_1.AudioURL$outboundSchema, z5.string()])
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        audioUrl: "audio_url"
+      });
+    });
+    function audioURLChunkToJSON(audioURLChunk) {
+      return JSON.stringify(exports2.AudioURLChunk$outboundSchema.parse(audioURLChunk));
+    }
+    function audioURLChunkFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.AudioURLChunk$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'AudioURLChunk' from JSON`);
     }
   }
 });
@@ -32060,10 +32443,19 @@ var require_thinkchunk = __commonJS({
     exports2.thinkChunkFromJSON = thinkChunkFromJSON;
     var z5 = __importStar(require_v3());
     var schemas_js_1 = require_schemas();
+    var referencechunk_js_1 = require_referencechunk();
     var textchunk_js_1 = require_textchunk();
     var toolreferencechunk_js_1 = require_toolreferencechunk();
-    exports2.Thinking$inboundSchema = z5.union([toolreferencechunk_js_1.ToolReferenceChunk$inboundSchema, textchunk_js_1.TextChunk$inboundSchema]);
-    exports2.Thinking$outboundSchema = z5.union([toolreferencechunk_js_1.ToolReferenceChunk$outboundSchema, textchunk_js_1.TextChunk$outboundSchema]);
+    exports2.Thinking$inboundSchema = z5.union([
+      toolreferencechunk_js_1.ToolReferenceChunk$inboundSchema,
+      textchunk_js_1.TextChunk$inboundSchema,
+      referencechunk_js_1.ReferenceChunk$inboundSchema
+    ]);
+    exports2.Thinking$outboundSchema = z5.union([
+      toolreferencechunk_js_1.ToolReferenceChunk$outboundSchema,
+      textchunk_js_1.TextChunk$outboundSchema,
+      referencechunk_js_1.ReferenceChunk$outboundSchema
+    ]);
     function thinkingToJSON(thinking) {
       return JSON.stringify(exports2.Thinking$outboundSchema.parse(thinking));
     }
@@ -32072,13 +32464,21 @@ var require_thinkchunk = __commonJS({
     }
     exports2.ThinkChunk$inboundSchema = z5.object({
       type: z5.literal("thinking").default("thinking"),
-      thinking: z5.array(z5.union([toolreferencechunk_js_1.ToolReferenceChunk$inboundSchema, textchunk_js_1.TextChunk$inboundSchema])),
-      closed: z5.boolean().default(true)
+      thinking: z5.array(z5.union([
+        toolreferencechunk_js_1.ToolReferenceChunk$inboundSchema,
+        textchunk_js_1.TextChunk$inboundSchema,
+        referencechunk_js_1.ReferenceChunk$inboundSchema
+      ])),
+      closed: z5.boolean().optional()
     });
     exports2.ThinkChunk$outboundSchema = z5.object({
       type: z5.literal("thinking").default("thinking"),
-      thinking: z5.array(z5.union([toolreferencechunk_js_1.ToolReferenceChunk$outboundSchema, textchunk_js_1.TextChunk$outboundSchema])),
-      closed: z5.boolean().default(true)
+      thinking: z5.array(z5.union([
+        toolreferencechunk_js_1.ToolReferenceChunk$outboundSchema,
+        textchunk_js_1.TextChunk$outboundSchema,
+        referencechunk_js_1.ReferenceChunk$outboundSchema
+      ])),
+      closed: z5.boolean().optional()
     });
     function thinkChunkToJSON(thinkChunk) {
       return JSON.stringify(exports2.ThinkChunk$outboundSchema.parse(thinkChunk));
@@ -32137,6 +32537,7 @@ var require_contentchunk = __commonJS({
     var z5 = __importStar(require_v3());
     var schemas_js_1 = require_schemas();
     var audiochunk_js_1 = require_audiochunk();
+    var audiourlchunk_js_1 = require_audiourlchunk();
     var documenturlchunk_js_1 = require_documenturlchunk();
     var filechunk_js_1 = require_filechunk();
     var imageurlchunk_js_1 = require_imageurlchunk();
@@ -32150,7 +32551,8 @@ var require_contentchunk = __commonJS({
       referencechunk_js_1.ReferenceChunk$inboundSchema.and(z5.object({ type: z5.literal("reference") })),
       filechunk_js_1.FileChunk$inboundSchema.and(z5.object({ type: z5.literal("file") })),
       thinkchunk_js_1.ThinkChunk$inboundSchema.and(z5.object({ type: z5.literal("thinking") })),
-      audiochunk_js_1.AudioChunk$inboundSchema.and(z5.object({ type: z5.literal("input_audio") }))
+      audiochunk_js_1.AudioChunk$inboundSchema.and(z5.object({ type: z5.literal("input_audio") })),
+      audiourlchunk_js_1.AudioURLChunk$inboundSchema.and(z5.object({ type: z5.literal("audio_url") }))
     ]);
     exports2.ContentChunk$outboundSchema = z5.union([
       imageurlchunk_js_1.ImageURLChunk$outboundSchema.and(z5.object({ type: z5.literal("image_url") })),
@@ -32159,7 +32561,8 @@ var require_contentchunk = __commonJS({
       referencechunk_js_1.ReferenceChunk$outboundSchema.and(z5.object({ type: z5.literal("reference") })),
       filechunk_js_1.FileChunk$outboundSchema.and(z5.object({ type: z5.literal("file") })),
       thinkchunk_js_1.ThinkChunk$outboundSchema.and(z5.object({ type: z5.literal("thinking") })),
-      audiochunk_js_1.AudioChunk$outboundSchema.and(z5.object({ type: z5.literal("input_audio") }))
+      audiochunk_js_1.AudioChunk$outboundSchema.and(z5.object({ type: z5.literal("input_audio") })),
+      audiourlchunk_js_1.AudioURLChunk$outboundSchema.and(z5.object({ type: z5.literal("audio_url") }))
     ]);
     function contentChunkToJSON(contentChunk) {
       return JSON.stringify(exports2.ContentChunk$outboundSchema.parse(contentChunk));
@@ -33321,6 +33724,7 @@ var require_agentupdaterequest = __commonJS({
     var completionargs_js_1 = require_completionargs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -33346,6 +33750,7 @@ var require_agentupdaterequest = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$outboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completionArgs: completionargs_js_1.CompletionArgs$outboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       model: z5.nullable(z5.string()).optional(),
       name: z5.nullable(z5.string()).optional(),
       description: z5.nullable(z5.string()).optional(),
@@ -33362,6 +33767,67 @@ var require_agentupdaterequest = __commonJS({
     });
     function agentUpdateRequestToJSON(agentUpdateRequest) {
       return JSON.stringify(exports2.AgentUpdateRequest$outboundSchema.parse(agentUpdateRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/annotations.js
+var require_annotations = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/annotations.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Annotations$inboundSchema = exports2.Audience$inboundSchema = exports2.Audience = void 0;
+    exports2.annotationsFromJSON = annotationsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.Audience = {
+      User: "user",
+      Assistant: "assistant"
+    };
+    exports2.Audience$inboundSchema = z5.nativeEnum(exports2.Audience);
+    exports2.Annotations$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      audience: z5.nullable(z5.array(exports2.Audience$inboundSchema)).optional(),
+      priority: z5.nullable(z5.number()).optional()
+    }).catchall(z5.any()), "additionalProperties", true);
+    function annotationsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Annotations$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Annotations' from JSON`);
     }
   }
 });
@@ -33479,6 +33945,71 @@ var require_archiveftmodelout = __commonJS({
     });
     function archiveFTModelOutFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ArchiveFTModelOut$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ArchiveFTModelOut' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/audiocontent.js
+var require_audiocontent = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/audiocontent.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AudioContent$inboundSchema = void 0;
+    exports2.audioContentFromJSON = audioContentFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var annotations_js_1 = require_annotations();
+    exports2.AudioContent$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      type: z5.literal("audio").default("audio").optional(),
+      data: z5.string(),
+      mimeType: z5.string(),
+      annotations: z5.nullable(annotations_js_1.Annotations$inboundSchema).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function audioContentFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.AudioContent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'AudioContent' from JSON`);
     }
   }
 });
@@ -33942,6 +34473,163 @@ var require_audiotranscriptionrequeststream = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/authdata.js
+var require_authdata = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/authdata.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AuthData$outboundSchema = void 0;
+    exports2.authDataToJSON = authDataToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.AuthData$outboundSchema = z5.object({
+      clientId: z5.string(),
+      clientSecret: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        clientId: "client_id",
+        clientSecret: "client_secret"
+      });
+    });
+    function authDataToJSON(authData) {
+      return JSON.stringify(exports2.AuthData$outboundSchema.parse(authData));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/basefielddefinition.js
+var require_basefielddefinition = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/basefielddefinition.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.BaseFieldDefinition$inboundSchema = exports2.SupportedOperators$inboundSchema = exports2.BaseFieldDefinitionType$inboundSchema = exports2.SupportedOperators = exports2.BaseFieldDefinitionType = void 0;
+    exports2.baseFieldDefinitionFromJSON = baseFieldDefinitionFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.BaseFieldDefinitionType = {
+      Enum: "ENUM",
+      Text: "TEXT",
+      Int: "INT",
+      Float: "FLOAT",
+      Bool: "BOOL",
+      Timestamp: "TIMESTAMP",
+      Array: "ARRAY"
+    };
+    exports2.SupportedOperators = {
+      Lt: "lt",
+      Lte: "lte",
+      Gt: "gt",
+      Gte: "gte",
+      Startswith: "startswith",
+      Istartswith: "istartswith",
+      Endswith: "endswith",
+      Iendswith: "iendswith",
+      Contains: "contains",
+      Icontains: "icontains",
+      Matches: "matches",
+      Notcontains: "notcontains",
+      Inotcontains: "inotcontains",
+      Eq: "eq",
+      Neq: "neq",
+      Isnull: "isnull",
+      Includes: "includes",
+      Excludes: "excludes",
+      LenEq: "len_eq"
+    };
+    exports2.BaseFieldDefinitionType$inboundSchema = z5.nativeEnum(exports2.BaseFieldDefinitionType);
+    exports2.SupportedOperators$inboundSchema = z5.nativeEnum(exports2.SupportedOperators);
+    exports2.BaseFieldDefinition$inboundSchema = z5.object({
+      name: z5.string(),
+      label: z5.string(),
+      type: exports2.BaseFieldDefinitionType$inboundSchema,
+      group: z5.nullable(z5.string()).optional(),
+      supported_operators: z5.array(exports2.SupportedOperators$inboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "supported_operators": "supportedOperators"
+      });
+    });
+    function baseFieldDefinitionFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.BaseFieldDefinition$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'BaseFieldDefinition' from JSON`);
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/modelcapabilities.js
 var require_modelcapabilities = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/modelcapabilities.js"(exports2) {
@@ -34088,6 +34776,64 @@ var require_basemodelcard = __commonJS({
     function baseModelCardFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.BaseModelCard$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'BaseModelCard' from JSON`);
     }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/basetaskstatus.js
+var require_basetaskstatus = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/basetaskstatus.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.BaseTaskStatus$inboundSchema = exports2.BaseTaskStatus = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.BaseTaskStatus = {
+      Running: "RUNNING",
+      Completed: "COMPLETED",
+      Failed: "FAILED",
+      Canceled: "CANCELED",
+      Terminated: "TERMINATED",
+      ContinuedAsNew: "CONTINUED_AS_NEW",
+      TimedOut: "TIMED_OUT",
+      Unknown: "UNKNOWN"
+    };
+    exports2.BaseTaskStatus$inboundSchema = z5.nativeEnum(exports2.BaseTaskStatus);
   }
 });
 
@@ -34482,6 +35228,1112 @@ var require_batchjobsout = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/blobresourcecontents.js
+var require_blobresourcecontents = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/blobresourcecontents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.BlobResourceContents$inboundSchema = void 0;
+    exports2.blobResourceContentsFromJSON = blobResourceContentsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.BlobResourceContents$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      uri: z5.string(),
+      mimeType: z5.nullable(z5.string()).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional(),
+      blob: z5.string()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function blobResourceContentsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.BlobResourceContents$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'BlobResourceContents' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/filtercondition.js
+var require_filtercondition = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/filtercondition.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FilterCondition$outboundSchema = exports2.FilterCondition$inboundSchema = exports2.Op$outboundSchema = exports2.Op$inboundSchema = exports2.Op = void 0;
+    exports2.filterConditionToJSON = filterConditionToJSON;
+    exports2.filterConditionFromJSON = filterConditionFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.Op = {
+      Lt: "lt",
+      Lte: "lte",
+      Gt: "gt",
+      Gte: "gte",
+      Startswith: "startswith",
+      Istartswith: "istartswith",
+      Endswith: "endswith",
+      Iendswith: "iendswith",
+      Contains: "contains",
+      Icontains: "icontains",
+      Matches: "matches",
+      Notcontains: "notcontains",
+      Inotcontains: "inotcontains",
+      Eq: "eq",
+      Neq: "neq",
+      Isnull: "isnull",
+      Includes: "includes",
+      Excludes: "excludes",
+      LenEq: "len_eq"
+    };
+    exports2.Op$inboundSchema = z5.nativeEnum(exports2.Op);
+    exports2.Op$outboundSchema = exports2.Op$inboundSchema;
+    exports2.FilterCondition$inboundSchema = z5.object({
+      field: z5.string(),
+      op: exports2.Op$inboundSchema,
+      value: z5.any().optional()
+    });
+    exports2.FilterCondition$outboundSchema = z5.object({
+      field: z5.string(),
+      op: exports2.Op$outboundSchema,
+      value: z5.any().optional()
+    });
+    function filterConditionToJSON(filterCondition) {
+      return JSON.stringify(exports2.FilterCondition$outboundSchema.parse(filterCondition));
+    }
+    function filterConditionFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FilterCondition$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FilterCondition' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/filtergroup.js
+var require_filtergroup = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/filtergroup.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.And$outboundSchema = exports2.And$inboundSchema = exports2.FilterGroup$outboundSchema = exports2.FilterGroup$inboundSchema = exports2.Or$outboundSchema = exports2.Or$inboundSchema = void 0;
+    exports2.orToJSON = orToJSON;
+    exports2.orFromJSON = orFromJSON;
+    exports2.filterGroupToJSON = filterGroupToJSON;
+    exports2.filterGroupFromJSON = filterGroupFromJSON;
+    exports2.andToJSON = andToJSON;
+    exports2.andFromJSON = andFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var filtercondition_js_1 = require_filtercondition();
+    exports2.Or$inboundSchema = z5.union([
+      filtercondition_js_1.FilterCondition$inboundSchema,
+      z5.lazy(() => exports2.FilterGroup$inboundSchema)
+    ]);
+    exports2.Or$outboundSchema = z5.union([
+      filtercondition_js_1.FilterCondition$outboundSchema,
+      z5.lazy(() => exports2.FilterGroup$outboundSchema)
+    ]);
+    function orToJSON(or2) {
+      return JSON.stringify(exports2.Or$outboundSchema.parse(or2));
+    }
+    function orFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Or$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Or' from JSON`);
+    }
+    exports2.FilterGroup$inboundSchema = z5.object({
+      AND: z5.nullable(z5.array(z5.union([
+        filtercondition_js_1.FilterCondition$inboundSchema,
+        z5.lazy(() => exports2.FilterGroup$inboundSchema)
+      ]))).optional(),
+      OR: z5.nullable(z5.array(z5.union([
+        filtercondition_js_1.FilterCondition$inboundSchema,
+        z5.lazy(() => exports2.FilterGroup$inboundSchema)
+      ]))).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "AND": "and",
+        "OR": "or"
+      });
+    });
+    exports2.FilterGroup$outboundSchema = z5.object({
+      and: z5.nullable(z5.array(z5.union([
+        filtercondition_js_1.FilterCondition$outboundSchema,
+        z5.lazy(() => exports2.FilterGroup$outboundSchema)
+      ]))).optional(),
+      or: z5.nullable(z5.array(z5.union([
+        filtercondition_js_1.FilterCondition$outboundSchema,
+        z5.lazy(() => exports2.FilterGroup$outboundSchema)
+      ]))).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        and: "AND",
+        or: "OR"
+      });
+    });
+    function filterGroupToJSON(filterGroup) {
+      return JSON.stringify(exports2.FilterGroup$outboundSchema.parse(filterGroup));
+    }
+    function filterGroupFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FilterGroup$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FilterGroup' from JSON`);
+    }
+    exports2.And$inboundSchema = z5.union([filtercondition_js_1.FilterCondition$inboundSchema, z5.lazy(() => exports2.FilterGroup$inboundSchema)]);
+    exports2.And$outboundSchema = z5.union([
+      filtercondition_js_1.FilterCondition$outboundSchema,
+      z5.lazy(() => exports2.FilterGroup$outboundSchema)
+    ]);
+    function andToJSON(and) {
+      return JSON.stringify(exports2.And$outboundSchema.parse(and));
+    }
+    function andFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.And$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'And' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/filterpayload.js
+var require_filterpayload = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/filterpayload.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FilterPayload$outboundSchema = exports2.FilterPayload$inboundSchema = exports2.Filters$outboundSchema = exports2.Filters$inboundSchema = void 0;
+    exports2.filtersToJSON = filtersToJSON;
+    exports2.filtersFromJSON = filtersFromJSON;
+    exports2.filterPayloadToJSON = filterPayloadToJSON;
+    exports2.filterPayloadFromJSON = filterPayloadFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var filtercondition_js_1 = require_filtercondition();
+    var filtergroup_js_1 = require_filtergroup();
+    exports2.Filters$inboundSchema = z5.union([filtercondition_js_1.FilterCondition$inboundSchema, filtergroup_js_1.FilterGroup$inboundSchema]);
+    exports2.Filters$outboundSchema = z5.union([filtercondition_js_1.FilterCondition$outboundSchema, filtergroup_js_1.FilterGroup$outboundSchema]);
+    function filtersToJSON(filters) {
+      return JSON.stringify(exports2.Filters$outboundSchema.parse(filters));
+    }
+    function filtersFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Filters$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Filters' from JSON`);
+    }
+    exports2.FilterPayload$inboundSchema = z5.object({
+      filters: z5.nullable(z5.union([filtercondition_js_1.FilterCondition$inboundSchema, filtergroup_js_1.FilterGroup$inboundSchema]))
+    });
+    exports2.FilterPayload$outboundSchema = z5.object({
+      filters: z5.nullable(z5.union([filtercondition_js_1.FilterCondition$outboundSchema, filtergroup_js_1.FilterGroup$outboundSchema]))
+    });
+    function filterPayloadToJSON(filterPayload) {
+      return JSON.stringify(exports2.FilterPayload$outboundSchema.parse(filterPayload));
+    }
+    function filterPayloadFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FilterPayload$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FilterPayload' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgeclassificationoutputoption.js
+var require_judgeclassificationoutputoption = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgeclassificationoutputoption.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeClassificationOutputOption$outboundSchema = exports2.JudgeClassificationOutputOption$inboundSchema = void 0;
+    exports2.judgeClassificationOutputOptionToJSON = judgeClassificationOutputOptionToJSON;
+    exports2.judgeClassificationOutputOptionFromJSON = judgeClassificationOutputOptionFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.JudgeClassificationOutputOption$inboundSchema = z5.object({
+      value: z5.string(),
+      description: z5.string()
+    });
+    exports2.JudgeClassificationOutputOption$outboundSchema = z5.object({
+      value: z5.string(),
+      description: z5.string()
+    });
+    function judgeClassificationOutputOptionToJSON(judgeClassificationOutputOption) {
+      return JSON.stringify(exports2.JudgeClassificationOutputOption$outboundSchema.parse(judgeClassificationOutputOption));
+    }
+    function judgeClassificationOutputOptionFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgeClassificationOutputOption$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgeClassificationOutputOption' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgeclassificationoutput.js
+var require_judgeclassificationoutput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgeclassificationoutput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeClassificationOutput$outboundSchema = exports2.JudgeClassificationOutput$inboundSchema = void 0;
+    exports2.judgeClassificationOutputToJSON = judgeClassificationOutputToJSON;
+    exports2.judgeClassificationOutputFromJSON = judgeClassificationOutputFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var judgeclassificationoutputoption_js_1 = require_judgeclassificationoutputoption();
+    exports2.JudgeClassificationOutput$inboundSchema = z5.object({
+      type: z5.literal("CLASSIFICATION").default("CLASSIFICATION"),
+      options: z5.array(judgeclassificationoutputoption_js_1.JudgeClassificationOutputOption$inboundSchema)
+    });
+    exports2.JudgeClassificationOutput$outboundSchema = z5.object({
+      type: z5.literal("CLASSIFICATION").default("CLASSIFICATION"),
+      options: z5.array(judgeclassificationoutputoption_js_1.JudgeClassificationOutputOption$outboundSchema)
+    });
+    function judgeClassificationOutputToJSON(judgeClassificationOutput) {
+      return JSON.stringify(exports2.JudgeClassificationOutput$outboundSchema.parse(judgeClassificationOutput));
+    }
+    function judgeClassificationOutputFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgeClassificationOutput$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgeClassificationOutput' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgeregressionoutput.js
+var require_judgeregressionoutput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgeregressionoutput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeRegressionOutput$outboundSchema = exports2.JudgeRegressionOutput$inboundSchema = void 0;
+    exports2.judgeRegressionOutputToJSON = judgeRegressionOutputToJSON;
+    exports2.judgeRegressionOutputFromJSON = judgeRegressionOutputFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.JudgeRegressionOutput$inboundSchema = z5.object({
+      type: z5.literal("REGRESSION").default("REGRESSION"),
+      min: z5.number().default(0),
+      min_description: z5.string(),
+      max: z5.number().default(1),
+      max_description: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "min_description": "minDescription",
+        "max_description": "maxDescription"
+      });
+    });
+    exports2.JudgeRegressionOutput$outboundSchema = z5.object({
+      type: z5.literal("REGRESSION").default("REGRESSION"),
+      min: z5.number().default(0),
+      minDescription: z5.string(),
+      max: z5.number().default(1),
+      maxDescription: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        minDescription: "min_description",
+        maxDescription: "max_description"
+      });
+    });
+    function judgeRegressionOutputToJSON(judgeRegressionOutput) {
+      return JSON.stringify(exports2.JudgeRegressionOutput$outboundSchema.parse(judgeRegressionOutput));
+    }
+    function judgeRegressionOutputFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgeRegressionOutput$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgeRegressionOutput' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgepreview.js
+var require_judgepreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgepreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgePreview$inboundSchema = exports2.JudgePreviewOutput$inboundSchema = void 0;
+    exports2.judgePreviewOutputFromJSON = judgePreviewOutputFromJSON;
+    exports2.judgePreviewFromJSON = judgePreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var judgeclassificationoutput_js_1 = require_judgeclassificationoutput();
+    var judgeregressionoutput_js_1 = require_judgeregressionoutput();
+    exports2.JudgePreviewOutput$inboundSchema = z5.union([
+      judgeclassificationoutput_js_1.JudgeClassificationOutput$inboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+      judgeregressionoutput_js_1.JudgeRegressionOutput$inboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+    ]);
+    function judgePreviewOutputFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgePreviewOutput$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgePreviewOutput' from JSON`);
+    }
+    exports2.JudgePreview$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      owner_id: z5.string(),
+      workspace_id: z5.string(),
+      name: z5.string(),
+      description: z5.string(),
+      model_name: z5.string(),
+      output: z5.union([
+        judgeclassificationoutput_js_1.JudgeClassificationOutput$inboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+        judgeregressionoutput_js_1.JudgeRegressionOutput$inboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+      ]),
+      instructions: z5.string(),
+      tools: z5.array(z5.string()),
+      up_revision: z5.nullable(z5.string()).optional(),
+      down_revision: z5.nullable(z5.string()).optional(),
+      base_revision: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "owner_id": "ownerId",
+        "workspace_id": "workspaceId",
+        "model_name": "modelName",
+        "up_revision": "upRevision",
+        "down_revision": "downRevision",
+        "base_revision": "baseRevision"
+      });
+    });
+    function judgePreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgePreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgePreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/campaignpreview.js
+var require_campaignpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/campaignpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CampaignPreview$inboundSchema = void 0;
+    exports2.campaignPreviewFromJSON = campaignPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var filterpayload_js_1 = require_filterpayload();
+    var judgepreview_js_1 = require_judgepreview();
+    exports2.CampaignPreview$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      name: z5.string(),
+      owner_id: z5.string(),
+      workspace_id: z5.string(),
+      description: z5.string(),
+      max_nb_events: z5.number().int(),
+      search_params: filterpayload_js_1.FilterPayload$inboundSchema,
+      judge: judgepreview_js_1.JudgePreview$inboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "owner_id": "ownerId",
+        "workspace_id": "workspaceId",
+        "max_nb_events": "maxNbEvents",
+        "search_params": "searchParams"
+      });
+    });
+    function campaignPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.CampaignPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'CampaignPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultcampaignpreview.js
+var require_paginatedresultcampaignpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultcampaignpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultCampaignPreview$inboundSchema = void 0;
+    exports2.paginatedResultCampaignPreviewFromJSON = paginatedResultCampaignPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var campaignpreview_js_1 = require_campaignpreview();
+    exports2.PaginatedResultCampaignPreview$inboundSchema = z5.object({
+      results: z5.array(campaignpreview_js_1.CampaignPreview$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultCampaignPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultCampaignPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultCampaignPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/campaignpreviews.js
+var require_campaignpreviews = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/campaignpreviews.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CampaignPreviews$inboundSchema = void 0;
+    exports2.campaignPreviewsFromJSON = campaignPreviewsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var paginatedresultcampaignpreview_js_1 = require_paginatedresultcampaignpreview();
+    exports2.CampaignPreviews$inboundSchema = z5.object({
+      campaigns: paginatedresultcampaignpreview_js_1.PaginatedResultCampaignPreview$inboundSchema
+    });
+    function campaignPreviewsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.CampaignPreviews$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'CampaignPreviews' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletioneventpreview.js
+var require_chatcompletioneventpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletioneventpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionEventPreview$inboundSchema = exports2.ExtraFields$inboundSchema = void 0;
+    exports2.extraFieldsFromJSON = extraFieldsFromJSON;
+    exports2.chatCompletionEventPreviewFromJSON = chatCompletionEventPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.ExtraFields$inboundSchema = z5.union([
+      z5.boolean(),
+      z5.number().int(),
+      z5.number(),
+      z5.string(),
+      z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      z5.array(z5.string())
+    ]);
+    function extraFieldsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ExtraFields$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ExtraFields' from JSON`);
+    }
+    exports2.ChatCompletionEventPreview$inboundSchema = z5.object({
+      event_id: z5.string(),
+      correlation_id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      extra_fields: z5.record(z5.nullable(z5.union([
+        z5.boolean(),
+        z5.number().int(),
+        z5.number(),
+        z5.string(),
+        z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+        z5.array(z5.string())
+      ]))),
+      nb_input_tokens: z5.number().int(),
+      nb_output_tokens: z5.number().int()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "event_id": "eventId",
+        "correlation_id": "correlationId",
+        "created_at": "createdAt",
+        "extra_fields": "extraFields",
+        "nb_input_tokens": "nbInputTokens",
+        "nb_output_tokens": "nbOutputTokens"
+      });
+    });
+    function chatCompletionEventPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionEventPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionEventPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultchatcompletioneventpreview.js
+var require_paginatedresultchatcompletioneventpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultchatcompletioneventpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultChatCompletionEventPreview$inboundSchema = void 0;
+    exports2.paginatedResultChatCompletionEventPreviewFromJSON = paginatedResultChatCompletionEventPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var chatcompletioneventpreview_js_1 = require_chatcompletioneventpreview();
+    exports2.PaginatedResultChatCompletionEventPreview$inboundSchema = z5.object({
+      results: z5.array(chatcompletioneventpreview_js_1.ChatCompletionEventPreview$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultChatCompletionEventPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultChatCompletionEventPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultChatCompletionEventPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/campaignselectedevents.js
+var require_campaignselectedevents = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/campaignselectedevents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CampaignSelectedEvents$inboundSchema = void 0;
+    exports2.campaignSelectedEventsFromJSON = campaignSelectedEventsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var paginatedresultchatcompletioneventpreview_js_1 = require_paginatedresultchatcompletioneventpreview();
+    exports2.CampaignSelectedEvents$inboundSchema = z5.object({
+      completion_events: paginatedresultchatcompletioneventpreview_js_1.PaginatedResultChatCompletionEventPreview$inboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "completion_events": "completionEvents"
+      });
+    });
+    function campaignSelectedEventsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.CampaignSelectedEvents$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'CampaignSelectedEvents' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/campaignstatus.js
+var require_campaignstatus = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/campaignstatus.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CampaignStatus$inboundSchema = void 0;
+    exports2.campaignStatusFromJSON = campaignStatusFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var basetaskstatus_js_1 = require_basetaskstatus();
+    exports2.CampaignStatus$inboundSchema = z5.object({
+      status: basetaskstatus_js_1.BaseTaskStatus$inboundSchema
+    });
+    function campaignStatusFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.CampaignStatus$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'CampaignStatus' from JSON`);
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/instructrequest.js
 var require_instructrequest = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/instructrequest.js"(exports2) {
@@ -34740,6 +36592,528 @@ var require_chatcompletionchoice = __commonJS({
     });
     function chatCompletionChoiceFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionChoice$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionChoice' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chattranscriptionevent.js
+var require_chattranscriptionevent = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chattranscriptionevent.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatTranscriptionEvent$inboundSchema = void 0;
+    exports2.chatTranscriptionEventFromJSON = chatTranscriptionEventFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.ChatTranscriptionEvent$inboundSchema = z5.object({
+      audio_url: z5.string(),
+      model: z5.string(),
+      response_message: z5.record(z5.any())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "audio_url": "audioUrl",
+        "response_message": "responseMessage"
+      });
+    });
+    function chatTranscriptionEventFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatTranscriptionEvent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatTranscriptionEvent' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletionevent.js
+var require_chatcompletionevent = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletionevent.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionEvent$inboundSchema = exports2.ChatCompletionEventExtraFields$inboundSchema = void 0;
+    exports2.chatCompletionEventExtraFieldsFromJSON = chatCompletionEventExtraFieldsFromJSON;
+    exports2.chatCompletionEventFromJSON = chatCompletionEventFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var chattranscriptionevent_js_1 = require_chattranscriptionevent();
+    exports2.ChatCompletionEventExtraFields$inboundSchema = z5.union([
+      z5.boolean(),
+      z5.number().int(),
+      z5.number(),
+      z5.string(),
+      z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      z5.array(z5.string())
+    ]);
+    function chatCompletionEventExtraFieldsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionEventExtraFields$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionEventExtraFields' from JSON`);
+    }
+    exports2.ChatCompletionEvent$inboundSchema = z5.object({
+      event_id: z5.string(),
+      correlation_id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      extra_fields: z5.record(z5.nullable(z5.union([
+        z5.boolean(),
+        z5.number().int(),
+        z5.number(),
+        z5.string(),
+        z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+        z5.array(z5.string())
+      ]))),
+      nb_input_tokens: z5.number().int(),
+      nb_output_tokens: z5.number().int(),
+      enabled_tools: z5.array(z5.record(z5.any())),
+      request_messages: z5.array(z5.record(z5.any())),
+      response_messages: z5.array(z5.record(z5.any())),
+      nb_messages: z5.number().int(),
+      chat_transcription_events: z5.array(chattranscriptionevent_js_1.ChatTranscriptionEvent$inboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "event_id": "eventId",
+        "correlation_id": "correlationId",
+        "created_at": "createdAt",
+        "extra_fields": "extraFields",
+        "nb_input_tokens": "nbInputTokens",
+        "nb_output_tokens": "nbOutputTokens",
+        "enabled_tools": "enabledTools",
+        "request_messages": "requestMessages",
+        "response_messages": "responseMessages",
+        "nb_messages": "nbMessages",
+        "chat_transcription_events": "chatTranscriptionEvents"
+      });
+    });
+    function chatCompletionEventFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionEvent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionEvent' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletioneventids.js
+var require_chatcompletioneventids = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletioneventids.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionEventIds$inboundSchema = void 0;
+    exports2.chatCompletionEventIdsFromJSON = chatCompletionEventIdsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.ChatCompletionEventIds$inboundSchema = z5.object({
+      completion_event_ids: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "completion_event_ids": "completionEventIds"
+      });
+    });
+    function chatCompletionEventIdsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionEventIds$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionEventIds' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/feedresultchatcompletioneventpreview.js
+var require_feedresultchatcompletioneventpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/feedresultchatcompletioneventpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FeedResultChatCompletionEventPreview$inboundSchema = void 0;
+    exports2.feedResultChatCompletionEventPreviewFromJSON = feedResultChatCompletionEventPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var chatcompletioneventpreview_js_1 = require_chatcompletioneventpreview();
+    exports2.FeedResultChatCompletionEventPreview$inboundSchema = z5.object({
+      results: z5.array(chatcompletioneventpreview_js_1.ChatCompletionEventPreview$inboundSchema).optional(),
+      next: z5.nullable(z5.string()).optional(),
+      cursor: z5.nullable(z5.string()).optional()
+    });
+    function feedResultChatCompletionEventPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FeedResultChatCompletionEventPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FeedResultChatCompletionEventPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletionevents.js
+var require_chatcompletionevents = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletionevents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionEvents$inboundSchema = void 0;
+    exports2.chatCompletionEventsFromJSON = chatCompletionEventsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var feedresultchatcompletioneventpreview_js_1 = require_feedresultchatcompletioneventpreview();
+    exports2.ChatCompletionEvents$inboundSchema = z5.object({
+      completion_events: feedresultchatcompletioneventpreview_js_1.FeedResultChatCompletionEventPreview$inboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "completion_events": "completionEvents"
+      });
+    });
+    function chatCompletionEventsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionEvents$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionEvents' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletionfieldoptions.js
+var require_chatcompletionfieldoptions = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletionfieldoptions.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionFieldOptions$inboundSchema = exports2.Options$inboundSchema = void 0;
+    exports2.optionsFromJSON = optionsFromJSON;
+    exports2.chatCompletionFieldOptionsFromJSON = chatCompletionFieldOptionsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.Options$inboundSchema = z5.union([z5.string(), z5.boolean()]);
+    function optionsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Options$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Options' from JSON`);
+    }
+    exports2.ChatCompletionFieldOptions$inboundSchema = z5.object({
+      options: z5.nullable(z5.array(z5.nullable(z5.union([z5.string(), z5.boolean()])))).optional()
+    });
+    function chatCompletionFieldOptionsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionFieldOptions$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionFieldOptions' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/fieldgroup.js
+var require_fieldgroup = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/fieldgroup.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FieldGroup$inboundSchema = void 0;
+    exports2.fieldGroupFromJSON = fieldGroupFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.FieldGroup$inboundSchema = z5.object({
+      name: z5.string(),
+      label: z5.string()
+    });
+    function fieldGroupFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FieldGroup$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FieldGroup' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/chatcompletionfields.js
+var require_chatcompletionfields = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/chatcompletionfields.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionFields$inboundSchema = void 0;
+    exports2.chatCompletionFieldsFromJSON = chatCompletionFieldsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var basefielddefinition_js_1 = require_basefielddefinition();
+    var fieldgroup_js_1 = require_fieldgroup();
+    exports2.ChatCompletionFields$inboundSchema = z5.object({
+      field_definitions: z5.array(basefielddefinition_js_1.BaseFieldDefinition$inboundSchema),
+      field_groups: z5.array(fieldgroup_js_1.FieldGroup$inboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "field_definitions": "fieldDefinitions",
+        "field_groups": "fieldGroups"
+      });
+    });
+    function chatCompletionFieldsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ChatCompletionFields$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ChatCompletionFields' from JSON`);
     }
   }
 });
@@ -36482,17 +38856,17 @@ var require_deltamessage = __commonJS({
       };
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.DeltaMessage$inboundSchema = exports2.Content$inboundSchema = void 0;
-    exports2.contentFromJSON = contentFromJSON;
+    exports2.DeltaMessage$inboundSchema = exports2.DeltaMessageContent$inboundSchema = void 0;
+    exports2.deltaMessageContentFromJSON = deltaMessageContentFromJSON;
     exports2.deltaMessageFromJSON = deltaMessageFromJSON;
     var z5 = __importStar(require_v3());
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
     var contentchunk_js_1 = require_contentchunk();
     var toolcall_js_1 = require_toolcall();
-    exports2.Content$inboundSchema = z5.union([z5.string(), z5.array(contentchunk_js_1.ContentChunk$inboundSchema)]);
-    function contentFromJSON(jsonString) {
-      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Content$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Content' from JSON`);
+    exports2.DeltaMessageContent$inboundSchema = z5.union([z5.string(), z5.array(contentchunk_js_1.ContentChunk$inboundSchema)]);
+    function deltaMessageContentFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DeltaMessageContent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DeltaMessageContent' from JSON`);
     }
     exports2.DeltaMessage$inboundSchema = z5.object({
       role: z5.nullable(z5.string()).optional(),
@@ -37214,6 +39588,526 @@ var require_completiontrainingparametersin = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/executionconfig.js
+var require_executionconfig = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/executionconfig.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ExecutionConfig$inboundSchema = void 0;
+    exports2.executionConfigFromJSON = executionConfigFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.ExecutionConfig$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      type: z5.string()
+    }).catchall(z5.any()), "additionalProperties", true);
+    function executionConfigFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ExecutionConfig$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ExecutionConfig' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/integrationsschemasturbinetoollocale.js
+var require_integrationsschemasturbinetoollocale = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/integrationsschemasturbinetoollocale.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.IntegrationsSchemasTurbineToolLocale$inboundSchema = void 0;
+    exports2.integrationsSchemasTurbineToolLocaleFromJSON = integrationsSchemasTurbineToolLocaleFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.IntegrationsSchemasTurbineToolLocale$inboundSchema = z5.object({
+      name: z5.record(z5.string()),
+      description: z5.record(z5.string()),
+      usage_sentence: z5.record(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "usage_sentence": "usageSentence"
+      });
+    });
+    function integrationsSchemasTurbineToolLocaleFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.IntegrationsSchemasTurbineToolLocale$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'IntegrationsSchemasTurbineToolLocale' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/resourcevisibility.js
+var require_resourcevisibility = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/resourcevisibility.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ResourceVisibility$outboundSchema = exports2.ResourceVisibility$inboundSchema = exports2.ResourceVisibility = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.ResourceVisibility = {
+      SharedGlobal: "shared_global",
+      SharedOrg: "shared_org",
+      SharedWorkspace: "shared_workspace",
+      Private: "private"
+    };
+    exports2.ResourceVisibility$inboundSchema = z5.nativeEnum(exports2.ResourceVisibility);
+    exports2.ResourceVisibility$outboundSchema = exports2.ResourceVisibility$inboundSchema;
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/integrationsschemasapitooltool.js
+var require_integrationsschemasapitooltool = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/integrationsschemasapitooltool.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.IntegrationsSchemasApiToolTool$inboundSchema = void 0;
+    exports2.integrationsSchemasApiToolToolFromJSON = integrationsSchemasApiToolToolFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var executionconfig_js_1 = require_executionconfig();
+    var integrationsschemasturbinetoollocale_js_1 = require_integrationsschemasturbinetoollocale();
+    var resourcevisibility_js_1 = require_resourcevisibility();
+    exports2.IntegrationsSchemasApiToolTool$inboundSchema = z5.object({
+      id: z5.string(),
+      name: z5.string(),
+      description: z5.string(),
+      system_prompt: z5.nullable(z5.string()).optional(),
+      locale: z5.nullable(integrationsschemasturbinetoollocale_js_1.IntegrationsSchemasTurbineToolLocale$inboundSchema).optional(),
+      jsonschema: z5.nullable(z5.record(z5.any())).optional(),
+      execution_config: z5.nullable(executionconfig_js_1.ExecutionConfig$inboundSchema),
+      visibility: resourcevisibility_js_1.ResourceVisibility$inboundSchema,
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      modified_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      active: z5.nullable(z5.boolean()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "system_prompt": "systemPrompt",
+        "execution_config": "executionConfig",
+        "created_at": "createdAt",
+        "modified_at": "modifiedAt"
+      });
+    });
+    function integrationsSchemasApiToolToolFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.IntegrationsSchemasApiToolTool$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'IntegrationsSchemasApiToolTool' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/connector.js
+var require_connector = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/connector.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Connector$inboundSchema = void 0;
+    exports2.connectorFromJSON = connectorFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var integrationsschemasapitooltool_js_1 = require_integrationsschemasapitooltool();
+    exports2.Connector$inboundSchema = z5.object({
+      id: z5.string(),
+      name: z5.string(),
+      description: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      modified_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      server: z5.nullable(z5.string()).optional(),
+      auth_type: z5.nullable(z5.string()).optional(),
+      tools: z5.nullable(z5.array(integrationsschemasapitooltool_js_1.IntegrationsSchemasApiToolTool$inboundSchema)).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "modified_at": "modifiedAt",
+        "auth_type": "authType"
+      });
+    });
+    function connectorFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Connector$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Connector' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/connectormcpcreate.js
+var require_connectormcpcreate = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/connectormcpcreate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorMCPCreate$outboundSchema = void 0;
+    exports2.connectorMCPCreateToJSON = connectorMCPCreateToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var authdata_js_1 = require_authdata();
+    var resourcevisibility_js_1 = require_resourcevisibility();
+    exports2.ConnectorMCPCreate$outboundSchema = z5.object({
+      name: z5.string(),
+      description: z5.string(),
+      iconUrl: z5.nullable(z5.string()).optional(),
+      visibility: resourcevisibility_js_1.ResourceVisibility$outboundSchema.optional(),
+      server: z5.string(),
+      headers: z5.nullable(z5.record(z5.any())).optional(),
+      authData: z5.nullable(authdata_js_1.AuthData$outboundSchema).optional(),
+      systemPrompt: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        iconUrl: "icon_url",
+        authData: "auth_data",
+        systemPrompt: "system_prompt"
+      });
+    });
+    function connectorMCPCreateToJSON(connectorMCPCreate) {
+      return JSON.stringify(exports2.ConnectorMCPCreate$outboundSchema.parse(connectorMCPCreate));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/connectormcpupdate.js
+var require_connectormcpupdate = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/connectormcpupdate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorMCPUpdate$outboundSchema = void 0;
+    exports2.connectorMCPUpdateToJSON = connectorMCPUpdateToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var authdata_js_1 = require_authdata();
+    exports2.ConnectorMCPUpdate$outboundSchema = z5.object({
+      name: z5.nullable(z5.string()).optional(),
+      description: z5.nullable(z5.string()).optional(),
+      iconUrl: z5.nullable(z5.string()).optional(),
+      systemPrompt: z5.nullable(z5.string()).optional(),
+      connectionConfig: z5.nullable(z5.record(z5.any())).optional(),
+      connectionSecrets: z5.nullable(z5.record(z5.any())).optional(),
+      server: z5.nullable(z5.string()).optional(),
+      headers: z5.nullable(z5.record(z5.any())).optional(),
+      authData: z5.nullable(authdata_js_1.AuthData$outboundSchema).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        iconUrl: "icon_url",
+        systemPrompt: "system_prompt",
+        connectionConfig: "connection_config",
+        connectionSecrets: "connection_secrets",
+        authData: "auth_data"
+      });
+    });
+    function connectorMCPUpdateToJSON(connectorMCPUpdate) {
+      return JSON.stringify(exports2.ConnectorMCPUpdate$outboundSchema.parse(connectorMCPUpdate));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/connectorsqueryfilters.js
+var require_connectorsqueryfilters = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/connectorsqueryfilters.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorsQueryFilters$outboundSchema = void 0;
+    exports2.connectorsQueryFiltersToJSON = connectorsQueryFiltersToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.ConnectorsQueryFilters$outboundSchema = z5.object({
+      active: z5.nullable(z5.boolean()).optional(),
+      fetchConnectionSecrets: z5.boolean().default(false)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        fetchConnectionSecrets: "fetch_connection_secrets"
+      });
+    });
+    function connectorsQueryFiltersToJSON(connectorsQueryFilters) {
+      return JSON.stringify(exports2.ConnectorsQueryFilters$outboundSchema.parse(connectorsQueryFilters));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/functioncallentryarguments.js
 var require_functioncallentryarguments = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/functioncallentryarguments.js"(exports2) {
@@ -37333,6 +40227,8 @@ var require_functioncallentry = __commonJS({
       type: z5.literal("function.call").default("function.call"),
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)).optional(),
       completed_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))).optional(),
+      agent_id: z5.nullable(z5.string()).optional(),
+      model: z5.nullable(z5.string()).optional(),
       id: z5.string().optional(),
       tool_call_id: z5.string(),
       name: z5.string(),
@@ -37342,6 +40238,7 @@ var require_functioncallentry = __commonJS({
       return (0, primitives_js_1.remap)(v5, {
         "created_at": "createdAt",
         "completed_at": "completedAt",
+        "agent_id": "agentId",
         "tool_call_id": "toolCallId",
         "confirmation_status": "confirmationStatus"
       });
@@ -37351,6 +40248,8 @@ var require_functioncallentry = __commonJS({
       type: z5.literal("function.call").default("function.call"),
       createdAt: z5.date().transform((v5) => v5.toISOString()).optional(),
       completedAt: z5.nullable(z5.date().transform((v5) => v5.toISOString())).optional(),
+      agentId: z5.nullable(z5.string()).optional(),
+      model: z5.nullable(z5.string()).optional(),
       id: z5.string().optional(),
       toolCallId: z5.string(),
       name: z5.string(),
@@ -37360,6 +40259,7 @@ var require_functioncallentry = __commonJS({
       return (0, primitives_js_1.remap)(v5, {
         createdAt: "created_at",
         completedAt: "completed_at",
+        agentId: "agent_id",
         toolCallId: "tool_call_id",
         confirmationStatus: "confirmation_status"
       });
@@ -37881,9 +40781,9 @@ var require_messageoutputentry = __commonJS({
       type: z5.literal("message.output").default("message.output"),
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)).optional(),
       completed_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))).optional(),
-      id: z5.string().optional(),
       agent_id: z5.nullable(z5.string()).optional(),
       model: z5.nullable(z5.string()).optional(),
+      id: z5.string().optional(),
       role: z5.literal("assistant").default("assistant"),
       content: z5.union([
         z5.string(),
@@ -37901,9 +40801,9 @@ var require_messageoutputentry = __commonJS({
       type: z5.literal("message.output").default("message.output"),
       createdAt: z5.date().transform((v5) => v5.toISOString()).optional(),
       completedAt: z5.nullable(z5.date().transform((v5) => v5.toISOString())).optional(),
-      id: z5.string().optional(),
       agentId: z5.nullable(z5.string()).optional(),
       model: z5.nullable(z5.string()).optional(),
+      id: z5.string().optional(),
       role: z5.literal("assistant").default("assistant"),
       content: z5.union([
         z5.string(),
@@ -37989,6 +40889,8 @@ var require_toolexecutionentry = __commonJS({
       type: z5.literal("tool.execution").default("tool.execution"),
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)).optional(),
       completed_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))).optional(),
+      agent_id: z5.nullable(z5.string()).optional(),
+      model: z5.nullable(z5.string()).optional(),
       id: z5.string().optional(),
       name: z5.union([builtinconnectors_js_1.BuiltInConnectors$inboundSchema, z5.string()]),
       arguments: z5.string(),
@@ -37996,7 +40898,8 @@ var require_toolexecutionentry = __commonJS({
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "created_at": "createdAt",
-        "completed_at": "completedAt"
+        "completed_at": "completedAt",
+        "agent_id": "agentId"
       });
     });
     exports2.ToolExecutionEntry$outboundSchema = z5.object({
@@ -38004,6 +40907,8 @@ var require_toolexecutionentry = __commonJS({
       type: z5.literal("tool.execution").default("tool.execution"),
       createdAt: z5.date().transform((v5) => v5.toISOString()).optional(),
       completedAt: z5.nullable(z5.date().transform((v5) => v5.toISOString())).optional(),
+      agentId: z5.nullable(z5.string()).optional(),
+      model: z5.nullable(z5.string()).optional(),
       id: z5.string().optional(),
       name: z5.union([builtinconnectors_js_1.BuiltInConnectors$outboundSchema, z5.string()]),
       arguments: z5.string(),
@@ -38011,7 +40916,8 @@ var require_toolexecutionentry = __commonJS({
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         createdAt: "created_at",
-        completedAt: "completed_at"
+        completedAt: "completed_at",
+        agentId: "agent_id"
       });
     });
     function toolExecutionEntryToJSON(toolExecutionEntry) {
@@ -38412,6 +41318,8 @@ var require_functioncallevent = __commonJS({
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)).optional(),
       output_index: z5.number().int().default(0),
       id: z5.string(),
+      model: z5.nullable(z5.string()).optional(),
+      agent_id: z5.nullable(z5.string()).optional(),
       name: z5.string(),
       tool_call_id: z5.string(),
       arguments: z5.string(),
@@ -38420,6 +41328,7 @@ var require_functioncallevent = __commonJS({
       return (0, primitives_js_1.remap)(v5, {
         "created_at": "createdAt",
         "output_index": "outputIndex",
+        "agent_id": "agentId",
         "tool_call_id": "toolCallId",
         "confirmation_status": "confirmationStatus"
       });
@@ -39091,12 +42000,15 @@ var require_toolexecutionstartedevent = __commonJS({
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)).optional(),
       output_index: z5.number().int().default(0),
       id: z5.string(),
+      model: z5.nullable(z5.string()).optional(),
+      agent_id: z5.nullable(z5.string()).optional(),
       name: z5.union([builtinconnectors_js_1.BuiltInConnectors$inboundSchema, z5.string()]),
       arguments: z5.string()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "created_at": "createdAt",
-        "output_index": "outputIndex"
+        "output_index": "outputIndex",
+        "agent_id": "agentId"
       });
     });
     function toolExecutionStartedEventFromJSON(jsonString) {
@@ -39414,6 +42326,77 @@ var require_conversationmessages = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/conversationpayload.js
+var require_conversationpayload = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/conversationpayload.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConversationPayload$outboundSchema = exports2.ConversationPayload$inboundSchema = void 0;
+    exports2.conversationPayloadToJSON = conversationPayloadToJSON;
+    exports2.conversationPayloadFromJSON = conversationPayloadFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.ConversationPayload$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      messages: z5.array(z5.record(z5.any()))
+    }).catchall(z5.any()), "additionalProperties", true);
+    exports2.ConversationPayload$outboundSchema = z5.object({
+      messages: z5.array(z5.record(z5.any())),
+      additionalProperties: z5.record(z5.any()).optional()
+    }).transform((v5) => {
+      return {
+        ...v5.additionalProperties,
+        ...(0, primitives_js_1.remap)(v5, {
+          additionalProperties: null
+        })
+      };
+    });
+    function conversationPayloadToJSON(conversationPayload) {
+      return JSON.stringify(exports2.ConversationPayload$outboundSchema.parse(conversationPayload));
+    }
+    function conversationPayloadFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ConversationPayload$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ConversationPayload' from JSON`);
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/conversationrequest.js
 var require_conversationrequest = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/conversationrequest.js"(exports2) {
@@ -39467,6 +42450,7 @@ var require_conversationrequest = __commonJS({
     var conversationinputs_js_1 = require_conversationinputs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -39505,6 +42489,7 @@ var require_conversationrequest = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$outboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completionArgs: z5.nullable(completionargs_js_1.CompletionArgs$outboundSchema).optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       name: z5.nullable(z5.string()).optional(),
       description: z5.nullable(z5.string()).optional(),
       metadata: z5.nullable(z5.record(z5.any())).optional(),
@@ -39567,8 +42552,9 @@ var require_conversationresponse = __commonJS({
       };
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ConversationResponse$inboundSchema = exports2.Outputs$inboundSchema = void 0;
+    exports2.ConversationResponse$inboundSchema = exports2.Guardrails$inboundSchema = exports2.Outputs$inboundSchema = void 0;
     exports2.outputsFromJSON = outputsFromJSON;
+    exports2.guardrailsFromJSON = guardrailsFromJSON;
     exports2.conversationResponseFromJSON = conversationResponseFromJSON;
     var z5 = __importStar(require_v3());
     var primitives_js_1 = require_primitives();
@@ -39587,6 +42573,10 @@ var require_conversationresponse = __commonJS({
     function outputsFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Outputs$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Outputs' from JSON`);
     }
+    exports2.Guardrails$inboundSchema = z5.object({});
+    function guardrailsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Guardrails$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Guardrails' from JSON`);
+    }
     exports2.ConversationResponse$inboundSchema = z5.object({
       object: z5.literal("conversation.response").default("conversation.response"),
       conversation_id: z5.string(),
@@ -39596,7 +42586,8 @@ var require_conversationresponse = __commonJS({
         toolexecutionentry_js_1.ToolExecutionEntry$inboundSchema,
         messageoutputentry_js_1.MessageOutputEntry$inboundSchema
       ])),
-      usage: conversationusageinfo_js_1.ConversationUsageInfo$inboundSchema
+      usage: conversationusageinfo_js_1.ConversationUsageInfo$inboundSchema,
+      guardrails: z5.nullable(z5.array(z5.lazy(() => exports2.Guardrails$inboundSchema))).optional()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "conversation_id": "conversationId"
@@ -39657,6 +42648,7 @@ var require_conversationrestartrequest = __commonJS({
     var primitives_js_1 = require_primitives();
     var completionargs_js_1 = require_completionargs();
     var conversationinputs_js_1 = require_conversationinputs();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     exports2.ConversationRestartRequestHandoffExecution = {
       Client: "client",
       Server: "server"
@@ -39672,6 +42664,7 @@ var require_conversationrestartrequest = __commonJS({
       store: z5.boolean().default(true),
       handoffExecution: exports2.ConversationRestartRequestHandoffExecution$outboundSchema.default("server"),
       completionArgs: completionargs_js_1.CompletionArgs$outboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       metadata: z5.nullable(z5.record(z5.any())).optional(),
       fromEntryId: z5.string(),
       agentVersion: z5.nullable(z5.union([z5.string(), z5.number().int()])).optional()
@@ -39738,6 +42731,7 @@ var require_conversationrestartstreamrequest = __commonJS({
     var primitives_js_1 = require_primitives();
     var completionargs_js_1 = require_completionargs();
     var conversationinputs_js_1 = require_conversationinputs();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     exports2.ConversationRestartStreamRequestHandoffExecution = {
       Client: "client",
       Server: "server"
@@ -39753,6 +42747,7 @@ var require_conversationrestartstreamrequest = __commonJS({
       store: z5.boolean().default(true),
       handoffExecution: exports2.ConversationRestartStreamRequestHandoffExecution$outboundSchema.default("server"),
       completionArgs: completionargs_js_1.CompletionArgs$outboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       metadata: z5.nullable(z5.record(z5.any())).optional(),
       fromEntryId: z5.string(),
       agentVersion: z5.nullable(z5.union([z5.string(), z5.number().int()])).optional()
@@ -39767,6 +42762,60 @@ var require_conversationrestartstreamrequest = __commonJS({
     function conversationRestartStreamRequestToJSON(conversationRestartStreamRequest) {
       return JSON.stringify(exports2.ConversationRestartStreamRequest$outboundSchema.parse(conversationRestartStreamRequest));
     }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/conversationsource.js
+var require_conversationsource = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/conversationsource.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConversationSource$inboundSchema = exports2.ConversationSource = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.ConversationSource = {
+      Explorer: "EXPLORER",
+      UploadedFile: "UPLOADED_FILE",
+      DirectInput: "DIRECT_INPUT",
+      Playground: "PLAYGROUND"
+    };
+    exports2.ConversationSource$inboundSchema = z5.nativeEnum(exports2.ConversationSource);
   }
 });
 
@@ -39823,6 +42872,7 @@ var require_conversationstreamrequest = __commonJS({
     var conversationinputs_js_1 = require_conversationinputs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -39861,6 +42911,7 @@ var require_conversationstreamrequest = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$outboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completionArgs: z5.nullable(completionargs_js_1.CompletionArgs$outboundSchema).optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$outboundSchema)).optional(),
       name: z5.nullable(z5.string()).optional(),
       description: z5.nullable(z5.string()).optional(),
       metadata: z5.nullable(z5.record(z5.any())).optional(),
@@ -39877,6 +42928,759 @@ var require_conversationstreamrequest = __commonJS({
     });
     function conversationStreamRequestToJSON(conversationStreamRequest) {
       return JSON.stringify(exports2.ConversationStreamRequest$outboundSchema.parse(conversationStreamRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/dataset.js
+var require_dataset = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/dataset.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Dataset$inboundSchema = void 0;
+    exports2.datasetFromJSON = datasetFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.Dataset$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      name: z5.string(),
+      description: z5.string(),
+      owner_id: z5.string(),
+      workspace_id: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "owner_id": "ownerId",
+        "workspace_id": "workspaceId"
+      });
+    });
+    function datasetFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Dataset$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Dataset' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetexport.js
+var require_datasetexport = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetexport.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetExport$inboundSchema = void 0;
+    exports2.datasetExportFromJSON = datasetExportFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.DatasetExport$inboundSchema = z5.object({
+      file_url: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "file_url": "fileUrl"
+      });
+    });
+    function datasetExportFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetExport$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetExport' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetimporttask.js
+var require_datasetimporttask = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetimporttask.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetImportTask$inboundSchema = void 0;
+    exports2.datasetImportTaskFromJSON = datasetImportTaskFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var basetaskstatus_js_1 = require_basetaskstatus();
+    exports2.DatasetImportTask$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      creator_id: z5.string(),
+      dataset_id: z5.string(),
+      workspace_id: z5.string(),
+      status: basetaskstatus_js_1.BaseTaskStatus$inboundSchema,
+      progress: z5.nullable(z5.number().int()).optional(),
+      message: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "creator_id": "creatorId",
+        "dataset_id": "datasetId",
+        "workspace_id": "workspaceId"
+      });
+    });
+    function datasetImportTaskFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetImportTask$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetImportTask' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetimporttask.js
+var require_paginatedresultdatasetimporttask = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetimporttask.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultDatasetImportTask$inboundSchema = void 0;
+    exports2.paginatedResultDatasetImportTaskFromJSON = paginatedResultDatasetImportTaskFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var datasetimporttask_js_1 = require_datasetimporttask();
+    exports2.PaginatedResultDatasetImportTask$inboundSchema = z5.object({
+      results: z5.array(datasetimporttask_js_1.DatasetImportTask$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultDatasetImportTaskFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultDatasetImportTask$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultDatasetImportTask' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetimporttasks.js
+var require_datasetimporttasks = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetimporttasks.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetImportTasks$inboundSchema = void 0;
+    exports2.datasetImportTasksFromJSON = datasetImportTasksFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var paginatedresultdatasetimporttask_js_1 = require_paginatedresultdatasetimporttask();
+    exports2.DatasetImportTasks$inboundSchema = z5.object({
+      tasks: paginatedresultdatasetimporttask_js_1.PaginatedResultDatasetImportTask$inboundSchema
+    });
+    function datasetImportTasksFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetImportTasks$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetImportTasks' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetpreview.js
+var require_datasetpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetPreview$inboundSchema = void 0;
+    exports2.datasetPreviewFromJSON = datasetPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.DatasetPreview$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      name: z5.string(),
+      description: z5.string(),
+      owner_id: z5.string(),
+      workspace_id: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "owner_id": "ownerId",
+        "workspace_id": "workspaceId"
+      });
+    });
+    function datasetPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetpreview.js
+var require_paginatedresultdatasetpreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetpreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultDatasetPreview$inboundSchema = void 0;
+    exports2.paginatedResultDatasetPreviewFromJSON = paginatedResultDatasetPreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var datasetpreview_js_1 = require_datasetpreview();
+    exports2.PaginatedResultDatasetPreview$inboundSchema = z5.object({
+      results: z5.array(datasetpreview_js_1.DatasetPreview$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultDatasetPreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultDatasetPreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultDatasetPreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetpreviews.js
+var require_datasetpreviews = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetpreviews.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetPreviews$inboundSchema = void 0;
+    exports2.datasetPreviewsFromJSON = datasetPreviewsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var paginatedresultdatasetpreview_js_1 = require_paginatedresultdatasetpreview();
+    exports2.DatasetPreviews$inboundSchema = z5.object({
+      datasets: paginatedresultdatasetpreview_js_1.PaginatedResultDatasetPreview$inboundSchema
+    });
+    function datasetPreviewsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetPreviews$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetPreviews' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetrecord.js
+var require_datasetrecord = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetrecord.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetRecord$inboundSchema = void 0;
+    exports2.datasetRecordFromJSON = datasetRecordFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var conversationpayload_js_1 = require_conversationpayload();
+    var conversationsource_js_1 = require_conversationsource();
+    exports2.DatasetRecord$inboundSchema = z5.object({
+      id: z5.string(),
+      created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      updated_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
+      deleted_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))),
+      dataset_id: z5.string(),
+      payload: conversationpayload_js_1.ConversationPayload$inboundSchema,
+      properties: z5.record(z5.any()),
+      source: conversationsource_js_1.ConversationSource$inboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "created_at": "createdAt",
+        "updated_at": "updatedAt",
+        "deleted_at": "deletedAt",
+        "dataset_id": "datasetId"
+      });
+    });
+    function datasetRecordFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetRecord$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetRecord' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetrecord.js
+var require_paginatedresultdatasetrecord = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultdatasetrecord.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultDatasetRecord$inboundSchema = void 0;
+    exports2.paginatedResultDatasetRecordFromJSON = paginatedResultDatasetRecordFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var datasetrecord_js_1 = require_datasetrecord();
+    exports2.PaginatedResultDatasetRecord$inboundSchema = z5.object({
+      results: z5.array(datasetrecord_js_1.DatasetRecord$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultDatasetRecordFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultDatasetRecord$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultDatasetRecord' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/datasetrecords.js
+var require_datasetrecords = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/datasetrecords.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DatasetRecords$inboundSchema = void 0;
+    exports2.datasetRecordsFromJSON = datasetRecordsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var paginatedresultdatasetrecord_js_1 = require_paginatedresultdatasetrecord();
+    exports2.DatasetRecords$inboundSchema = z5.object({
+      records: paginatedresultdatasetrecord_js_1.PaginatedResultDatasetRecord$inboundSchema
+    });
+    function datasetRecordsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.DatasetRecords$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'DatasetRecords' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/deletedatasetrecordsinschema.js
+var require_deletedatasetrecordsinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/deletedatasetrecordsinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeleteDatasetRecordsInSchema$outboundSchema = void 0;
+    exports2.deleteDatasetRecordsInSchemaToJSON = deleteDatasetRecordsInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.DeleteDatasetRecordsInSchema$outboundSchema = z5.object({
+      datasetRecordIds: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordIds: "dataset_record_ids"
+      });
+    });
+    function deleteDatasetRecordsInSchemaToJSON(deleteDatasetRecordsInSchema) {
+      return JSON.stringify(exports2.DeleteDatasetRecordsInSchema$outboundSchema.parse(deleteDatasetRecordsInSchema));
     }
   }
 });
@@ -39995,6 +43799,64 @@ var require_deletemodelout = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/processstatus.js
+var require_processstatus = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/processstatus.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ProcessStatus$inboundSchema = exports2.ProcessStatus = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.ProcessStatus = {
+      SelfManaged: "self_managed",
+      MissingContent: "missing_content",
+      Noop: "noop",
+      Done: "done",
+      Todo: "todo",
+      InProgress: "in_progress",
+      Error: "error",
+      WaitingForCapacity: "waiting_for_capacity"
+    };
+    exports2.ProcessStatus$inboundSchema = z5.nativeEnum(exports2.ProcessStatus);
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/documentout.js
 var require_documentout = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/documentout.js"(exports2) {
@@ -40042,6 +43904,7 @@ var require_documentout = __commonJS({
     var z5 = __importStar(require_v3());
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
+    var processstatus_js_1 = require_processstatus();
     exports2.DocumentOut$inboundSchema = z5.object({
       id: z5.string(),
       library_id: z5.string(),
@@ -40054,6 +43917,7 @@ var require_documentout = __commonJS({
       created_at: z5.string().datetime({ offset: true }).transform((v5) => new Date(v5)),
       last_processed_at: z5.nullable(z5.string().datetime({ offset: true }).transform((v5) => new Date(v5))).optional(),
       number_of_pages: z5.nullable(z5.number().int()).optional(),
+      process_status: processstatus_js_1.ProcessStatus$inboundSchema,
       uploaded_by_id: z5.nullable(z5.string()),
       uploaded_by_type: z5.string(),
       tokens_processing_main_content: z5.nullable(z5.number().int()).optional(),
@@ -40069,6 +43933,7 @@ var require_documentout = __commonJS({
         "created_at": "createdAt",
         "last_processed_at": "lastProcessedAt",
         "number_of_pages": "numberOfPages",
+        "process_status": "processStatus",
         "uploaded_by_id": "uploadedById",
         "uploaded_by_type": "uploadedByType",
         "tokens_processing_main_content": "tokensProcessingMainContent",
@@ -40214,6 +44079,146 @@ var require_documentupdatein = __commonJS({
     });
     function documentUpdateInToJSON(documentUpdateIn) {
       return JSON.stringify(exports2.DocumentUpdateIn$outboundSchema.parse(documentUpdateIn));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/textresourcecontents.js
+var require_textresourcecontents = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/textresourcecontents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TextResourceContents$inboundSchema = void 0;
+    exports2.textResourceContentsFromJSON = textResourceContentsFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.TextResourceContents$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      uri: z5.string(),
+      mimeType: z5.nullable(z5.string()).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional(),
+      text: z5.string()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function textResourceContentsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.TextResourceContents$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'TextResourceContents' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/embeddedresource.js
+var require_embeddedresource = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/embeddedresource.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.EmbeddedResource$inboundSchema = exports2.Resource$inboundSchema = void 0;
+    exports2.resourceFromJSON = resourceFromJSON;
+    exports2.embeddedResourceFromJSON = embeddedResourceFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var annotations_js_1 = require_annotations();
+    var blobresourcecontents_js_1 = require_blobresourcecontents();
+    var textresourcecontents_js_1 = require_textresourcecontents();
+    exports2.Resource$inboundSchema = z5.union([
+      textresourcecontents_js_1.TextResourceContents$inboundSchema,
+      blobresourcecontents_js_1.BlobResourceContents$inboundSchema
+    ]);
+    function resourceFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Resource$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Resource' from JSON`);
+    }
+    exports2.EmbeddedResource$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      type: z5.literal("resource").default("resource").optional(),
+      resource: z5.union([
+        textresourcecontents_js_1.TextResourceContents$inboundSchema,
+        blobresourcecontents_js_1.BlobResourceContents$inboundSchema
+      ]),
+      annotations: z5.nullable(annotations_js_1.Annotations$inboundSchema).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function embeddedResourceFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.EmbeddedResource$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'EmbeddedResource' from JSON`);
     }
   }
 });
@@ -40570,6 +44575,178 @@ var require_entitytype = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/fieldoptioncountitem.js
+var require_fieldoptioncountitem = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/fieldoptioncountitem.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FieldOptionCountItem$inboundSchema = void 0;
+    exports2.fieldOptionCountItemFromJSON = fieldOptionCountItemFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.FieldOptionCountItem$inboundSchema = z5.object({
+      value: z5.string(),
+      count: z5.number().int()
+    });
+    function fieldOptionCountItemFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FieldOptionCountItem$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FieldOptionCountItem' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/fieldoptioncounts.js
+var require_fieldoptioncounts = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/fieldoptioncounts.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FieldOptionCounts$inboundSchema = void 0;
+    exports2.fieldOptionCountsFromJSON = fieldOptionCountsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var fieldoptioncountitem_js_1 = require_fieldoptioncountitem();
+    exports2.FieldOptionCounts$inboundSchema = z5.object({
+      counts: z5.array(fieldoptioncountitem_js_1.FieldOptionCountItem$inboundSchema)
+    });
+    function fieldOptionCountsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.FieldOptionCounts$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'FieldOptionCounts' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/fieldoptioncountsinschema.js
+var require_fieldoptioncountsinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/fieldoptioncountsinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FieldOptionCountsInSchema$outboundSchema = void 0;
+    exports2.fieldOptionCountsInSchemaToJSON = fieldOptionCountsInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var filterpayload_js_1 = require_filterpayload();
+    exports2.FieldOptionCountsInSchema$outboundSchema = z5.object({
+      filterParams: z5.nullable(filterpayload_js_1.FilterPayload$outboundSchema).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        filterParams: "filter_params"
+      });
+    });
+    function fieldOptionCountsInSchemaToJSON(fieldOptionCountsInSchema) {
+      return JSON.stringify(exports2.FieldOptionCountsInSchema$outboundSchema.parse(fieldOptionCountsInSchema));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/filepurpose.js
 var require_filepurpose = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/filepurpose.js"(exports2) {
@@ -40621,6 +44798,58 @@ var require_filepurpose = __commonJS({
     };
     exports2.FilePurpose$inboundSchema = openEnums.inboundSchema(exports2.FilePurpose);
     exports2.FilePurpose$outboundSchema = openEnums.outboundSchema(exports2.FilePurpose);
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/filevisibility.js
+var require_filevisibility = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/filevisibility.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.FileVisibility$inboundSchema = exports2.FileVisibility = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.FileVisibility = {
+      Workspace: "workspace",
+      User: "user"
+    };
+    exports2.FileVisibility$inboundSchema = z5.nativeEnum(exports2.FileVisibility);
   }
 });
 
@@ -40782,6 +45011,7 @@ var require_fileschema = __commonJS({
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
     var filepurpose_js_1 = require_filepurpose();
+    var filevisibility_js_1 = require_filevisibility();
     var sampletype_js_1 = require_sampletype();
     var source_js_1 = require_source();
     exports2.FileSchema$inboundSchema = z5.object({
@@ -40795,13 +45025,16 @@ var require_fileschema = __commonJS({
       num_lines: z5.nullable(z5.number().int()).optional(),
       mimetype: z5.nullable(z5.string()).optional(),
       source: source_js_1.Source$inboundSchema,
-      signature: z5.nullable(z5.string()).optional()
+      signature: z5.nullable(z5.string()).optional(),
+      expires_at: z5.nullable(z5.number().int()).optional(),
+      visibility: z5.nullable(filevisibility_js_1.FileVisibility$inboundSchema).optional()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "bytes": "sizeBytes",
         "created_at": "createdAt",
         "sample_type": "sampleType",
-        "num_lines": "numLines"
+        "num_lines": "numLines",
+        "expires_at": "expiresAt"
       });
     });
     function fileSchemaFromJSON(jsonString) {
@@ -41212,6 +45445,130 @@ var require_ftmodelcard = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/getchatcompletioneventidsinschema.js
+var require_getchatcompletioneventidsinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/getchatcompletioneventidsinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionEventIdsInSchema$outboundSchema = void 0;
+    exports2.getChatCompletionEventIdsInSchemaToJSON = getChatCompletionEventIdsInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var filterpayload_js_1 = require_filterpayload();
+    exports2.GetChatCompletionEventIdsInSchema$outboundSchema = z5.object({
+      searchParams: filterpayload_js_1.FilterPayload$outboundSchema,
+      extraFields: z5.nullable(z5.array(z5.string())).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        searchParams: "search_params",
+        extraFields: "extra_fields"
+      });
+    });
+    function getChatCompletionEventIdsInSchemaToJSON(getChatCompletionEventIdsInSchema) {
+      return JSON.stringify(exports2.GetChatCompletionEventIdsInSchema$outboundSchema.parse(getChatCompletionEventIdsInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/getchatcompletioneventsinschema.js
+var require_getchatcompletioneventsinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/getchatcompletioneventsinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionEventsInSchema$outboundSchema = void 0;
+    exports2.getChatCompletionEventsInSchemaToJSON = getChatCompletionEventsInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var filterpayload_js_1 = require_filterpayload();
+    exports2.GetChatCompletionEventsInSchema$outboundSchema = z5.object({
+      searchParams: filterpayload_js_1.FilterPayload$outboundSchema,
+      extraFields: z5.nullable(z5.array(z5.string())).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        searchParams: "search_params",
+        extraFields: "extra_fields"
+      });
+    });
+    function getChatCompletionEventsInSchemaToJSON(getChatCompletionEventsInSchema) {
+      return JSON.stringify(exports2.GetChatCompletionEventsInSchema$outboundSchema.parse(getChatCompletionEventsInSchema));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/githubrepositoryin.js
 var require_githubrepositoryin = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/githubrepositoryin.js"(exports2) {
@@ -41267,6 +45624,71 @@ var require_githubrepositoryin = __commonJS({
     });
     function githubRepositoryInToJSON(githubRepositoryIn) {
       return JSON.stringify(exports2.GithubRepositoryIn$outboundSchema.parse(githubRepositoryIn));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/imagecontent.js
+var require_imagecontent = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/imagecontent.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ImageContent$inboundSchema = void 0;
+    exports2.imageContentFromJSON = imageContentFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var annotations_js_1 = require_annotations();
+    exports2.ImageContent$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      type: z5.literal("image").default("image").optional(),
+      data: z5.string(),
+      mimeType: z5.string(),
+      annotations: z5.nullable(annotations_js_1.Annotations$inboundSchema).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function imageContentFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ImageContent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ImageContent' from JSON`);
     }
   }
 });
@@ -41571,6 +45993,234 @@ var require_jobsout = __commonJS({
     });
     function jobsOutFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JobsOut$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JobsOut' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgeoutput.js
+var require_judgeoutput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgeoutput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeOutput$inboundSchema = exports2.Answer$inboundSchema = void 0;
+    exports2.answerFromJSON = answerFromJSON;
+    exports2.judgeOutputFromJSON = judgeOutputFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.Answer$inboundSchema = z5.union([z5.string(), z5.number()]);
+    function answerFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Answer$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Answer' from JSON`);
+    }
+    exports2.JudgeOutput$inboundSchema = z5.object({
+      analysis: z5.string(),
+      answer: z5.union([z5.string(), z5.number()])
+    });
+    function judgeOutputFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgeOutput$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgeOutput' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgeoutputtype.js
+var require_judgeoutputtype = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgeoutputtype.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeOutputType$outboundSchema = exports2.JudgeOutputType = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.JudgeOutputType = {
+      Regression: "REGRESSION",
+      Classification: "CLASSIFICATION"
+    };
+    exports2.JudgeOutputType$outboundSchema = z5.nativeEnum(exports2.JudgeOutputType);
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedresultjudgepreview.js
+var require_paginatedresultjudgepreview = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedresultjudgepreview.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedResultJudgePreview$inboundSchema = void 0;
+    exports2.paginatedResultJudgePreviewFromJSON = paginatedResultJudgePreviewFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var judgepreview_js_1 = require_judgepreview();
+    exports2.PaginatedResultJudgePreview$inboundSchema = z5.object({
+      results: z5.array(judgepreview_js_1.JudgePreview$inboundSchema).optional(),
+      count: z5.number().int(),
+      next: z5.nullable(z5.string()).optional(),
+      previous: z5.nullable(z5.string()).optional()
+    });
+    function paginatedResultJudgePreviewFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedResultJudgePreview$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedResultJudgePreview' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/judgepreviews.js
+var require_judgepreviews = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/judgepreviews.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgePreviews$inboundSchema = void 0;
+    exports2.judgePreviewsFromJSON = judgePreviewsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var paginatedresultjudgepreview_js_1 = require_paginatedresultjudgepreview();
+    exports2.JudgePreviews$inboundSchema = z5.object({
+      judges: paginatedresultjudgepreview_js_1.PaginatedResultJudgePreview$inboundSchema
+    });
+    function judgePreviewsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JudgePreviews$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JudgePreviews' from JSON`);
     }
   }
 });
@@ -42219,6 +46869,509 @@ var require_listsharingout = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/mcpresultmetadata.js
+var require_mcpresultmetadata = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/mcpresultmetadata.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MCPResultMetadata$inboundSchema = void 0;
+    exports2.mcpResultMetadataFromJSON = mcpResultMetadataFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.MCPResultMetadata$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      isError: z5.boolean().default(false),
+      structuredContent: z5.nullable(z5.record(z5.any())).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function mcpResultMetadataFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.MCPResultMetadata$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'MCPResultMetadata' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/mcpservericon.js
+var require_mcpservericon = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/mcpservericon.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MCPServerIcon$inboundSchema = void 0;
+    exports2.mcpServerIconFromJSON = mcpServerIconFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.MCPServerIcon$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      src: z5.string(),
+      mimeType: z5.nullable(z5.string()).optional(),
+      sizes: z5.nullable(z5.array(z5.string())).optional()
+    }).catchall(z5.any()), "additionalProperties", true);
+    function mcpServerIconFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.MCPServerIcon$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'MCPServerIcon' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/mcptoolcallmetadata.js
+var require_mcptoolcallmetadata = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/mcptoolcallmetadata.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MCPToolCallMetadata$inboundSchema = void 0;
+    exports2.mcpToolCallMetadataFromJSON = mcpToolCallMetadataFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var mcpresultmetadata_js_1 = require_mcpresultmetadata();
+    exports2.MCPToolCallMetadata$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      mcp_meta: z5.nullable(mcpresultmetadata_js_1.MCPResultMetadata$inboundSchema).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "mcp_meta": "mcpMeta"
+      });
+    });
+    function mcpToolCallMetadataFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.MCPToolCallMetadata$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'MCPToolCallMetadata' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/mcptoolcallrequest.js
+var require_mcptoolcallrequest = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/mcptoolcallrequest.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MCPToolCallRequest$outboundSchema = void 0;
+    exports2.mcpToolCallRequestToJSON = mcpToolCallRequestToJSON;
+    var z5 = __importStar(require_v3());
+    exports2.MCPToolCallRequest$outboundSchema = z5.object({
+      arguments: z5.record(z5.any()).optional()
+    });
+    function mcpToolCallRequestToJSON(mcpToolCallRequest) {
+      return JSON.stringify(exports2.MCPToolCallRequest$outboundSchema.parse(mcpToolCallRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/resourcelink.js
+var require_resourcelink = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/resourcelink.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ResourceLink$inboundSchema = void 0;
+    exports2.resourceLinkFromJSON = resourceLinkFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var annotations_js_1 = require_annotations();
+    var mcpservericon_js_1 = require_mcpservericon();
+    exports2.ResourceLink$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      name: z5.string(),
+      title: z5.nullable(z5.string()).optional(),
+      uri: z5.string(),
+      description: z5.nullable(z5.string()).optional(),
+      mimeType: z5.nullable(z5.string()).optional(),
+      size: z5.nullable(z5.number().int()).optional(),
+      icons: z5.nullable(z5.array(mcpservericon_js_1.MCPServerIcon$inboundSchema)).optional(),
+      annotations: z5.nullable(annotations_js_1.Annotations$inboundSchema).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional(),
+      type: z5.literal("resource_link").default("resource_link").optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function resourceLinkFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ResourceLink$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ResourceLink' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/textcontent.js
+var require_textcontent = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/textcontent.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TextContent$inboundSchema = void 0;
+    exports2.textContentFromJSON = textContentFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var annotations_js_1 = require_annotations();
+    exports2.TextContent$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      type: z5.literal("text").default("text").optional(),
+      text: z5.string(),
+      annotations: z5.nullable(annotations_js_1.Annotations$inboundSchema).optional(),
+      _meta: z5.nullable(z5.record(z5.any())).optional()
+    }).catchall(z5.any()), "additionalProperties", true).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "_meta": "meta"
+      });
+    });
+    function textContentFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.TextContent$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'TextContent' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/mcptoolcallresponse.js
+var require_mcptoolcallresponse = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/mcptoolcallresponse.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MCPToolCallResponse$inboundSchema = exports2.Content$inboundSchema = void 0;
+    exports2.contentFromJSON = contentFromJSON;
+    exports2.mcpToolCallResponseFromJSON = mcpToolCallResponseFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var audiocontent_js_1 = require_audiocontent();
+    var embeddedresource_js_1 = require_embeddedresource();
+    var imagecontent_js_1 = require_imagecontent();
+    var mcptoolcallmetadata_js_1 = require_mcptoolcallmetadata();
+    var resourcelink_js_1 = require_resourcelink();
+    var textcontent_js_1 = require_textcontent();
+    exports2.Content$inboundSchema = z5.union([
+      textcontent_js_1.TextContent$inboundSchema,
+      imagecontent_js_1.ImageContent$inboundSchema,
+      audiocontent_js_1.AudioContent$inboundSchema,
+      resourcelink_js_1.ResourceLink$inboundSchema,
+      embeddedresource_js_1.EmbeddedResource$inboundSchema
+    ]);
+    function contentFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Content$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Content' from JSON`);
+    }
+    exports2.MCPToolCallResponse$inboundSchema = (0, schemas_js_1.collectExtraKeys)(z5.object({
+      content: z5.array(z5.union([
+        textcontent_js_1.TextContent$inboundSchema,
+        imagecontent_js_1.ImageContent$inboundSchema,
+        audiocontent_js_1.AudioContent$inboundSchema,
+        resourcelink_js_1.ResourceLink$inboundSchema,
+        embeddedresource_js_1.EmbeddedResource$inboundSchema
+      ])),
+      metadata: z5.nullable(mcptoolcallmetadata_js_1.MCPToolCallMetadata$inboundSchema).optional()
+    }).catchall(z5.any()), "additionalProperties", true);
+    function mcpToolCallResponseFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.MCPToolCallResponse$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'MCPToolCallResponse' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/messageresponse.js
+var require_messageresponse = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/messageresponse.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MessageResponse$inboundSchema = void 0;
+    exports2.messageResponseFromJSON = messageResponseFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    exports2.MessageResponse$inboundSchema = z5.object({
+      message: z5.string()
+    });
+    function messageResponseFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.MessageResponse$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'MessageResponse' from JSON`);
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/modelconversation.js
 var require_modelconversation = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/modelconversation.js"(exports2) {
@@ -42271,6 +47424,7 @@ var require_modelconversation = __commonJS({
     var completionargs_js_1 = require_completionargs();
     var documentlibrarytool_js_1 = require_documentlibrarytool();
     var functiontool_js_1 = require_functiontool();
+    var guardrailconfig_js_1 = require_guardrailconfig();
     var imagegenerationtool_js_1 = require_imagegenerationtool();
     var websearchpremiumtool_js_1 = require_websearchpremiumtool();
     var websearchtool_js_1 = require_websearchtool();
@@ -42296,6 +47450,7 @@ var require_modelconversation = __commonJS({
         websearchpremiumtool_js_1.WebSearchPremiumTool$inboundSchema.and(z5.object({ type: z5.literal("web_search_premium") }))
       ])).optional(),
       completion_args: completionargs_js_1.CompletionArgs$inboundSchema.optional(),
+      guardrails: z5.nullable(z5.array(guardrailconfig_js_1.GuardrailConfig$inboundSchema)).optional(),
       name: z5.nullable(z5.string()).optional(),
       description: z5.nullable(z5.string()).optional(),
       metadata: z5.nullable(z5.record(z5.any())).optional(),
@@ -42501,6 +47656,161 @@ var require_moderationresponse = __commonJS({
     });
     function moderationResponseFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ModerationResponse$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ModerationResponse' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/observabilityerrorcode.js
+var require_observabilityerrorcode = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/observabilityerrorcode.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ObservabilityErrorCode$inboundSchema = exports2.ObservabilityErrorCode = void 0;
+    var z5 = __importStar(require_v3());
+    exports2.ObservabilityErrorCode = {
+      UnknownError: "UNKNOWN_ERROR",
+      ValidationError: "VALIDATION_ERROR",
+      AuthForbidden: "AUTH_FORBIDDEN",
+      AuthForbiddenNotWorkspaceAdmin: "AUTH_FORBIDDEN_NOT_WORKSPACE_ADMIN",
+      AuthForbiddenWorkspaceNotFound: "AUTH_FORBIDDEN_WORKSPACE_NOT_FOUND",
+      AuthForbiddenRoleNotFound: "AUTH_FORBIDDEN_ROLE_NOT_FOUND",
+      AuthForbiddenOrgNotWhitelisted: "AUTH_FORBIDDEN_ORG_NOT_WHITELISTED",
+      AuthUnauthorized: "AUTH_UNAUTHORIZED",
+      FeatureNotSupported: "FEATURE_NOT_SUPPORTED",
+      FieldsBadRequest: "FIELDS_BAD_REQUEST",
+      FieldsNotFound: "FIELDS_NOT_FOUND",
+      SearchNotFound: "SEARCH_NOT_FOUND",
+      SearchBadRequest: "SEARCH_BAD_REQUEST",
+      SearchServiceUnavailable: "SEARCH_SERVICE_UNAVAILABLE",
+      DatabaseError: "DATABASE_ERROR",
+      DatabaseTimeout: "DATABASE_TIMEOUT",
+      DatabaseUnavailable: "DATABASE_UNAVAILABLE",
+      DatabaseQueryError: "DATABASE_QUERY_ERROR",
+      SearchFilterToSqlConversionError: "SEARCH_FILTER_TO_SQL_CONVERSION_ERROR",
+      JudgeConversationFormatError: "JUDGE_CONVERSATION_FORMAT_ERROR",
+      JudgeMistralApiError: "JUDGE_MISTRAL_API_ERROR",
+      JudgeMistralApiTimeout: "JUDGE_MISTRAL_API_TIMEOUT",
+      JudgeNameAlreadyExists: "JUDGE_NAME_ALREADY_EXISTS",
+      JudgeNotFound: "JUDGE_NOT_FOUND",
+      JudgeAlreadyHasNewVersion: "JUDGE_ALREADY_HAS_NEW_VERSION",
+      JudgeUsedInCampaignCannotBeUpdated: "JUDGE_USED_IN_CAMPAIGN_CANNOT_BE_UPDATED",
+      JudgeDidNotChange: "JUDGE_DID_NOT_CHANGE",
+      CampaignNotFound: "CAMPAIGN_NOT_FOUND",
+      CampaignNoMatchingEvents: "CAMPAIGN_NO_MATCHING_EVENTS",
+      DatasetNotFound: "DATASET_NOT_FOUND",
+      DatasetTaskNotFound: "DATASET_TASK_NOT_FOUND",
+      DatasetRecordNotFound: "DATASET_RECORD_NOT_FOUND",
+      DatasetRecordFormatError: "DATASET_RECORD_FORMAT_ERROR",
+      AgentNotFound: "AGENT_NOT_FOUND",
+      AgentMistralApiError: "AGENT_MISTRAL_API_ERROR",
+      EvaluationNotFound: "EVALUATION_NOT_FOUND",
+      EvaluationCurrentlyRunning: "EVALUATION_CURRENTLY_RUNNING",
+      EvaluationRecordNotFound: "EVALUATION_RECORD_NOT_FOUND",
+      EvaluationRunNotFound: "EVALUATION_RUN_NOT_FOUND",
+      EvaluationRunTransitionIsInvalid: "EVALUATION_RUN_TRANSITION_IS_INVALID",
+      EvaluationRunTransitionIsRunningAlready: "EVALUATION_RUN_TRANSITION_IS_RUNNING_ALREADY",
+      EvaluationRunTransitionError: "EVALUATION_RUN_TRANSITION_ERROR",
+      TemplateSyntaxError: "TEMPLATE_SYNTAX_ERROR"
+    };
+    exports2.ObservabilityErrorCode$inboundSchema = z5.nativeEnum(exports2.ObservabilityErrorCode);
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/observabilityerrordetail.js
+var require_observabilityerrordetail = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/observabilityerrordetail.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ObservabilityErrorDetail$inboundSchema = void 0;
+    exports2.observabilityErrorDetailFromJSON = observabilityErrorDetailFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var observabilityerrorcode_js_1 = require_observabilityerrorcode();
+    exports2.ObservabilityErrorDetail$inboundSchema = z5.object({
+      message: z5.string(),
+      error_code: z5.nullable(observabilityerrorcode_js_1.ObservabilityErrorCode$inboundSchema)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "error_code": "errorCode"
+      });
+    });
+    function observabilityErrorDetailFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ObservabilityErrorDetail$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ObservabilityErrorDetail' from JSON`);
     }
   }
 });
@@ -42989,6 +48299,850 @@ var require_ocrresponse = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/components/paginationresponse.js
+var require_paginationresponse = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginationresponse.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginationResponse$inboundSchema = void 0;
+    exports2.paginationResponseFromJSON = paginationResponseFromJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    exports2.PaginationResponse$inboundSchema = z5.object({
+      next_cursor: z5.nullable(z5.string()).optional(),
+      page_size: z5.number().int()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        "next_cursor": "nextCursor",
+        "page_size": "pageSize"
+      });
+    });
+    function paginationResponseFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginationResponse$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginationResponse' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/paginatedconnectors.js
+var require_paginatedconnectors = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/paginatedconnectors.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PaginatedConnectors$inboundSchema = void 0;
+    exports2.paginatedConnectorsFromJSON = paginatedConnectorsFromJSON;
+    var z5 = __importStar(require_v3());
+    var schemas_js_1 = require_schemas();
+    var connector_js_1 = require_connector();
+    var paginationresponse_js_1 = require_paginationresponse();
+    exports2.PaginatedConnectors$inboundSchema = z5.object({
+      items: z5.array(connector_js_1.Connector$inboundSchema),
+      pagination: paginationresponse_js_1.PaginationResponse$inboundSchema
+    });
+    function paginatedConnectorsFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.PaginatedConnectors$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'PaginatedConnectors' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/patchdatasetinschema.js
+var require_patchdatasetinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/patchdatasetinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PatchDatasetInSchema$outboundSchema = void 0;
+    exports2.patchDatasetInSchemaToJSON = patchDatasetInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    exports2.PatchDatasetInSchema$outboundSchema = z5.object({
+      name: z5.nullable(z5.string()).optional(),
+      description: z5.nullable(z5.string()).optional()
+    });
+    function patchDatasetInSchemaToJSON(patchDatasetInSchema) {
+      return JSON.stringify(exports2.PatchDatasetInSchema$outboundSchema.parse(patchDatasetInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postcampaigninschema.js
+var require_postcampaigninschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postcampaigninschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostCampaignInSchema$outboundSchema = void 0;
+    exports2.postCampaignInSchemaToJSON = postCampaignInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var filterpayload_js_1 = require_filterpayload();
+    exports2.PostCampaignInSchema$outboundSchema = z5.object({
+      searchParams: filterpayload_js_1.FilterPayload$outboundSchema,
+      judgeId: z5.string(),
+      name: z5.string(),
+      description: z5.string(),
+      maxNbEvents: z5.number().int()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        searchParams: "search_params",
+        judgeId: "judge_id",
+        maxNbEvents: "max_nb_events"
+      });
+    });
+    function postCampaignInSchemaToJSON(postCampaignInSchema) {
+      return JSON.stringify(exports2.PostCampaignInSchema$outboundSchema.parse(postCampaignInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postjudgeinschema.js
+var require_postjudgeinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postjudgeinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostJudgeInSchema$outboundSchema = exports2.Output$outboundSchema = void 0;
+    exports2.outputToJSON = outputToJSON;
+    exports2.postJudgeInSchemaToJSON = postJudgeInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var judgeclassificationoutput_js_1 = require_judgeclassificationoutput();
+    var judgeregressionoutput_js_1 = require_judgeregressionoutput();
+    exports2.Output$outboundSchema = z5.union([
+      judgeclassificationoutput_js_1.JudgeClassificationOutput$outboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+      judgeregressionoutput_js_1.JudgeRegressionOutput$outboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+    ]);
+    function outputToJSON(output) {
+      return JSON.stringify(exports2.Output$outboundSchema.parse(output));
+    }
+    exports2.PostJudgeInSchema$outboundSchema = z5.object({
+      name: z5.string(),
+      description: z5.string(),
+      modelName: z5.string(),
+      output: z5.union([
+        judgeclassificationoutput_js_1.JudgeClassificationOutput$outboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+        judgeregressionoutput_js_1.JudgeRegressionOutput$outboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+      ]),
+      instructions: z5.string(),
+      tools: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        modelName: "model_name"
+      });
+    });
+    function postJudgeInSchemaToJSON(postJudgeInSchema) {
+      return JSON.stringify(exports2.PostJudgeInSchema$outboundSchema.parse(postJudgeInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postchatcompletioneventjudginginschema.js
+var require_postchatcompletioneventjudginginschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postchatcompletioneventjudginginschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostChatCompletionEventJudgingInSchema$outboundSchema = void 0;
+    exports2.postChatCompletionEventJudgingInSchemaToJSON = postChatCompletionEventJudgingInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var postjudgeinschema_js_1 = require_postjudgeinschema();
+    exports2.PostChatCompletionEventJudgingInSchema$outboundSchema = z5.object({
+      judgeDefinition: postjudgeinschema_js_1.PostJudgeInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        judgeDefinition: "judge_definition"
+      });
+    });
+    function postChatCompletionEventJudgingInSchemaToJSON(postChatCompletionEventJudgingInSchema) {
+      return JSON.stringify(exports2.PostChatCompletionEventJudgingInSchema$outboundSchema.parse(postChatCompletionEventJudgingInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetimportfromcampaigninschema.js
+var require_postdatasetimportfromcampaigninschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetimportfromcampaigninschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetImportFromCampaignInSchema$outboundSchema = void 0;
+    exports2.postDatasetImportFromCampaignInSchemaToJSON = postDatasetImportFromCampaignInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.PostDatasetImportFromCampaignInSchema$outboundSchema = z5.object({
+      campaignId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        campaignId: "campaign_id"
+      });
+    });
+    function postDatasetImportFromCampaignInSchemaToJSON(postDatasetImportFromCampaignInSchema) {
+      return JSON.stringify(exports2.PostDatasetImportFromCampaignInSchema$outboundSchema.parse(postDatasetImportFromCampaignInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetimportfromdatasetinschema.js
+var require_postdatasetimportfromdatasetinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetimportfromdatasetinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetImportFromDatasetInSchema$outboundSchema = void 0;
+    exports2.postDatasetImportFromDatasetInSchemaToJSON = postDatasetImportFromDatasetInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.PostDatasetImportFromDatasetInSchema$outboundSchema = z5.object({
+      datasetRecordIds: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordIds: "dataset_record_ids"
+      });
+    });
+    function postDatasetImportFromDatasetInSchemaToJSON(postDatasetImportFromDatasetInSchema) {
+      return JSON.stringify(exports2.PostDatasetImportFromDatasetInSchema$outboundSchema.parse(postDatasetImportFromDatasetInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetimportfromexplorerinschema.js
+var require_postdatasetimportfromexplorerinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetimportfromexplorerinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetImportFromExplorerInSchema$outboundSchema = void 0;
+    exports2.postDatasetImportFromExplorerInSchemaToJSON = postDatasetImportFromExplorerInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.PostDatasetImportFromExplorerInSchema$outboundSchema = z5.object({
+      completionEventIds: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        completionEventIds: "completion_event_ids"
+      });
+    });
+    function postDatasetImportFromExplorerInSchemaToJSON(postDatasetImportFromExplorerInSchema) {
+      return JSON.stringify(exports2.PostDatasetImportFromExplorerInSchema$outboundSchema.parse(postDatasetImportFromExplorerInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetimportfromfileinschema.js
+var require_postdatasetimportfromfileinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetimportfromfileinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetImportFromFileInSchema$outboundSchema = void 0;
+    exports2.postDatasetImportFromFileInSchemaToJSON = postDatasetImportFromFileInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.PostDatasetImportFromFileInSchema$outboundSchema = z5.object({
+      fileId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        fileId: "file_id"
+      });
+    });
+    function postDatasetImportFromFileInSchemaToJSON(postDatasetImportFromFileInSchema) {
+      return JSON.stringify(exports2.PostDatasetImportFromFileInSchema$outboundSchema.parse(postDatasetImportFromFileInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetimportfromplaygroundinschema.js
+var require_postdatasetimportfromplaygroundinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetimportfromplaygroundinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetImportFromPlaygroundInSchema$outboundSchema = void 0;
+    exports2.postDatasetImportFromPlaygroundInSchemaToJSON = postDatasetImportFromPlaygroundInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.PostDatasetImportFromPlaygroundInSchema$outboundSchema = z5.object({
+      conversationIds: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        conversationIds: "conversation_ids"
+      });
+    });
+    function postDatasetImportFromPlaygroundInSchemaToJSON(postDatasetImportFromPlaygroundInSchema) {
+      return JSON.stringify(exports2.PostDatasetImportFromPlaygroundInSchema$outboundSchema.parse(postDatasetImportFromPlaygroundInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetinschema.js
+var require_postdatasetinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetInSchema$outboundSchema = void 0;
+    exports2.postDatasetInSchemaToJSON = postDatasetInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    exports2.PostDatasetInSchema$outboundSchema = z5.object({
+      name: z5.string(),
+      description: z5.string()
+    });
+    function postDatasetInSchemaToJSON(postDatasetInSchema) {
+      return JSON.stringify(exports2.PostDatasetInSchema$outboundSchema.parse(postDatasetInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetrecordinschema.js
+var require_postdatasetrecordinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetrecordinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordInSchema$outboundSchema = void 0;
+    exports2.postDatasetRecordInSchemaToJSON = postDatasetRecordInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var conversationpayload_js_1 = require_conversationpayload();
+    exports2.PostDatasetRecordInSchema$outboundSchema = z5.object({
+      payload: conversationpayload_js_1.ConversationPayload$outboundSchema,
+      properties: z5.record(z5.any())
+    });
+    function postDatasetRecordInSchemaToJSON(postDatasetRecordInSchema) {
+      return JSON.stringify(exports2.PostDatasetRecordInSchema$outboundSchema.parse(postDatasetRecordInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/postdatasetrecordjudginginschema.js
+var require_postdatasetrecordjudginginschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/postdatasetrecordjudginginschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordJudgingInSchema$outboundSchema = void 0;
+    exports2.postDatasetRecordJudgingInSchemaToJSON = postDatasetRecordJudgingInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var postjudgeinschema_js_1 = require_postjudgeinschema();
+    exports2.PostDatasetRecordJudgingInSchema$outboundSchema = z5.object({
+      judgeDefinition: postjudgeinschema_js_1.PostJudgeInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        judgeDefinition: "judge_definition"
+      });
+    });
+    function postDatasetRecordJudgingInSchemaToJSON(postDatasetRecordJudgingInSchema) {
+      return JSON.stringify(exports2.PostDatasetRecordJudgingInSchema$outboundSchema.parse(postDatasetRecordJudgingInSchema));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/components/processingstatusout.js
 var require_processingstatusout = __commonJS({
   "node_modules/@mistralai/mistralai/models/components/processingstatusout.js"(exports2) {
@@ -43036,17 +49190,206 @@ var require_processingstatusout = __commonJS({
     var z5 = __importStar(require_v3());
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
+    var processstatus_js_1 = require_processstatus();
     exports2.ProcessingStatusOut$inboundSchema = z5.object({
       document_id: z5.string(),
+      process_status: processstatus_js_1.ProcessStatus$inboundSchema,
       processing_status: z5.string()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "document_id": "documentId",
+        "process_status": "processStatus",
         "processing_status": "processingStatus"
       });
     });
     function processingStatusOutFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ProcessingStatusOut$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ProcessingStatusOut' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/putdatasetrecordpayloadinschema.js
+var require_putdatasetrecordpayloadinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/putdatasetrecordpayloadinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PutDatasetRecordPayloadInSchema$outboundSchema = void 0;
+    exports2.putDatasetRecordPayloadInSchemaToJSON = putDatasetRecordPayloadInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var conversationpayload_js_1 = require_conversationpayload();
+    exports2.PutDatasetRecordPayloadInSchema$outboundSchema = z5.object({
+      payload: conversationpayload_js_1.ConversationPayload$outboundSchema
+    });
+    function putDatasetRecordPayloadInSchemaToJSON(putDatasetRecordPayloadInSchema) {
+      return JSON.stringify(exports2.PutDatasetRecordPayloadInSchema$outboundSchema.parse(putDatasetRecordPayloadInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/putdatasetrecordpropertiesinschema.js
+var require_putdatasetrecordpropertiesinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/putdatasetrecordpropertiesinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PutDatasetRecordPropertiesInSchema$outboundSchema = void 0;
+    exports2.putDatasetRecordPropertiesInSchemaToJSON = putDatasetRecordPropertiesInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    exports2.PutDatasetRecordPropertiesInSchema$outboundSchema = z5.object({
+      properties: z5.record(z5.any())
+    });
+    function putDatasetRecordPropertiesInSchemaToJSON(putDatasetRecordPropertiesInSchema) {
+      return JSON.stringify(exports2.PutDatasetRecordPropertiesInSchema$outboundSchema.parse(putDatasetRecordPropertiesInSchema));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/components/putjudgeinschema.js
+var require_putjudgeinschema = __commonJS({
+  "node_modules/@mistralai/mistralai/models/components/putjudgeinschema.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PutJudgeInSchema$outboundSchema = exports2.PutJudgeInSchemaOutput$outboundSchema = void 0;
+    exports2.putJudgeInSchemaOutputToJSON = putJudgeInSchemaOutputToJSON;
+    exports2.putJudgeInSchemaToJSON = putJudgeInSchemaToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var judgeclassificationoutput_js_1 = require_judgeclassificationoutput();
+    var judgeregressionoutput_js_1 = require_judgeregressionoutput();
+    exports2.PutJudgeInSchemaOutput$outboundSchema = z5.union([
+      judgeclassificationoutput_js_1.JudgeClassificationOutput$outboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+      judgeregressionoutput_js_1.JudgeRegressionOutput$outboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+    ]);
+    function putJudgeInSchemaOutputToJSON(putJudgeInSchemaOutput) {
+      return JSON.stringify(exports2.PutJudgeInSchemaOutput$outboundSchema.parse(putJudgeInSchemaOutput));
+    }
+    exports2.PutJudgeInSchema$outboundSchema = z5.object({
+      name: z5.string(),
+      description: z5.string(),
+      modelName: z5.string(),
+      output: z5.union([
+        judgeclassificationoutput_js_1.JudgeClassificationOutput$outboundSchema.and(z5.object({ type: z5.literal("CLASSIFICATION") })),
+        judgeregressionoutput_js_1.JudgeRegressionOutput$outboundSchema.and(z5.object({ type: z5.literal("REGRESSION") }))
+      ]),
+      instructions: z5.string(),
+      tools: z5.array(z5.string())
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        modelName: "model_name"
+      });
+    });
+    function putJudgeInSchemaToJSON(putJudgeInSchema) {
+      return JSON.stringify(exports2.PutJudgeInSchema$outboundSchema.parse(putJudgeInSchema));
     }
   }
 });
@@ -43832,6 +50175,7 @@ var require_retrievefileout = __commonJS({
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
     var filepurpose_js_1 = require_filepurpose();
+    var filevisibility_js_1 = require_filevisibility();
     var sampletype_js_1 = require_sampletype();
     var source_js_1 = require_source();
     exports2.RetrieveFileOut$inboundSchema = z5.object({
@@ -43846,13 +50190,16 @@ var require_retrievefileout = __commonJS({
       mimetype: z5.nullable(z5.string()).optional(),
       source: source_js_1.Source$inboundSchema,
       signature: z5.nullable(z5.string()).optional(),
+      expires_at: z5.nullable(z5.number().int()).optional(),
+      visibility: z5.nullable(filevisibility_js_1.FileVisibility$inboundSchema).optional(),
       deleted: z5.boolean()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "bytes": "sizeBytes",
         "created_at": "createdAt",
         "sample_type": "sampleType",
-        "num_lines": "numLines"
+        "num_lines": "numLines",
+        "expires_at": "expiresAt"
       });
     });
     function retrieveFileOutFromJSON(jsonString) {
@@ -44844,6 +51191,7 @@ var require_uploadfileout = __commonJS({
     var primitives_js_1 = require_primitives();
     var schemas_js_1 = require_schemas();
     var filepurpose_js_1 = require_filepurpose();
+    var filevisibility_js_1 = require_filevisibility();
     var sampletype_js_1 = require_sampletype();
     var source_js_1 = require_source();
     exports2.UploadFileOut$inboundSchema = z5.object({
@@ -44857,13 +51205,16 @@ var require_uploadfileout = __commonJS({
       num_lines: z5.nullable(z5.number().int()).optional(),
       mimetype: z5.nullable(z5.string()).optional(),
       source: source_js_1.Source$inboundSchema,
-      signature: z5.nullable(z5.string()).optional()
+      signature: z5.nullable(z5.string()).optional(),
+      expires_at: z5.nullable(z5.number().int()).optional(),
+      visibility: z5.nullable(filevisibility_js_1.FileVisibility$inboundSchema).optional()
     }).transform((v5) => {
       return (0, primitives_js_1.remap)(v5, {
         "bytes": "sizeBytes",
         "created_at": "createdAt",
         "sample_type": "sampleType",
-        "num_lines": "numLines"
+        "num_lines": "numLines",
+        "expires_at": "expiresAt"
       });
     });
     function uploadFileOutFromJSON(jsonString) {
@@ -44914,8 +51265,9 @@ var require_validationerror = __commonJS({
       };
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ValidationError$inboundSchema = exports2.Loc$inboundSchema = void 0;
+    exports2.ValidationError$inboundSchema = exports2.Context$inboundSchema = exports2.Loc$inboundSchema = void 0;
     exports2.locFromJSON = locFromJSON;
+    exports2.contextFromJSON = contextFromJSON;
     exports2.validationErrorFromJSON = validationErrorFromJSON;
     var z5 = __importStar(require_v3());
     var schemas_js_1 = require_schemas();
@@ -44923,14 +51275,111 @@ var require_validationerror = __commonJS({
     function locFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Loc$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Loc' from JSON`);
     }
+    exports2.Context$inboundSchema = z5.object({});
+    function contextFromJSON(jsonString) {
+      return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.Context$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'Context' from JSON`);
+    }
     exports2.ValidationError$inboundSchema = z5.object({
       loc: z5.array(z5.union([z5.string(), z5.number().int()])),
       msg: z5.string(),
-      type: z5.string()
+      type: z5.string(),
+      input: z5.any().optional(),
+      ctx: z5.lazy(() => exports2.Context$inboundSchema).optional()
     });
     function validationErrorFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.ValidationError$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'ValidationError' from JSON`);
     }
+  }
+});
+
+// node_modules/@mistralai/mistralai/extra/type-constants.js
+var require_type_constants = __commonJS({
+  "node_modules/@mistralai/mistralai/extra/type-constants.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AgentConversationObject = exports2.AgentObject = exports2.ReportErrorEventType = exports2.ReportCompletedEventType = exports2.ReportStartedEventType = exports2.TaskErrorEventType = exports2.TaskCanceledEventType = exports2.TaskCompletedEventType = exports2.TaskStartedEventType = exports2.StepErrorEventType = exports2.StepCompletedEventType = exports2.StepStartedEventType = exports2.AgentHandoffDoneEventType = exports2.AgentHandoffStartedEventType = exports2.ToolExecutionDoneEventType = exports2.ToolExecutionDeltaEventType = exports2.ToolExecutionStartedEventType = exports2.ResponseErrorEventType = exports2.ResponseDoneEventType = exports2.ResponseStartedEventType = exports2.ConversationEventType = exports2.FunctionCallEventType = exports2.MessageOutputEventRole = exports2.MessageOutputEventType = exports2.AgentHandoffEntryObject = exports2.ToolExecutionEntryObject = exports2.FunctionCallEntryObject = exports2.FunctionResultEntryObject = exports2.MessageInputEntryObject = exports2.MessageOutputEntryObject = exports2.AgentHandoffEntryType = exports2.ToolExecutionEntryType = exports2.FunctionCallEntryType = exports2.FunctionResultEntryType = exports2.MessageInputEntryType = exports2.MessageOutputEntryType = exports2.ToolMessageRole = exports2.UserMessageRole = exports2.SystemMessageRole = exports2.AssistantMessageRole = exports2.TranscriptionSegmentChunkType = exports2.FileURLChunkType = exports2.ToolReferenceChunkType = exports2.ToolFileChunkType = exports2.ReferenceChunkType = exports2.AudioChunkType = exports2.DocumentURLChunkType = exports2.ImageURLChunkType = exports2.ThinkChunkType = exports2.TextChunkType = void 0;
+    exports2.FunctionToolType = exports2.UnarchiveFTModelOutObject = exports2.ArchiveFTModelOutObject = exports2.ModelType = exports2.CompletionFTModelOutObject = exports2.ClassifierFTModelOutModelType = exports2.ClassifierFTModelOutObject = exports2.LegacyJobMetadataOutObject = exports2.WandbIntegrationType = exports2.WandbIntegrationOutType = exports2.GithubRepositoryInType = exports2.GithubRepositoryOutType = exports2.BatchJobsOutObject = exports2.BatchJobOutObject = exports2.JobsOutObject = exports2.CompletionDetailedJobOutJobType = exports2.CompletionDetailedJobOutObject = exports2.ClassifierDetailedJobOutJobType = exports2.ClassifierDetailedJobOutObject = exports2.CompletionJobOutJobType = exports2.CompletionJobOutObject = exports2.ClassifierJobOutJobType = exports2.ClassifierJobOutObject = exports2.TranscriptionStreamTextDeltaType = exports2.TranscriptionStreamSegmentDeltaType = exports2.TranscriptionStreamLanguageType = exports2.TranscriptionStreamDoneType = exports2.ConversationResponseObject = exports2.ConversationMessagesObject = exports2.ConversationHistoryObject = exports2.ModelConversationObject = void 0;
+    exports2.TextChunkType = { Text: "text" };
+    exports2.ThinkChunkType = { Thinking: "thinking" };
+    exports2.ImageURLChunkType = { ImageUrl: "image_url" };
+    exports2.DocumentURLChunkType = { DocumentUrl: "document_url" };
+    exports2.AudioChunkType = { InputAudio: "input_audio" };
+    exports2.ReferenceChunkType = { Reference: "reference" };
+    exports2.ToolFileChunkType = { ToolFile: "tool_file" };
+    exports2.ToolReferenceChunkType = { ToolReference: "tool_reference" };
+    exports2.FileURLChunkType = { FileUrl: "file_url" };
+    exports2.TranscriptionSegmentChunkType = { TranscriptionSegment: "transcription_segment" };
+    exports2.AssistantMessageRole = { Assistant: "assistant" };
+    exports2.SystemMessageRole = { System: "system" };
+    exports2.UserMessageRole = { User: "user" };
+    exports2.ToolMessageRole = { Tool: "tool" };
+    exports2.MessageOutputEntryType = { MessageOutput: "message.output" };
+    exports2.MessageInputEntryType = { MessageInput: "message.input" };
+    exports2.FunctionResultEntryType = { FunctionResult: "function.result" };
+    exports2.FunctionCallEntryType = { FunctionCall: "function.call" };
+    exports2.ToolExecutionEntryType = { ToolExecution: "tool.execution" };
+    exports2.AgentHandoffEntryType = { AgentHandoff: "agent.handoff" };
+    exports2.MessageOutputEntryObject = { MessageOutput: "message.output" };
+    exports2.MessageInputEntryObject = { MessageInput: "message.input" };
+    exports2.FunctionResultEntryObject = { FunctionResult: "function.result" };
+    exports2.FunctionCallEntryObject = { FunctionCall: "function.call" };
+    exports2.ToolExecutionEntryObject = { ToolExecution: "tool.execution" };
+    exports2.AgentHandoffEntryObject = { AgentHandoff: "agent.handoff" };
+    exports2.MessageOutputEventType = { MessageOutputDelta: "message.output.delta" };
+    exports2.MessageOutputEventRole = { Assistant: "assistant" };
+    exports2.FunctionCallEventType = { FunctionCallDelta: "function.call.delta" };
+    exports2.ConversationEventType = { ConversationEvent: "conversation.event" };
+    exports2.ResponseStartedEventType = { ResponseStarted: "response.started" };
+    exports2.ResponseDoneEventType = { ResponseDone: "response.done" };
+    exports2.ResponseErrorEventType = { ResponseError: "response.error" };
+    exports2.ToolExecutionStartedEventType = { ToolExecutionStarted: "tool.execution.started" };
+    exports2.ToolExecutionDeltaEventType = { ToolExecutionDelta: "tool.execution.delta" };
+    exports2.ToolExecutionDoneEventType = { ToolExecutionDone: "tool.execution.done" };
+    exports2.AgentHandoffStartedEventType = { AgentHandoffStarted: "agent.handoff.started" };
+    exports2.AgentHandoffDoneEventType = { AgentHandoffDone: "agent.handoff.done" };
+    exports2.StepStartedEventType = { StepStarted: "step.started" };
+    exports2.StepCompletedEventType = { StepCompleted: "step.completed" };
+    exports2.StepErrorEventType = { StepError: "step.error" };
+    exports2.TaskStartedEventType = { TaskStarted: "task.started" };
+    exports2.TaskCompletedEventType = { TaskCompleted: "task.completed" };
+    exports2.TaskCanceledEventType = { TaskCanceled: "task.canceled" };
+    exports2.TaskErrorEventType = { TaskError: "task.error" };
+    exports2.ReportStartedEventType = { ReportStarted: "report.started" };
+    exports2.ReportCompletedEventType = { ReportCompleted: "report.completed" };
+    exports2.ReportErrorEventType = { ReportError: "report.error" };
+    exports2.AgentObject = { Agent: "agent" };
+    exports2.AgentConversationObject = { AgentConversation: "agent.conversation" };
+    exports2.ModelConversationObject = { ModelConversation: "model.conversation" };
+    exports2.ConversationHistoryObject = { ConversationHistory: "conversation.history" };
+    exports2.ConversationMessagesObject = { ConversationMessages: "conversation.messages" };
+    exports2.ConversationResponseObject = { ConversationResponse: "conversation.response" };
+    exports2.TranscriptionStreamDoneType = { TranscriptionDone: "transcription.done" };
+    exports2.TranscriptionStreamLanguageType = { TranscriptionLanguage: "transcription.language" };
+    exports2.TranscriptionStreamSegmentDeltaType = { TranscriptionSegment: "transcription.segment" };
+    exports2.TranscriptionStreamTextDeltaType = { TranscriptionTextDelta: "transcription.text.delta" };
+    exports2.ClassifierJobOutObject = { Job: "job" };
+    exports2.ClassifierJobOutJobType = { Classifier: "classifier" };
+    exports2.CompletionJobOutObject = { Job: "job" };
+    exports2.CompletionJobOutJobType = { Completion: "completion" };
+    exports2.ClassifierDetailedJobOutObject = { Job: "job" };
+    exports2.ClassifierDetailedJobOutJobType = { Classifier: "classifier" };
+    exports2.CompletionDetailedJobOutObject = { Job: "job" };
+    exports2.CompletionDetailedJobOutJobType = { Completion: "completion" };
+    exports2.JobsOutObject = { List: "list" };
+    exports2.BatchJobOutObject = { Batch: "batch" };
+    exports2.BatchJobsOutObject = { List: "list" };
+    exports2.GithubRepositoryOutType = { Github: "github" };
+    exports2.GithubRepositoryInType = { Github: "github" };
+    exports2.WandbIntegrationOutType = { Wandb: "wandb" };
+    exports2.WandbIntegrationType = { Wandb: "wandb" };
+    exports2.LegacyJobMetadataOutObject = { JobMetadata: "job.metadata" };
+    exports2.ClassifierFTModelOutObject = { Model: "model" };
+    exports2.ClassifierFTModelOutModelType = { Classifier: "classifier" };
+    exports2.CompletionFTModelOutObject = { Model: "model" };
+    exports2.ModelType = { Completion: "completion" };
+    exports2.ArchiveFTModelOutObject = { Model: "model" };
+    exports2.UnarchiveFTModelOutObject = { Model: "model" };
+    exports2.FunctionToolType = { Function: "function" };
   }
 });
 
@@ -44965,28 +51414,47 @@ var require_components = __commonJS({
     __exportStar(require_agentscompletionrequest(), exports2);
     __exportStar(require_agentscompletionstreamrequest(), exports2);
     __exportStar(require_agentupdaterequest(), exports2);
+    __exportStar(require_annotations(), exports2);
     __exportStar(require_apiendpoint(), exports2);
     __exportStar(require_archiveftmodelout(), exports2);
     __exportStar(require_assistantmessage(), exports2);
     __exportStar(require_audiochunk(), exports2);
+    __exportStar(require_audiocontent(), exports2);
     __exportStar(require_audioencoding(), exports2);
     __exportStar(require_audioformat(), exports2);
     __exportStar(require_audiotranscriptionrequest(), exports2);
     __exportStar(require_audiotranscriptionrequeststream(), exports2);
+    __exportStar(require_audiourl(), exports2);
+    __exportStar(require_audiourlchunk(), exports2);
+    __exportStar(require_authdata(), exports2);
+    __exportStar(require_basefielddefinition(), exports2);
     __exportStar(require_basemodelcard(), exports2);
+    __exportStar(require_basetaskstatus(), exports2);
     __exportStar(require_batcherror(), exports2);
     __exportStar(require_batchjobin(), exports2);
     __exportStar(require_batchjobout(), exports2);
     __exportStar(require_batchjobsout(), exports2);
     __exportStar(require_batchjobstatus(), exports2);
     __exportStar(require_batchrequest(), exports2);
+    __exportStar(require_blobresourcecontents(), exports2);
     __exportStar(require_builtinconnectors(), exports2);
+    __exportStar(require_campaignpreview(), exports2);
+    __exportStar(require_campaignpreviews(), exports2);
+    __exportStar(require_campaignselectedevents(), exports2);
+    __exportStar(require_campaignstatus(), exports2);
     __exportStar(require_chatclassificationrequest(), exports2);
     __exportStar(require_chatcompletionchoice(), exports2);
+    __exportStar(require_chatcompletionevent(), exports2);
+    __exportStar(require_chatcompletioneventids(), exports2);
+    __exportStar(require_chatcompletioneventpreview(), exports2);
+    __exportStar(require_chatcompletionevents(), exports2);
+    __exportStar(require_chatcompletionfieldoptions(), exports2);
+    __exportStar(require_chatcompletionfields(), exports2);
     __exportStar(require_chatcompletionrequest(), exports2);
     __exportStar(require_chatcompletionresponse(), exports2);
     __exportStar(require_chatcompletionstreamrequest(), exports2);
     __exportStar(require_chatmoderationrequest(), exports2);
+    __exportStar(require_chattranscriptionevent(), exports2);
     __exportStar(require_checkpointout(), exports2);
     __exportStar(require_classificationrequest(), exports2);
     __exportStar(require_classificationresponse(), exports2);
@@ -45009,6 +51477,10 @@ var require_components = __commonJS({
     __exportStar(require_completionresponsestreamchoice(), exports2);
     __exportStar(require_completiontrainingparameters(), exports2);
     __exportStar(require_completiontrainingparametersin(), exports2);
+    __exportStar(require_connector(), exports2);
+    __exportStar(require_connectormcpcreate(), exports2);
+    __exportStar(require_connectormcpupdate(), exports2);
+    __exportStar(require_connectorsqueryfilters(), exports2);
     __exportStar(require_contentchunk(), exports2);
     __exportStar(require_conversationappendrequest(), exports2);
     __exportStar(require_conversationappendstreamrequest(), exports2);
@@ -45016,12 +51488,23 @@ var require_components = __commonJS({
     __exportStar(require_conversationhistory(), exports2);
     __exportStar(require_conversationinputs(), exports2);
     __exportStar(require_conversationmessages(), exports2);
+    __exportStar(require_conversationpayload(), exports2);
     __exportStar(require_conversationrequest(), exports2);
     __exportStar(require_conversationresponse(), exports2);
     __exportStar(require_conversationrestartrequest(), exports2);
     __exportStar(require_conversationrestartstreamrequest(), exports2);
+    __exportStar(require_conversationsource(), exports2);
     __exportStar(require_conversationstreamrequest(), exports2);
     __exportStar(require_conversationusageinfo(), exports2);
+    __exportStar(require_dataset(), exports2);
+    __exportStar(require_datasetexport(), exports2);
+    __exportStar(require_datasetimporttask(), exports2);
+    __exportStar(require_datasetimporttasks(), exports2);
+    __exportStar(require_datasetpreview(), exports2);
+    __exportStar(require_datasetpreviews(), exports2);
+    __exportStar(require_datasetrecord(), exports2);
+    __exportStar(require_datasetrecords(), exports2);
+    __exportStar(require_deletedatasetrecordsinschema(), exports2);
     __exportStar(require_deletefileout(), exports2);
     __exportStar(require_deletemodelout(), exports2);
     __exportStar(require_deltamessage(), exports2);
@@ -45030,6 +51513,7 @@ var require_components = __commonJS({
     __exportStar(require_documenttextcontent(), exports2);
     __exportStar(require_documentupdatein(), exports2);
     __exportStar(require_documenturlchunk(), exports2);
+    __exportStar(require_embeddedresource(), exports2);
     __exportStar(require_embeddingdtype(), exports2);
     __exportStar(require_embeddingrequest(), exports2);
     __exportStar(require_embeddingresponse(), exports2);
@@ -45037,11 +51521,21 @@ var require_components = __commonJS({
     __exportStar(require_encodingformat(), exports2);
     __exportStar(require_entitytype(), exports2);
     __exportStar(require_eventout(), exports2);
+    __exportStar(require_executionconfig(), exports2);
+    __exportStar(require_feedresultchatcompletioneventpreview(), exports2);
+    __exportStar(require_fieldgroup(), exports2);
+    __exportStar(require_fieldoptioncountitem(), exports2);
+    __exportStar(require_fieldoptioncounts(), exports2);
+    __exportStar(require_fieldoptioncountsinschema(), exports2);
     __exportStar(require_file(), exports2);
     __exportStar(require_filechunk(), exports2);
     __exportStar(require_filepurpose(), exports2);
     __exportStar(require_fileschema(), exports2);
     __exportStar(require_filesignedurl(), exports2);
+    __exportStar(require_filevisibility(), exports2);
+    __exportStar(require_filtercondition(), exports2);
+    __exportStar(require_filtergroup(), exports2);
+    __exportStar(require_filterpayload(), exports2);
     __exportStar(require_fimcompletionrequest(), exports2);
     __exportStar(require_fimcompletionresponse(), exports2);
     __exportStar(require_fimcompletionstreamrequest(), exports2);
@@ -45057,8 +51551,12 @@ var require_components = __commonJS({
     __exportStar(require_functionname(), exports2);
     __exportStar(require_functionresultentry(), exports2);
     __exportStar(require_functiontool(), exports2);
+    __exportStar(require_getchatcompletioneventidsinschema(), exports2);
+    __exportStar(require_getchatcompletioneventsinschema(), exports2);
     __exportStar(require_githubrepositoryin(), exports2);
     __exportStar(require_githubrepositoryout(), exports2);
+    __exportStar(require_guardrailconfig(), exports2);
+    __exportStar(require_imagecontent(), exports2);
     __exportStar(require_imagedetail(), exports2);
     __exportStar(require_imagegenerationtool(), exports2);
     __exportStar(require_imageurl(), exports2);
@@ -45066,10 +51564,19 @@ var require_components = __commonJS({
     __exportStar(require_inputentries(), exports2);
     __exportStar(require_inputs(), exports2);
     __exportStar(require_instructrequest(), exports2);
+    __exportStar(require_integrationsschemasapitooltool(), exports2);
+    __exportStar(require_integrationsschemasturbinetoollocale(), exports2);
     __exportStar(require_jobin(), exports2);
     __exportStar(require_jobmetadataout(), exports2);
     __exportStar(require_jobsout(), exports2);
     __exportStar(require_jsonschema(), exports2);
+    __exportStar(require_judgeclassificationoutput(), exports2);
+    __exportStar(require_judgeclassificationoutputoption(), exports2);
+    __exportStar(require_judgeoutput(), exports2);
+    __exportStar(require_judgeoutputtype(), exports2);
+    __exportStar(require_judgepreview(), exports2);
+    __exportStar(require_judgepreviews(), exports2);
+    __exportStar(require_judgeregressionoutput(), exports2);
     __exportStar(require_legacyjobmetadataout(), exports2);
     __exportStar(require_libraryin(), exports2);
     __exportStar(require_libraryinupdate(), exports2);
@@ -45078,19 +51585,30 @@ var require_components = __commonJS({
     __exportStar(require_listfilesout(), exports2);
     __exportStar(require_listlibraryout(), exports2);
     __exportStar(require_listsharingout(), exports2);
+    __exportStar(require_mcpresultmetadata(), exports2);
+    __exportStar(require_mcpservericon(), exports2);
+    __exportStar(require_mcptoolcallmetadata(), exports2);
+    __exportStar(require_mcptoolcallrequest(), exports2);
+    __exportStar(require_mcptoolcallresponse(), exports2);
     __exportStar(require_messageentries(), exports2);
     __exportStar(require_messageinputcontentchunks(), exports2);
     __exportStar(require_messageinputentry(), exports2);
     __exportStar(require_messageoutputcontentchunks(), exports2);
     __exportStar(require_messageoutputentry(), exports2);
     __exportStar(require_messageoutputevent(), exports2);
+    __exportStar(require_messageresponse(), exports2);
     __exportStar(require_metricout(), exports2);
     __exportStar(require_mistralpromptmode(), exports2);
     __exportStar(require_modelcapabilities(), exports2);
     __exportStar(require_modelconversation(), exports2);
     __exportStar(require_modellist(), exports2);
+    __exportStar(require_moderationllmv1action(), exports2);
+    __exportStar(require_moderationllmv1categorythresholds(), exports2);
+    __exportStar(require_moderationllmv1config(), exports2);
     __exportStar(require_moderationobject(), exports2);
     __exportStar(require_moderationresponse(), exports2);
+    __exportStar(require_observabilityerrorcode(), exports2);
+    __exportStar(require_observabilityerrordetail(), exports2);
     __exportStar(require_ocrimageobject(), exports2);
     __exportStar(require_ocrpagedimensions(), exports2);
     __exportStar(require_ocrpageobject(), exports2);
@@ -45099,9 +51617,33 @@ var require_components = __commonJS({
     __exportStar(require_ocrtableobject(), exports2);
     __exportStar(require_ocrusageinfo(), exports2);
     __exportStar(require_outputcontentchunks(), exports2);
+    __exportStar(require_paginatedconnectors(), exports2);
+    __exportStar(require_paginatedresultcampaignpreview(), exports2);
+    __exportStar(require_paginatedresultchatcompletioneventpreview(), exports2);
+    __exportStar(require_paginatedresultdatasetimporttask(), exports2);
+    __exportStar(require_paginatedresultdatasetpreview(), exports2);
+    __exportStar(require_paginatedresultdatasetrecord(), exports2);
+    __exportStar(require_paginatedresultjudgepreview(), exports2);
     __exportStar(require_paginationinfo(), exports2);
+    __exportStar(require_paginationresponse(), exports2);
+    __exportStar(require_patchdatasetinschema(), exports2);
+    __exportStar(require_postcampaigninschema(), exports2);
+    __exportStar(require_postchatcompletioneventjudginginschema(), exports2);
+    __exportStar(require_postdatasetimportfromcampaigninschema(), exports2);
+    __exportStar(require_postdatasetimportfromdatasetinschema(), exports2);
+    __exportStar(require_postdatasetimportfromexplorerinschema(), exports2);
+    __exportStar(require_postdatasetimportfromfileinschema(), exports2);
+    __exportStar(require_postdatasetimportfromplaygroundinschema(), exports2);
+    __exportStar(require_postdatasetinschema(), exports2);
+    __exportStar(require_postdatasetrecordinschema(), exports2);
+    __exportStar(require_postdatasetrecordjudginginschema(), exports2);
+    __exportStar(require_postjudgeinschema(), exports2);
     __exportStar(require_prediction(), exports2);
     __exportStar(require_processingstatusout(), exports2);
+    __exportStar(require_processstatus(), exports2);
+    __exportStar(require_putdatasetrecordpayloadinschema(), exports2);
+    __exportStar(require_putdatasetrecordpropertiesinschema(), exports2);
+    __exportStar(require_putjudgeinschema(), exports2);
     __exportStar(require_realtimetranscriptionerror(), exports2);
     __exportStar(require_realtimetranscriptionerrordetail(), exports2);
     __exportStar(require_realtimetranscriptioninputaudioappend(), exports2);
@@ -45114,6 +51656,8 @@ var require_components = __commonJS({
     __exportStar(require_realtimetranscriptionsessionupdatepayload(), exports2);
     __exportStar(require_referencechunk(), exports2);
     __exportStar(require_requestsource(), exports2);
+    __exportStar(require_resourcelink(), exports2);
+    __exportStar(require_resourcevisibility(), exports2);
     __exportStar(require_responsedoneevent(), exports2);
     __exportStar(require_responseerrorevent(), exports2);
     __exportStar(require_responseformat(), exports2);
@@ -45131,6 +51675,8 @@ var require_components = __commonJS({
     __exportStar(require_systemmessage(), exports2);
     __exportStar(require_systemmessagecontentchunks(), exports2);
     __exportStar(require_textchunk(), exports2);
+    __exportStar(require_textcontent(), exports2);
+    __exportStar(require_textresourcecontents(), exports2);
     __exportStar(require_thinkchunk(), exports2);
     __exportStar(require_timestampgranularity(), exports2);
     __exportStar(require_tool(), exports2);
@@ -45166,6 +51712,7 @@ var require_components = __commonJS({
     __exportStar(require_wandbintegrationout(), exports2);
     __exportStar(require_websearchpremiumtool(), exports2);
     __exportStar(require_websearchtool(), exports2);
+    __exportStar(require_type_constants(), exports2);
   }
 });
 
@@ -45241,6 +51788,77 @@ var require_httpvalidationerror = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/errors/observabilityerror.js
+var require_observabilityerror = __commonJS({
+  "node_modules/@mistralai/mistralai/models/errors/observabilityerror.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ObservabilityError$inboundSchema = exports2.ObservabilityError = void 0;
+    var z5 = __importStar(require_v3());
+    var components = __importStar(require_components());
+    var mistralerror_js_1 = require_mistralerror();
+    var ObservabilityError = class extends mistralerror_js_1.MistralError {
+      constructor(err, httpMeta) {
+        const message = err.detail?.message || `API error occurred: ${JSON.stringify(err)}`;
+        super(message, httpMeta);
+        this.data$ = err;
+        this.detail = err.detail;
+        this.name = "ObservabilityError";
+      }
+    };
+    exports2.ObservabilityError = ObservabilityError;
+    exports2.ObservabilityError$inboundSchema = z5.object({
+      detail: components.ObservabilityErrorDetail$inboundSchema,
+      request$: z5.instanceof(Request),
+      response$: z5.instanceof(Response),
+      body$: z5.string()
+    }).transform((v5) => {
+      return new ObservabilityError(v5, {
+        request: v5.request$,
+        response: v5.response$,
+        body: v5.body$
+      });
+    });
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/errors/index.js
 var require_errors2 = __commonJS({
   "node_modules/@mistralai/mistralai/models/errors/index.js"(exports2) {
@@ -45265,6 +51883,7 @@ var require_errors2 = __commonJS({
     __exportStar(require_httpclienterrors(), exports2);
     __exportStar(require_httpvalidationerror(), exports2);
     __exportStar(require_mistralerror(), exports2);
+    __exportStar(require_observabilityerror(), exports2);
     __exportStar(require_responsevalidationerror(), exports2);
     __exportStar(require_sdkerror(), exports2);
     __exportStar(require_sdkvalidationerror(), exports2);
@@ -47272,6 +53891,615 @@ var require_agentsapiv1conversationsrestartstream = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/operations/connectorcalltoolv1.js
+var require_connectorcalltoolv1 = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/connectorcalltoolv1.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorCallToolV1Request$outboundSchema = void 0;
+    exports2.connectorCallToolV1RequestToJSON = connectorCallToolV1RequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.ConnectorCallToolV1Request$outboundSchema = z5.object({
+      toolName: z5.string(),
+      connectorIdOrName: z5.string(),
+      mcpToolCallRequest: components.MCPToolCallRequest$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        toolName: "tool_name",
+        connectorIdOrName: "connector_id_or_name",
+        mcpToolCallRequest: "MCPToolCallRequest"
+      });
+    });
+    function connectorCallToolV1RequestToJSON(connectorCallToolV1Request) {
+      return JSON.stringify(exports2.ConnectorCallToolV1Request$outboundSchema.parse(connectorCallToolV1Request));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/connectordeletev1.js
+var require_connectordeletev1 = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/connectordeletev1.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorDeleteV1Request$outboundSchema = void 0;
+    exports2.connectorDeleteV1RequestToJSON = connectorDeleteV1RequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.ConnectorDeleteV1Request$outboundSchema = z5.object({
+      connectorId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        connectorId: "connector_id"
+      });
+    });
+    function connectorDeleteV1RequestToJSON(connectorDeleteV1Request) {
+      return JSON.stringify(exports2.ConnectorDeleteV1Request$outboundSchema.parse(connectorDeleteV1Request));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/connectorgetv1.js
+var require_connectorgetv1 = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/connectorgetv1.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorGetV1Request$outboundSchema = void 0;
+    exports2.connectorGetV1RequestToJSON = connectorGetV1RequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.ConnectorGetV1Request$outboundSchema = z5.object({
+      fetchCustomerData: z5.boolean().default(false),
+      fetchConnectionSecrets: z5.boolean().default(false),
+      connectorIdOrName: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        fetchCustomerData: "fetch_customer_data",
+        fetchConnectionSecrets: "fetch_connection_secrets",
+        connectorIdOrName: "connector_id_or_name"
+      });
+    });
+    function connectorGetV1RequestToJSON(connectorGetV1Request) {
+      return JSON.stringify(exports2.ConnectorGetV1Request$outboundSchema.parse(connectorGetV1Request));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/connectorlistv1.js
+var require_connectorlistv1 = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/connectorlistv1.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorListV1Request$outboundSchema = void 0;
+    exports2.connectorListV1RequestToJSON = connectorListV1RequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.ConnectorListV1Request$outboundSchema = z5.object({
+      queryFilters: components.ConnectorsQueryFilters$outboundSchema.optional(),
+      cursor: z5.nullable(z5.string()).optional(),
+      pageSize: z5.number().int().default(100)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        queryFilters: "query_filters",
+        pageSize: "page_size"
+      });
+    });
+    function connectorListV1RequestToJSON(connectorListV1Request) {
+      return JSON.stringify(exports2.ConnectorListV1Request$outboundSchema.parse(connectorListV1Request));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/connectorupdatev1.js
+var require_connectorupdatev1 = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/connectorupdatev1.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ConnectorUpdateV1Request$outboundSchema = void 0;
+    exports2.connectorUpdateV1RequestToJSON = connectorUpdateV1RequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.ConnectorUpdateV1Request$outboundSchema = z5.object({
+      connectorId: z5.string(),
+      connectorMCPUpdate: components.ConnectorMCPUpdate$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        connectorId: "connector_id",
+        connectorMCPUpdate: "ConnectorMCPUpdate"
+      });
+    });
+    function connectorUpdateV1RequestToJSON(connectorUpdateV1Request) {
+      return JSON.stringify(exports2.ConnectorUpdateV1Request$outboundSchema.parse(connectorUpdateV1Request));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/createdatasetrecordv1observabilitydatasetsdatasetidrecordspost.js
+var require_createdatasetrecordv1observabilitydatasetsdatasetidrecordspost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/createdatasetrecordv1observabilitydatasetsdatasetidrecordspost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CreateDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest$outboundSchema = void 0;
+    exports2.createDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequestToJSON = createDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.CreateDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetRecordInSchema: components.PostDatasetRecordInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetRecordInSchema: "PostDatasetRecordInSchema"
+      });
+    });
+    function createDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequestToJSON(createDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest) {
+      return JSON.stringify(exports2.CreateDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest$outboundSchema.parse(createDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/deletecampaignv1observabilitycampaignscampaigniddelete.js
+var require_deletecampaignv1observabilitycampaignscampaigniddelete = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/deletecampaignv1observabilitycampaignscampaigniddelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest$outboundSchema = void 0;
+    exports2.deleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequestToJSON = deleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.DeleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest$outboundSchema = z5.object({
+      campaignId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        campaignId: "campaign_id"
+      });
+    });
+    function deleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequestToJSON(deleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest) {
+      return JSON.stringify(exports2.DeleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest$outboundSchema.parse(deleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/deletedatasetrecordv1observabilitydatasetrecordsdatasetrecordiddelete.js
+var require_deletedatasetrecordv1observabilitydatasetrecordsdatasetrecordiddelete = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/deletedatasetrecordv1observabilitydatasetrecordsdatasetrecordiddelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest$outboundSchema = void 0;
+    exports2.deleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequestToJSON = deleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.DeleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest$outboundSchema = z5.object({
+      datasetRecordId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordId: "dataset_record_id"
+      });
+    });
+    function deleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequestToJSON(deleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest) {
+      return JSON.stringify(exports2.DeleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest$outboundSchema.parse(deleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/deletedatasetv1observabilitydatasetsdatasetiddelete.js
+var require_deletedatasetv1observabilitydatasetsdatasetiddelete = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/deletedatasetv1observabilitydatasetsdatasetiddelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest$outboundSchema = void 0;
+    exports2.deleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequestToJSON = deleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.DeleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest$outboundSchema = z5.object({
+      datasetId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id"
+      });
+    });
+    function deleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequestToJSON(deleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest) {
+      return JSON.stringify(exports2.DeleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest$outboundSchema.parse(deleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/deletejudgev1observabilityjudgesjudgeiddelete.js
+var require_deletejudgev1observabilityjudgesjudgeiddelete = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/deletejudgev1observabilityjudgesjudgeiddelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest$outboundSchema = void 0;
+    exports2.deleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequestToJSON = deleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.DeleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest$outboundSchema = z5.object({
+      judgeId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        judgeId: "judge_id"
+      });
+    });
+    function deleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequestToJSON(deleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest) {
+      return JSON.stringify(exports2.DeleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest$outboundSchema.parse(deleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/operations/deletemodelv1modelsmodeliddelete.js
 var require_deletemodelv1modelsmodeliddelete = __commonJS({
   "node_modules/@mistralai/mistralai/models/operations/deletemodelv1modelsmodeliddelete.js"(exports2) {
@@ -47327,6 +54555,65 @@ var require_deletemodelv1modelsmodeliddelete = __commonJS({
     });
     function deleteModelV1ModelsModelIdDeleteRequestToJSON(deleteModelV1ModelsModelIdDeleteRequest) {
       return JSON.stringify(exports2.DeleteModelV1ModelsModelIdDeleteRequest$outboundSchema.parse(deleteModelV1ModelsModelIdDeleteRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/exportdatasettojsonlv1observabilitydatasetsdatasetidexportstojsonlget.js
+var require_exportdatasettojsonlv1observabilitydatasetsdatasetidexportstojsonlget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/exportdatasettojsonlv1observabilitydatasetsdatasetidexportstojsonlget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ExportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest$outboundSchema = void 0;
+    exports2.exportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequestToJSON = exportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.ExportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest$outboundSchema = z5.object({
+      datasetId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id"
+      });
+    });
+    function exportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequestToJSON(exportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest) {
+      return JSON.stringify(exports2.ExportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest$outboundSchema.parse(exportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest));
     }
   }
 });
@@ -47679,17 +54966,1079 @@ var require_filesapiroutesuploadfile = __commonJS({
       };
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.FilesApiRoutesUploadFileMultiPartBodyParams$outboundSchema = void 0;
+    exports2.FilesApiRoutesUploadFileMultiPartBodyParams$outboundSchema = exports2.FileVisibility$outboundSchema = exports2.FileVisibility = void 0;
     exports2.filesApiRoutesUploadFileMultiPartBodyParamsToJSON = filesApiRoutesUploadFileMultiPartBodyParamsToJSON;
     var z5 = __importStar(require_v3());
     var blobs_js_1 = require_blobs();
     var components = __importStar(require_components());
+    exports2.FileVisibility = {
+      Workspace: "workspace",
+      User: "user"
+    };
+    exports2.FileVisibility$outboundSchema = z5.nativeEnum(exports2.FileVisibility);
     exports2.FilesApiRoutesUploadFileMultiPartBodyParams$outboundSchema = z5.object({
+      expiry: z5.nullable(z5.number().int()).optional(),
+      visibility: exports2.FileVisibility$outboundSchema.default("workspace"),
       purpose: components.FilePurpose$outboundSchema.optional(),
       file: components.FileT$outboundSchema.or(blobs_js_1.blobLikeSchema)
     });
     function filesApiRoutesUploadFileMultiPartBodyParamsToJSON(filesApiRoutesUploadFileMultiPartBodyParams) {
       return JSON.stringify(exports2.FilesApiRoutesUploadFileMultiPartBodyParams$outboundSchema.parse(filesApiRoutesUploadFileMultiPartBodyParams));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getcampaignbyidv1observabilitycampaignscampaignidget.js
+var require_getcampaignbyidv1observabilitycampaignscampaignidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getcampaignbyidv1observabilitycampaignscampaignidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest$outboundSchema = void 0;
+    exports2.getCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequestToJSON = getCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest$outboundSchema = z5.object({
+      campaignId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        campaignId: "campaign_id"
+      });
+    });
+    function getCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequestToJSON(getCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest) {
+      return JSON.stringify(exports2.GetCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest$outboundSchema.parse(getCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getcampaignselectedeventsv1observabilitycampaignscampaignidselectedeventsget.js
+var require_getcampaignselectedeventsv1observabilitycampaignscampaignidselectedeventsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getcampaignselectedeventsv1observabilitycampaignscampaignidselectedeventsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest$outboundSchema = void 0;
+    exports2.getCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequestToJSON = getCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest$outboundSchema = z5.object({
+      campaignId: z5.string(),
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        campaignId: "campaign_id",
+        pageSize: "page_size"
+      });
+    });
+    function getCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequestToJSON(getCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest) {
+      return JSON.stringify(exports2.GetCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest$outboundSchema.parse(getCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getcampaignstatusbyidv1observabilitycampaignscampaignidstatusget.js
+var require_getcampaignstatusbyidv1observabilitycampaignscampaignidstatusget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getcampaignstatusbyidv1observabilitycampaignscampaignidstatusget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest$outboundSchema = void 0;
+    exports2.getCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequestToJSON = getCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest$outboundSchema = z5.object({
+      campaignId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        campaignId: "campaign_id"
+      });
+    });
+    function getCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequestToJSON(getCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest) {
+      return JSON.stringify(exports2.GetCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest$outboundSchema.parse(getCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getcampaignsv1observabilitycampaignsget.js
+var require_getcampaignsv1observabilitycampaignsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getcampaignsv1observabilitycampaignsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetCampaignsV1ObservabilityCampaignsGetRequest$outboundSchema = void 0;
+    exports2.getCampaignsV1ObservabilityCampaignsGetRequestToJSON = getCampaignsV1ObservabilityCampaignsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetCampaignsV1ObservabilityCampaignsGetRequest$outboundSchema = z5.object({
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1),
+      q: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        pageSize: "page_size"
+      });
+    });
+    function getCampaignsV1ObservabilityCampaignsGetRequestToJSON(getCampaignsV1ObservabilityCampaignsGetRequest) {
+      return JSON.stringify(exports2.GetCampaignsV1ObservabilityCampaignsGetRequest$outboundSchema.parse(getCampaignsV1ObservabilityCampaignsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getchatcompletioneventsv1observabilitychatcompletioneventssearchpost.js
+var require_getchatcompletioneventsv1observabilitychatcompletioneventssearchpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getchatcompletioneventsv1observabilitychatcompletioneventssearchpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest$outboundSchema = void 0;
+    exports2.getChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequestToJSON = getChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.GetChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest$outboundSchema = z5.object({
+      pageSize: z5.number().int().default(50),
+      cursor: z5.nullable(z5.string()).optional(),
+      getChatCompletionEventsInSchema: components.GetChatCompletionEventsInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        pageSize: "page_size",
+        getChatCompletionEventsInSchema: "GetChatCompletionEventsInSchema"
+      });
+    });
+    function getChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequestToJSON(getChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest) {
+      return JSON.stringify(exports2.GetChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest$outboundSchema.parse(getChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getchatcompletioneventv1observabilitychatcompletioneventseventidget.js
+var require_getchatcompletioneventv1observabilitychatcompletioneventseventidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getchatcompletioneventv1observabilitychatcompletioneventseventidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest$outboundSchema = void 0;
+    exports2.getChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequestToJSON = getChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest$outboundSchema = z5.object({
+      eventId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        eventId: "event_id"
+      });
+    });
+    function getChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequestToJSON(getChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest) {
+      return JSON.stringify(exports2.GetChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest$outboundSchema.parse(getChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getchatcompletionfieldoptionscountsv1observabilitychatcompletionfieldsfieldnameoptionscountspost.js
+var require_getchatcompletionfieldoptionscountsv1observabilitychatcompletionfieldsfieldnameoptionscountspost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getchatcompletionfieldoptionscountsv1observabilitychatcompletionfieldsfieldnameoptionscountspost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest$outboundSchema = void 0;
+    exports2.getChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequestToJSON = getChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.GetChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest$outboundSchema = z5.object({
+      fieldName: z5.string(),
+      fieldOptionCountsInSchema: components.FieldOptionCountsInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        fieldName: "field_name",
+        fieldOptionCountsInSchema: "FieldOptionCountsInSchema"
+      });
+    });
+    function getChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequestToJSON(getChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest) {
+      return JSON.stringify(exports2.GetChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest$outboundSchema.parse(getChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getchatcompletionfieldoptionsv1observabilitychatcompletionfieldsfieldnameoptionsget.js
+var require_getchatcompletionfieldoptionsv1observabilitychatcompletionfieldsfieldnameoptionsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getchatcompletionfieldoptionsv1observabilitychatcompletionfieldsfieldnameoptionsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest$outboundSchema = exports2.Operator$outboundSchema = exports2.Operator = void 0;
+    exports2.getChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequestToJSON = getChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.Operator = {
+      Lt: "lt",
+      Lte: "lte",
+      Gt: "gt",
+      Gte: "gte",
+      Startswith: "startswith",
+      Istartswith: "istartswith",
+      Endswith: "endswith",
+      Iendswith: "iendswith",
+      Contains: "contains",
+      Icontains: "icontains",
+      Matches: "matches",
+      Notcontains: "notcontains",
+      Inotcontains: "inotcontains",
+      Eq: "eq",
+      Neq: "neq",
+      Isnull: "isnull",
+      Includes: "includes",
+      Excludes: "excludes",
+      LenEq: "len_eq"
+    };
+    exports2.Operator$outboundSchema = z5.nativeEnum(exports2.Operator);
+    exports2.GetChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest$outboundSchema = z5.object({
+      fieldName: z5.string(),
+      operator: exports2.Operator$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        fieldName: "field_name"
+      });
+    });
+    function getChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequestToJSON(getChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest) {
+      return JSON.stringify(exports2.GetChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest$outboundSchema.parse(getChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetbyidv1observabilitydatasetsdatasetidget.js
+var require_getdatasetbyidv1observabilitydatasetsdatasetidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetbyidv1observabilitydatasetsdatasetidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest$outboundSchema = void 0;
+    exports2.getDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequestToJSON = getDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest$outboundSchema = z5.object({
+      datasetId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id"
+      });
+    });
+    function getDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequestToJSON(getDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest) {
+      return JSON.stringify(exports2.GetDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest$outboundSchema.parse(getDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetimporttasksv1observabilitydatasetsdatasetidtasksget.js
+var require_getdatasetimporttasksv1observabilitydatasetsdatasetidtasksget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetimporttasksv1observabilitydatasetsdatasetidtasksget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest$outboundSchema = void 0;
+    exports2.getDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequestToJSON = getDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        pageSize: "page_size"
+      });
+    });
+    function getDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequestToJSON(getDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest) {
+      return JSON.stringify(exports2.GetDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest$outboundSchema.parse(getDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetimporttaskv1observabilitydatasetsdatasetidtaskstaskidget.js
+var require_getdatasetimporttaskv1observabilitydatasetsdatasetidtaskstaskidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetimporttaskv1observabilitydatasetsdatasetidtaskstaskidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest$outboundSchema = void 0;
+    exports2.getDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequestToJSON = getDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      taskId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        taskId: "task_id"
+      });
+    });
+    function getDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequestToJSON(getDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest) {
+      return JSON.stringify(exports2.GetDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest$outboundSchema.parse(getDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetrecordsv1observabilitydatasetsdatasetidrecordsget.js
+var require_getdatasetrecordsv1observabilitydatasetsdatasetidrecordsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetrecordsv1observabilitydatasetsdatasetidrecordsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest$outboundSchema = void 0;
+    exports2.getDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequestToJSON = getDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1)
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        pageSize: "page_size"
+      });
+    });
+    function getDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequestToJSON(getDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest) {
+      return JSON.stringify(exports2.GetDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest$outboundSchema.parse(getDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetrecordv1observabilitydatasetrecordsdatasetrecordidget.js
+var require_getdatasetrecordv1observabilitydatasetrecordsdatasetrecordidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetrecordv1observabilitydatasetrecordsdatasetrecordidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest$outboundSchema = void 0;
+    exports2.getDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequestToJSON = getDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest$outboundSchema = z5.object({
+      datasetRecordId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordId: "dataset_record_id"
+      });
+    });
+    function getDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequestToJSON(getDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest) {
+      return JSON.stringify(exports2.GetDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest$outboundSchema.parse(getDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getdatasetsv1observabilitydatasetsget.js
+var require_getdatasetsv1observabilitydatasetsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getdatasetsv1observabilitydatasetsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetDatasetsV1ObservabilityDatasetsGetRequest$outboundSchema = void 0;
+    exports2.getDatasetsV1ObservabilityDatasetsGetRequestToJSON = getDatasetsV1ObservabilityDatasetsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetDatasetsV1ObservabilityDatasetsGetRequest$outboundSchema = z5.object({
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1),
+      q: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        pageSize: "page_size"
+      });
+    });
+    function getDatasetsV1ObservabilityDatasetsGetRequestToJSON(getDatasetsV1ObservabilityDatasetsGetRequest) {
+      return JSON.stringify(exports2.GetDatasetsV1ObservabilityDatasetsGetRequest$outboundSchema.parse(getDatasetsV1ObservabilityDatasetsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getjudgebyidv1observabilityjudgesjudgeidget.js
+var require_getjudgebyidv1observabilityjudgesjudgeidget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getjudgebyidv1observabilityjudgesjudgeidget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest$outboundSchema = void 0;
+    exports2.getJudgeByIdV1ObservabilityJudgesJudgeIdGetRequestToJSON = getJudgeByIdV1ObservabilityJudgesJudgeIdGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest$outboundSchema = z5.object({
+      judgeId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        judgeId: "judge_id"
+      });
+    });
+    function getJudgeByIdV1ObservabilityJudgesJudgeIdGetRequestToJSON(getJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest) {
+      return JSON.stringify(exports2.GetJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest$outboundSchema.parse(getJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getjudgesv1observabilityjudgesget.js
+var require_getjudgesv1observabilityjudgesget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getjudgesv1observabilityjudgesget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetJudgesV1ObservabilityJudgesGetRequest$outboundSchema = void 0;
+    exports2.getJudgesV1ObservabilityJudgesGetRequestToJSON = getJudgesV1ObservabilityJudgesGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.GetJudgesV1ObservabilityJudgesGetRequest$outboundSchema = z5.object({
+      typeFilter: z5.nullable(z5.array(components.JudgeOutputType$outboundSchema)).optional(),
+      modelFilter: z5.nullable(z5.array(z5.string())).optional(),
+      pageSize: z5.number().int().default(50),
+      page: z5.number().int().default(1),
+      q: z5.nullable(z5.string()).optional()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        typeFilter: "type_filter",
+        modelFilter: "model_filter",
+        pageSize: "page_size"
+      });
+    });
+    function getJudgesV1ObservabilityJudgesGetRequestToJSON(getJudgesV1ObservabilityJudgesGetRequest) {
+      return JSON.stringify(exports2.GetJudgesV1ObservabilityJudgesGetRequest$outboundSchema.parse(getJudgesV1ObservabilityJudgesGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/getsimilarchatcompletioneventsv1observabilitychatcompletioneventseventidsimilareventsget.js
+var require_getsimilarchatcompletioneventsv1observabilitychatcompletioneventseventidsimilareventsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/getsimilarchatcompletioneventsv1observabilitychatcompletioneventseventidsimilareventsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.GetSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest$outboundSchema = void 0;
+    exports2.getSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequestToJSON = getSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    exports2.GetSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest$outboundSchema = z5.object({
+      eventId: z5.string()
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        eventId: "event_id"
+      });
+    });
+    function getSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequestToJSON(getSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest) {
+      return JSON.stringify(exports2.GetSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest$outboundSchema.parse(getSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest));
     }
   }
 });
@@ -48460,6 +56809,130 @@ var require_jobsapiroutesfinetuningupdatefinetunedmodel = __commonJS({
     ]);
     function jobsApiRoutesFineTuningUpdateFineTunedModelResponseFromJSON(jsonString) {
       return (0, schemas_js_1.safeParse)(jsonString, (x6) => exports2.JobsApiRoutesFineTuningUpdateFineTunedModelResponse$inboundSchema.parse(JSON.parse(x6)), `Failed to parse 'JobsApiRoutesFineTuningUpdateFineTunedModelResponse' from JSON`);
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/judgechatcompletioneventv1observabilitychatcompletioneventseventidlivejudgingpost.js
+var require_judgechatcompletioneventv1observabilitychatcompletioneventseventidlivejudgingpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/judgechatcompletioneventv1observabilitychatcompletioneventseventidlivejudgingpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest$outboundSchema = void 0;
+    exports2.judgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequestToJSON = judgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.JudgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest$outboundSchema = z5.object({
+      eventId: z5.string(),
+      postChatCompletionEventJudgingInSchema: components.PostChatCompletionEventJudgingInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        eventId: "event_id",
+        postChatCompletionEventJudgingInSchema: "PostChatCompletionEventJudgingInSchema"
+      });
+    });
+    function judgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequestToJSON(judgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest) {
+      return JSON.stringify(exports2.JudgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest$outboundSchema.parse(judgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/judgedatasetrecordv1observabilitydatasetrecordsdatasetrecordidlivejudgingpost.js
+var require_judgedatasetrecordv1observabilitydatasetrecordsdatasetrecordidlivejudgingpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/judgedatasetrecordv1observabilitydatasetrecordsdatasetrecordidlivejudgingpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.JudgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest$outboundSchema = void 0;
+    exports2.judgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequestToJSON = judgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.JudgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest$outboundSchema = z5.object({
+      datasetRecordId: z5.string(),
+      postDatasetRecordJudgingInSchema: components.PostDatasetRecordJudgingInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordId: "dataset_record_id",
+        postDatasetRecordJudgingInSchema: "PostDatasetRecordJudgingInSchema"
+      });
+    });
+    function judgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequestToJSON(judgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest) {
+      return JSON.stringify(exports2.JudgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest$outboundSchema.parse(judgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest));
     }
   }
 });
@@ -49457,6 +57930,371 @@ var require_librariesupdatev1 = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/operations/listmodelsv1modelsget.js
+var require_listmodelsv1modelsget = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/listmodelsv1modelsget.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ListModelsV1ModelsGetRequest$outboundSchema = void 0;
+    exports2.listModelsV1ModelsGetRequestToJSON = listModelsV1ModelsGetRequestToJSON;
+    var z5 = __importStar(require_v3());
+    exports2.ListModelsV1ModelsGetRequest$outboundSchema = z5.object({
+      provider: z5.nullable(z5.string()).optional(),
+      model: z5.nullable(z5.string()).optional()
+    });
+    function listModelsV1ModelsGetRequestToJSON(listModelsV1ModelsGetRequest) {
+      return JSON.stringify(exports2.ListModelsV1ModelsGetRequest$outboundSchema.parse(listModelsV1ModelsGetRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromcampaignv1observabilitydatasetsdatasetidimportsfromcampaignpost.js
+var require_postdatasetrecordsfromcampaignv1observabilitydatasetsdatasetidimportsfromcampaignpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromcampaignv1observabilitydatasetsdatasetidimportsfromcampaignpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest$outboundSchema = void 0;
+    exports2.postDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequestToJSON = postDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.PostDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetImportFromCampaignInSchema: components.PostDatasetImportFromCampaignInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetImportFromCampaignInSchema: "PostDatasetImportFromCampaignInSchema"
+      });
+    });
+    function postDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequestToJSON(postDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest) {
+      return JSON.stringify(exports2.PostDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest$outboundSchema.parse(postDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromdatasetv1observabilitydatasetsdatasetidimportsfromdatasetpost.js
+var require_postdatasetrecordsfromdatasetv1observabilitydatasetsdatasetidimportsfromdatasetpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromdatasetv1observabilitydatasetsdatasetidimportsfromdatasetpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest$outboundSchema = void 0;
+    exports2.postDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequestToJSON = postDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.PostDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetImportFromDatasetInSchema: components.PostDatasetImportFromDatasetInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetImportFromDatasetInSchema: "PostDatasetImportFromDatasetInSchema"
+      });
+    });
+    function postDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequestToJSON(postDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest) {
+      return JSON.stringify(exports2.PostDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest$outboundSchema.parse(postDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromexplorerv1observabilitydatasetsdatasetidimportsfromexplorerpost.js
+var require_postdatasetrecordsfromexplorerv1observabilitydatasetsdatasetidimportsfromexplorerpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromexplorerv1observabilitydatasetsdatasetidimportsfromexplorerpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest$outboundSchema = void 0;
+    exports2.postDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequestToJSON = postDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.PostDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetImportFromExplorerInSchema: components.PostDatasetImportFromExplorerInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetImportFromExplorerInSchema: "PostDatasetImportFromExplorerInSchema"
+      });
+    });
+    function postDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequestToJSON(postDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest) {
+      return JSON.stringify(exports2.PostDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest$outboundSchema.parse(postDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromfilev1observabilitydatasetsdatasetidimportsfromfilepost.js
+var require_postdatasetrecordsfromfilev1observabilitydatasetsdatasetidimportsfromfilepost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromfilev1observabilitydatasetsdatasetidimportsfromfilepost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest$outboundSchema = void 0;
+    exports2.postDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequestToJSON = postDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.PostDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetImportFromFileInSchema: components.PostDatasetImportFromFileInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetImportFromFileInSchema: "PostDatasetImportFromFileInSchema"
+      });
+    });
+    function postDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequestToJSON(postDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest) {
+      return JSON.stringify(exports2.PostDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest$outboundSchema.parse(postDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromplaygroundv1observabilitydatasetsdatasetidimportsfromplaygroundpost.js
+var require_postdatasetrecordsfromplaygroundv1observabilitydatasetsdatasetidimportsfromplaygroundpost = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/postdatasetrecordsfromplaygroundv1observabilitydatasetsdatasetidimportsfromplaygroundpost.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PostDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest$outboundSchema = void 0;
+    exports2.postDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequestToJSON = postDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.PostDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      postDatasetImportFromPlaygroundInSchema: components.PostDatasetImportFromPlaygroundInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        postDatasetImportFromPlaygroundInSchema: "PostDatasetImportFromPlaygroundInSchema"
+      });
+    });
+    function postDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequestToJSON(postDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest) {
+      return JSON.stringify(exports2.PostDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest$outboundSchema.parse(postDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/operations/retrievemodelv1modelsmodelidget.js
 var require_retrievemodelv1modelsmodelidget = __commonJS({
   "node_modules/@mistralai/mistralai/models/operations/retrievemodelv1modelsmodelidget.js"(exports2) {
@@ -49526,6 +58364,254 @@ var require_retrievemodelv1modelsmodelidget = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/models/operations/updatedatasetrecordpayloadv1observabilitydatasetrecordsdatasetrecordidpayloadput.js
+var require_updatedatasetrecordpayloadv1observabilitydatasetrecordsdatasetrecordidpayloadput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/updatedatasetrecordpayloadv1observabilitydatasetrecordsdatasetrecordidpayloadput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.UpdateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest$outboundSchema = void 0;
+    exports2.updateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequestToJSON = updateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.UpdateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest$outboundSchema = z5.object({
+      datasetRecordId: z5.string(),
+      putDatasetRecordPayloadInSchema: components.PutDatasetRecordPayloadInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordId: "dataset_record_id",
+        putDatasetRecordPayloadInSchema: "PutDatasetRecordPayloadInSchema"
+      });
+    });
+    function updateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequestToJSON(updateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest) {
+      return JSON.stringify(exports2.UpdateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest$outboundSchema.parse(updateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/updatedatasetrecordpropertiesv1observabilitydatasetrecordsdatasetrecordidpropertiesput.js
+var require_updatedatasetrecordpropertiesv1observabilitydatasetrecordsdatasetrecordidpropertiesput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/updatedatasetrecordpropertiesv1observabilitydatasetrecordsdatasetrecordidpropertiesput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.UpdateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest$outboundSchema = void 0;
+    exports2.updateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequestToJSON = updateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.UpdateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest$outboundSchema = z5.object({
+      datasetRecordId: z5.string(),
+      putDatasetRecordPropertiesInSchema: components.PutDatasetRecordPropertiesInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetRecordId: "dataset_record_id",
+        putDatasetRecordPropertiesInSchema: "PutDatasetRecordPropertiesInSchema"
+      });
+    });
+    function updateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequestToJSON(updateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest) {
+      return JSON.stringify(exports2.UpdateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest$outboundSchema.parse(updateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/updatedatasetv1observabilitydatasetsdatasetidpatch.js
+var require_updatedatasetv1observabilitydatasetsdatasetidpatch = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/updatedatasetv1observabilitydatasetsdatasetidpatch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.UpdateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest$outboundSchema = void 0;
+    exports2.updateDatasetV1ObservabilityDatasetsDatasetIdPatchRequestToJSON = updateDatasetV1ObservabilityDatasetsDatasetIdPatchRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.UpdateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest$outboundSchema = z5.object({
+      datasetId: z5.string(),
+      patchDatasetInSchema: components.PatchDatasetInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        datasetId: "dataset_id",
+        patchDatasetInSchema: "PatchDatasetInSchema"
+      });
+    });
+    function updateDatasetV1ObservabilityDatasetsDatasetIdPatchRequestToJSON(updateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest) {
+      return JSON.stringify(exports2.UpdateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest$outboundSchema.parse(updateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest));
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/models/operations/updatejudgev1observabilityjudgesjudgeidput.js
+var require_updatejudgev1observabilityjudgesjudgeidput = __commonJS({
+  "node_modules/@mistralai/mistralai/models/operations/updatejudgev1observabilityjudgesjudgeidput.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.UpdateJudgeV1ObservabilityJudgesJudgeIdPutRequest$outboundSchema = void 0;
+    exports2.updateJudgeV1ObservabilityJudgesJudgeIdPutRequestToJSON = updateJudgeV1ObservabilityJudgesJudgeIdPutRequestToJSON;
+    var z5 = __importStar(require_v3());
+    var primitives_js_1 = require_primitives();
+    var components = __importStar(require_components());
+    exports2.UpdateJudgeV1ObservabilityJudgesJudgeIdPutRequest$outboundSchema = z5.object({
+      judgeId: z5.string(),
+      putJudgeInSchema: components.PutJudgeInSchema$outboundSchema
+    }).transform((v5) => {
+      return (0, primitives_js_1.remap)(v5, {
+        judgeId: "judge_id",
+        putJudgeInSchema: "PutJudgeInSchema"
+      });
+    });
+    function updateJudgeV1ObservabilityJudgesJudgeIdPutRequestToJSON(updateJudgeV1ObservabilityJudgesJudgeIdPutRequest) {
+      return JSON.stringify(exports2.UpdateJudgeV1ObservabilityJudgesJudgeIdPutRequest$outboundSchema.parse(updateJudgeV1ObservabilityJudgesJudgeIdPutRequest));
+    }
+  }
+});
+
 // node_modules/@mistralai/mistralai/models/operations/index.js
 var require_operations = __commonJS({
   "node_modules/@mistralai/mistralai/models/operations/index.js"(exports2) {
@@ -49566,13 +58652,41 @@ var require_operations = __commonJS({
     __exportStar(require_agentsapiv1conversationsmessages(), exports2);
     __exportStar(require_agentsapiv1conversationsrestart(), exports2);
     __exportStar(require_agentsapiv1conversationsrestartstream(), exports2);
+    __exportStar(require_connectorcalltoolv1(), exports2);
+    __exportStar(require_connectordeletev1(), exports2);
+    __exportStar(require_connectorgetv1(), exports2);
+    __exportStar(require_connectorlistv1(), exports2);
+    __exportStar(require_connectorupdatev1(), exports2);
+    __exportStar(require_createdatasetrecordv1observabilitydatasetsdatasetidrecordspost(), exports2);
+    __exportStar(require_deletecampaignv1observabilitycampaignscampaigniddelete(), exports2);
+    __exportStar(require_deletedatasetrecordv1observabilitydatasetrecordsdatasetrecordiddelete(), exports2);
+    __exportStar(require_deletedatasetv1observabilitydatasetsdatasetiddelete(), exports2);
+    __exportStar(require_deletejudgev1observabilityjudgesjudgeiddelete(), exports2);
     __exportStar(require_deletemodelv1modelsmodeliddelete(), exports2);
+    __exportStar(require_exportdatasettojsonlv1observabilitydatasetsdatasetidexportstojsonlget(), exports2);
     __exportStar(require_filesapiroutesdeletefile(), exports2);
     __exportStar(require_filesapiroutesdownloadfile(), exports2);
     __exportStar(require_filesapiroutesgetsignedurl(), exports2);
     __exportStar(require_filesapirouteslistfiles(), exports2);
     __exportStar(require_filesapiroutesretrievefile(), exports2);
     __exportStar(require_filesapiroutesuploadfile(), exports2);
+    __exportStar(require_getcampaignbyidv1observabilitycampaignscampaignidget(), exports2);
+    __exportStar(require_getcampaignselectedeventsv1observabilitycampaignscampaignidselectedeventsget(), exports2);
+    __exportStar(require_getcampaignstatusbyidv1observabilitycampaignscampaignidstatusget(), exports2);
+    __exportStar(require_getcampaignsv1observabilitycampaignsget(), exports2);
+    __exportStar(require_getchatcompletioneventsv1observabilitychatcompletioneventssearchpost(), exports2);
+    __exportStar(require_getchatcompletioneventv1observabilitychatcompletioneventseventidget(), exports2);
+    __exportStar(require_getchatcompletionfieldoptionscountsv1observabilitychatcompletionfieldsfieldnameoptionscountspost(), exports2);
+    __exportStar(require_getchatcompletionfieldoptionsv1observabilitychatcompletionfieldsfieldnameoptionsget(), exports2);
+    __exportStar(require_getdatasetbyidv1observabilitydatasetsdatasetidget(), exports2);
+    __exportStar(require_getdatasetimporttasksv1observabilitydatasetsdatasetidtasksget(), exports2);
+    __exportStar(require_getdatasetimporttaskv1observabilitydatasetsdatasetidtaskstaskidget(), exports2);
+    __exportStar(require_getdatasetrecordsv1observabilitydatasetsdatasetidrecordsget(), exports2);
+    __exportStar(require_getdatasetrecordv1observabilitydatasetrecordsdatasetrecordidget(), exports2);
+    __exportStar(require_getdatasetsv1observabilitydatasetsget(), exports2);
+    __exportStar(require_getjudgebyidv1observabilityjudgesjudgeidget(), exports2);
+    __exportStar(require_getjudgesv1observabilityjudgesget(), exports2);
+    __exportStar(require_getsimilarchatcompletioneventsv1observabilitychatcompletioneventseventidsimilareventsget(), exports2);
     __exportStar(require_jobsapiroutesbatchcancelbatchjob(), exports2);
     __exportStar(require_jobsapiroutesbatchgetbatchjob(), exports2);
     __exportStar(require_jobsapiroutesbatchgetbatchjobs(), exports2);
@@ -49584,6 +58698,8 @@ var require_operations = __commonJS({
     __exportStar(require_jobsapiroutesfinetuningstartfinetuningjob(), exports2);
     __exportStar(require_jobsapiroutesfinetuningunarchivefinetunedmodel(), exports2);
     __exportStar(require_jobsapiroutesfinetuningupdatefinetunedmodel(), exports2);
+    __exportStar(require_judgechatcompletioneventv1observabilitychatcompletioneventseventidlivejudgingpost(), exports2);
+    __exportStar(require_judgedatasetrecordv1observabilitydatasetrecordsdatasetrecordidlivejudgingpost(), exports2);
     __exportStar(require_librariesdeletev1(), exports2);
     __exportStar(require_librariesdocumentsdeletev1(), exports2);
     __exportStar(require_librariesdocumentsgetextractedtextsignedurlv1(), exports2);
@@ -49600,7 +58716,17 @@ var require_operations = __commonJS({
     __exportStar(require_librariessharedeletev1(), exports2);
     __exportStar(require_librariessharelistv1(), exports2);
     __exportStar(require_librariesupdatev1(), exports2);
+    __exportStar(require_listmodelsv1modelsget(), exports2);
+    __exportStar(require_postdatasetrecordsfromcampaignv1observabilitydatasetsdatasetidimportsfromcampaignpost(), exports2);
+    __exportStar(require_postdatasetrecordsfromdatasetv1observabilitydatasetsdatasetidimportsfromdatasetpost(), exports2);
+    __exportStar(require_postdatasetrecordsfromexplorerv1observabilitydatasetsdatasetidimportsfromexplorerpost(), exports2);
+    __exportStar(require_postdatasetrecordsfromfilev1observabilitydatasetsdatasetidimportsfromfilepost(), exports2);
+    __exportStar(require_postdatasetrecordsfromplaygroundv1observabilitydatasetsdatasetidimportsfromplaygroundpost(), exports2);
     __exportStar(require_retrievemodelv1modelsmodelidget(), exports2);
+    __exportStar(require_updatedatasetrecordpayloadv1observabilitydatasetrecordsdatasetrecordidpayloadput(), exports2);
+    __exportStar(require_updatedatasetrecordpropertiesv1observabilitydatasetrecordsdatasetrecordidpropertiesput(), exports2);
+    __exportStar(require_updatedatasetv1observabilitydatasetsdatasetidpatch(), exports2);
+    __exportStar(require_updatejudgev1observabilityjudgesjudgeidput(), exports2);
   }
 });
 
@@ -50151,6 +59277,815 @@ var require_batch = __commonJS({
       }
     };
     exports2.Batch = Batch;
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsCallTool.js
+var require_betaConnectorsCallTool = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsCallTool.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsCallTool = betaConnectorsCallTool;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaConnectorsCallTool(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ConnectorCallToolV1Request$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.MCPToolCallRequest, {
+        explode: true
+      });
+      const pathParams = {
+        connector_id_or_name: (0, encodings_js_1.encodeSimple)("connector_id_or_name", payload.connector_id_or_name, { explode: false, charEncoding: "percent" }),
+        tool_name: (0, encodings_js_1.encodeSimple)("tool_name", payload.tool_name, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors/{connector_id_or_name}/tools/{tool_name}/call")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_call_tool_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.MCPToolCallResponse$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsCreate.js
+var require_betaConnectorsCreate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsCreate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsCreate = betaConnectorsCreate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaConnectorsCreate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.ConnectorMCPCreate$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_create_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(201, components.Connector$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsDelete.js
+var require_betaConnectorsDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsDelete = betaConnectorsDelete;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaConnectorsDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ConnectorDeleteV1Request$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        connector_id: (0, encodings_js_1.encodeSimple)("connector_id", payload.connector_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors/{connector_id}#id")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_delete_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "DELETE",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.MessageResponse$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsGet.js
+var require_betaConnectorsGet = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsGet.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsGet = betaConnectorsGet;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaConnectorsGet(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ConnectorGetV1Request$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        connector_id_or_name: (0, encodings_js_1.encodeSimple)("connector_id_or_name", payload.connector_id_or_name, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors/{connector_id_or_name}#idOrName")(pathParams);
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "fetch_connection_secrets": payload.fetch_connection_secrets,
+        "fetch_customer_data": payload.fetch_customer_data
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_get_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.Connector$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsList.js
+var require_betaConnectorsList = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsList.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsList = betaConnectorsList;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaConnectorsList(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ConnectorListV1Request$outboundSchema.optional().parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "cursor": payload?.cursor,
+        "page_size": payload?.page_size,
+        "query_filters": payload?.query_filters
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_list_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.PaginatedConnectors$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaConnectorsUpdate.js
+var require_betaConnectorsUpdate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaConnectorsUpdate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaConnectorsUpdate = betaConnectorsUpdate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaConnectorsUpdate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ConnectorUpdateV1Request$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.ConnectorMCPUpdate, {
+        explode: true
+      });
+      const pathParams = {
+        connector_id: (0, encodings_js_1.encodeSimple)("connector_id", payload.connector_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/connectors/{connector_id}#id")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "connector_update_v1",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "PATCH",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.Connector$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/connectors.js
+var require_connectors = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/connectors.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Connectors = void 0;
+    var betaConnectorsCallTool_js_1 = require_betaConnectorsCallTool();
+    var betaConnectorsCreate_js_1 = require_betaConnectorsCreate();
+    var betaConnectorsDelete_js_1 = require_betaConnectorsDelete();
+    var betaConnectorsGet_js_1 = require_betaConnectorsGet();
+    var betaConnectorsList_js_1 = require_betaConnectorsList();
+    var betaConnectorsUpdate_js_1 = require_betaConnectorsUpdate();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var Connectors = class extends sdks_js_1.ClientSDK {
+      /**
+       * Create a new connector.
+       *
+       * @remarks
+       * Create a new MCP connector. You can customize its visibility, url and auth type.
+       */
+      async create(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsCreate_js_1.betaConnectorsCreate)(this, request, options));
+      }
+      /**
+       * List all connectors.
+       *
+       * @remarks
+       * List all your custom connectors with keyset pagination and filters.
+       */
+      async list(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsList_js_1.betaConnectorsList)(this, request, options));
+      }
+      /**
+       * Call Connector Tool
+       *
+       * @remarks
+       * Call a tool on an MCP connector.
+       */
+      async callTool(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsCallTool_js_1.betaConnectorsCallTool)(this, request, options));
+      }
+      /**
+       * Get a connector.
+       *
+       * @remarks
+       * Get a connector by its ID or name.
+       */
+      async get(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsGet_js_1.betaConnectorsGet)(this, request, options));
+      }
+      /**
+       * Update a connector.
+       *
+       * @remarks
+       * Update a connector by its ID.
+       */
+      async update(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsUpdate_js_1.betaConnectorsUpdate)(this, request, options));
+      }
+      /**
+       * Delete a connector.
+       *
+       * @remarks
+       * Delete a connector by its ID.
+       */
+      async delete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaConnectorsDelete_js_1.betaConnectorsDelete)(this, request, options));
+      }
+    };
+    exports2.Connectors = Connectors;
   }
 });
 
@@ -55598,6 +65533,5281 @@ var require_mistralagents = __commonJS({
   }
 });
 
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsCreate.js
+var require_betaObservabilityCampaignsCreate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsCreate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsCreate = betaObservabilityCampaignsCreate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsCreate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.PostCampaignInSchema$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "create_campaign_v1_observability_campaigns_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(201, components.CampaignPreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsDelete.js
+var require_betaObservabilityCampaignsDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsDelete = betaObservabilityCampaignsDelete;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.DeleteCampaignV1ObservabilityCampaignsCampaignIdDeleteRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        campaign_id: (0, encodings_js_1.encodeSimple)("campaign_id", payload.campaign_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns/{campaign_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "delete_campaign_v1_observability_campaigns__campaign_id__delete",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "DELETE",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsFetch.js
+var require_betaObservabilityCampaignsFetch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsFetch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsFetch = betaObservabilityCampaignsFetch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsFetch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetCampaignByIdV1ObservabilityCampaignsCampaignIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        campaign_id: (0, encodings_js_1.encodeSimple)("campaign_id", payload.campaign_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns/{campaign_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_campaign_by_id_v1_observability_campaigns__campaign_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.CampaignPreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsFetchStatus.js
+var require_betaObservabilityCampaignsFetchStatus = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsFetchStatus.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsFetchStatus = betaObservabilityCampaignsFetchStatus;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsFetchStatus(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetCampaignStatusByIdV1ObservabilityCampaignsCampaignIdStatusGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        campaign_id: (0, encodings_js_1.encodeSimple)("campaign_id", payload.campaign_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns/{campaign_id}/status")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_campaign_status_by_id_v1_observability_campaigns__campaign_id__status_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.CampaignStatus$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsList.js
+var require_betaObservabilityCampaignsList = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsList.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsList = betaObservabilityCampaignsList;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsList(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetCampaignsV1ObservabilityCampaignsGetRequest$outboundSchema.optional().parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "page": payload?.page,
+        "page_size": payload?.page_size,
+        "q": payload?.q
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_campaigns_v1_observability_campaigns_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.CampaignPreviews$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsListEvents.js
+var require_betaObservabilityCampaignsListEvents = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityCampaignsListEvents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityCampaignsListEvents = betaObservabilityCampaignsListEvents;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityCampaignsListEvents(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetCampaignSelectedEventsV1ObservabilityCampaignsCampaignIdSelectedEventsGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        campaign_id: (0, encodings_js_1.encodeSimple)("campaign_id", payload.campaign_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/campaigns/{campaign_id}/selected-events")(pathParams);
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "page": payload.page,
+        "page_size": payload.page_size
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_campaign_selected_events_v1_observability_campaigns__campaign_id__selected_events_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.CampaignSelectedEvents$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/campaigns.js
+var require_campaigns = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/campaigns.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Campaigns = void 0;
+    var betaObservabilityCampaignsCreate_js_1 = require_betaObservabilityCampaignsCreate();
+    var betaObservabilityCampaignsDelete_js_1 = require_betaObservabilityCampaignsDelete();
+    var betaObservabilityCampaignsFetch_js_1 = require_betaObservabilityCampaignsFetch();
+    var betaObservabilityCampaignsFetchStatus_js_1 = require_betaObservabilityCampaignsFetchStatus();
+    var betaObservabilityCampaignsList_js_1 = require_betaObservabilityCampaignsList();
+    var betaObservabilityCampaignsListEvents_js_1 = require_betaObservabilityCampaignsListEvents();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var Campaigns = class extends sdks_js_1.ClientSDK {
+      /**
+       * Create and start a new campaign
+       */
+      async create(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsCreate_js_1.betaObservabilityCampaignsCreate)(this, request, options));
+      }
+      /**
+       * Get all campaigns
+       */
+      async list(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsList_js_1.betaObservabilityCampaignsList)(this, request, options));
+      }
+      /**
+       * Get campaign by id
+       */
+      async fetch(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsFetch_js_1.betaObservabilityCampaignsFetch)(this, request, options));
+      }
+      /**
+       * Delete a campaign
+       */
+      async delete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsDelete_js_1.betaObservabilityCampaignsDelete)(this, request, options));
+      }
+      /**
+       * Get campaign status by campaign id
+       */
+      async fetchStatus(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsFetchStatus_js_1.betaObservabilityCampaignsFetchStatus)(this, request, options));
+      }
+      /**
+       * Get event ids that were selected by the given campaign
+       */
+      async listEvents(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityCampaignsListEvents_js_1.betaObservabilityCampaignsListEvents)(this, request, options));
+      }
+    };
+    exports2.Campaigns = Campaigns;
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFetch.js
+var require_betaObservabilityChatCompletionEventsFetch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFetch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsFetch = betaObservabilityChatCompletionEventsFetch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsFetch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetChatCompletionEventV1ObservabilityChatCompletionEventsEventIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        event_id: (0, encodings_js_1.encodeSimple)("event_id", payload.event_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-events/{event_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_event_v1_observability_chat_completion_events__event_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionEvent$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFetchSimilarEvents.js
+var require_betaObservabilityChatCompletionEventsFetchSimilarEvents = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFetchSimilarEvents.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsFetchSimilarEvents = betaObservabilityChatCompletionEventsFetchSimilarEvents;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsFetchSimilarEvents(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetSimilarChatCompletionEventsV1ObservabilityChatCompletionEventsEventIdSimilarEventsGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        event_id: (0, encodings_js_1.encodeSimple)("event_id", payload.event_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-events/{event_id}/similar-events")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_similar_chat_completion_events_v1_observability_chat_completion_events__event_id__similar_events_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionEvents$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsJudge.js
+var require_betaObservabilityChatCompletionEventsJudge = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsJudge.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsJudge = betaObservabilityChatCompletionEventsJudge;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsJudge(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.JudgeChatCompletionEventV1ObservabilityChatCompletionEventsEventIdLiveJudgingPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostChatCompletionEventJudgingInSchema, { explode: true });
+      const pathParams = {
+        event_id: (0, encodings_js_1.encodeSimple)("event_id", payload.event_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-events/{event_id}/live-judging")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "judge_chat_completion_event_v1_observability_chat_completion_events__event_id__live_judging_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.JudgeOutput$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsSearch.js
+var require_betaObservabilityChatCompletionEventsSearch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsSearch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsSearch = betaObservabilityChatCompletionEventsSearch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsSearch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetChatCompletionEventsV1ObservabilityChatCompletionEventsSearchPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.GetChatCompletionEventsInSchema, {
+        explode: true
+      });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-events/search")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "cursor": payload.cursor,
+        "page_size": payload.page_size
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_events_v1_observability_chat_completion_events_search_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionEvents$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsSearchIds.js
+var require_betaObservabilityChatCompletionEventsSearchIds = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsSearchIds.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsSearchIds = betaObservabilityChatCompletionEventsSearchIds;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsSearchIds(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.GetChatCompletionEventIdsInSchema$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-events/search-ids")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_event_ids_v1_observability_chat_completion_events_search_ids_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionEventIds$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsFetchOptionCounts.js
+var require_betaObservabilityChatCompletionEventsFieldsFetchOptionCounts = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsFetchOptionCounts.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsFieldsFetchOptionCounts = betaObservabilityChatCompletionEventsFieldsFetchOptionCounts;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsFieldsFetchOptionCounts(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetChatCompletionFieldOptionsCountsV1ObservabilityChatCompletionFieldsFieldNameOptionsCountsPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.FieldOptionCountsInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        field_name: (0, encodings_js_1.encodeSimple)("field_name", payload.field_name, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-fields/{field_name}/options-counts")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_field_options_counts_v1_observability_chat_completion_fields__field_name__options_counts_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.FieldOptionCounts$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsFetchOptions.js
+var require_betaObservabilityChatCompletionEventsFieldsFetchOptions = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsFetchOptions.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsFieldsFetchOptions = betaObservabilityChatCompletionEventsFieldsFetchOptions;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsFieldsFetchOptions(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetChatCompletionFieldOptionsV1ObservabilityChatCompletionFieldsFieldNameOptionsGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        field_name: (0, encodings_js_1.encodeSimple)("field_name", payload.field_name, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-fields/{field_name}/options")(pathParams);
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "operator": payload.operator
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_field_options_v1_observability_chat_completion_fields__field_name__options_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionFieldOptions$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsList.js
+var require_betaObservabilityChatCompletionEventsFieldsList = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityChatCompletionEventsFieldsList.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityChatCompletionEventsFieldsList = betaObservabilityChatCompletionEventsFieldsList;
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityChatCompletionEventsFieldsList(client, options) {
+      return new async_js_1.APIPromise($do(client, options));
+    }
+    async function $do(client, options) {
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/chat-completion-fields")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_chat_completion_fields_v1_observability_chat_completion_fields_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ChatCompletionFields$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/fields.js
+var require_fields = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/fields.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Fields = void 0;
+    var betaObservabilityChatCompletionEventsFieldsFetchOptionCounts_js_1 = require_betaObservabilityChatCompletionEventsFieldsFetchOptionCounts();
+    var betaObservabilityChatCompletionEventsFieldsFetchOptions_js_1 = require_betaObservabilityChatCompletionEventsFieldsFetchOptions();
+    var betaObservabilityChatCompletionEventsFieldsList_js_1 = require_betaObservabilityChatCompletionEventsFieldsList();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var Fields = class extends sdks_js_1.ClientSDK {
+      /**
+       * Get Chat Completion Fields
+       */
+      async list(options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsFieldsList_js_1.betaObservabilityChatCompletionEventsFieldsList)(this, options));
+      }
+      /**
+       * Get Chat Completion Field Options
+       */
+      async fetchOptions(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsFieldsFetchOptions_js_1.betaObservabilityChatCompletionEventsFieldsFetchOptions)(this, request, options));
+      }
+      /**
+       * Get Chat Completion Field Options Counts
+       */
+      async fetchOptionCounts(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsFieldsFetchOptionCounts_js_1.betaObservabilityChatCompletionEventsFieldsFetchOptionCounts)(this, request, options));
+      }
+    };
+    exports2.Fields = Fields;
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/chatcompletionevents.js
+var require_chatcompletionevents2 = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/chatcompletionevents.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ChatCompletionEvents = void 0;
+    var betaObservabilityChatCompletionEventsFetch_js_1 = require_betaObservabilityChatCompletionEventsFetch();
+    var betaObservabilityChatCompletionEventsFetchSimilarEvents_js_1 = require_betaObservabilityChatCompletionEventsFetchSimilarEvents();
+    var betaObservabilityChatCompletionEventsJudge_js_1 = require_betaObservabilityChatCompletionEventsJudge();
+    var betaObservabilityChatCompletionEventsSearch_js_1 = require_betaObservabilityChatCompletionEventsSearch();
+    var betaObservabilityChatCompletionEventsSearchIds_js_1 = require_betaObservabilityChatCompletionEventsSearchIds();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var fields_js_1 = require_fields();
+    var ChatCompletionEvents = class extends sdks_js_1.ClientSDK {
+      get fields() {
+        return this._fields ?? (this._fields = new fields_js_1.Fields(this._options));
+      }
+      /**
+       * Get Chat Completion Events
+       */
+      async search(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsSearch_js_1.betaObservabilityChatCompletionEventsSearch)(this, request, options));
+      }
+      /**
+       * Alternative to /search that returns only the IDs and that can return many IDs at once
+       */
+      async searchIds(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsSearchIds_js_1.betaObservabilityChatCompletionEventsSearchIds)(this, request, options));
+      }
+      /**
+       * Get Chat Completion Event
+       */
+      async fetch(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsFetch_js_1.betaObservabilityChatCompletionEventsFetch)(this, request, options));
+      }
+      /**
+       * Get Similar Chat Completion Events
+       */
+      async fetchSimilarEvents(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsFetchSimilarEvents_js_1.betaObservabilityChatCompletionEventsFetchSimilarEvents)(this, request, options));
+      }
+      /**
+       * Run Judge on an event based on the given options
+       */
+      async judge(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityChatCompletionEventsJudge_js_1.betaObservabilityChatCompletionEventsJudge)(this, request, options));
+      }
+    };
+    exports2.ChatCompletionEvents = ChatCompletionEvents;
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsCreate.js
+var require_betaObservabilityDatasetsCreate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsCreate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsCreate = betaObservabilityDatasetsCreate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsCreate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.PostDatasetInSchema$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "create_dataset_v1_observability_datasets_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(201, components.Dataset$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsCreateRecord.js
+var require_betaObservabilityDatasetsCreateRecord = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsCreateRecord.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsCreateRecord = betaObservabilityDatasetsCreateRecord;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsCreateRecord(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.CreateDatasetRecordV1ObservabilityDatasetsDatasetIdRecordsPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetRecordInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/records")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "create_dataset_record_v1_observability_datasets__dataset_id__records_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(201, components.DatasetRecord$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsDelete.js
+var require_betaObservabilityDatasetsDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsDelete = betaObservabilityDatasetsDelete;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.DeleteDatasetV1ObservabilityDatasetsDatasetIdDeleteRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "delete_dataset_v1_observability_datasets__dataset_id__delete",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "DELETE",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsExportToJsonl.js
+var require_betaObservabilityDatasetsExportToJsonl = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsExportToJsonl.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsExportToJsonl = betaObservabilityDatasetsExportToJsonl;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsExportToJsonl(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ExportDatasetToJsonlV1ObservabilityDatasetsDatasetIdExportsToJsonlGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/exports/to-jsonl")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "export_dataset_to_jsonl_v1_observability_datasets__dataset_id__exports_to_jsonl_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetExport$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsFetch.js
+var require_betaObservabilityDatasetsFetch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsFetch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsFetch = betaObservabilityDatasetsFetch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsFetch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetByIdV1ObservabilityDatasetsDatasetIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_dataset_by_id_v1_observability_datasets__dataset_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetPreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsFetchTask.js
+var require_betaObservabilityDatasetsFetchTask = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsFetchTask.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsFetchTask = betaObservabilityDatasetsFetchTask;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsFetchTask(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetImportTaskV1ObservabilityDatasetsDatasetIdTasksTaskIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        }),
+        task_id: (0, encodings_js_1.encodeSimple)("task_id", payload.task_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/tasks/{task_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_dataset_import_task_v1_observability_datasets__dataset_id__tasks__task_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromCampaign.js
+var require_betaObservabilityDatasetsImportFromCampaign = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromCampaign.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsImportFromCampaign = betaObservabilityDatasetsImportFromCampaign;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsImportFromCampaign(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.PostDatasetRecordsFromCampaignV1ObservabilityDatasetsDatasetIdImportsFromCampaignPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetImportFromCampaignInSchema, { explode: true });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/imports/from-campaign")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "post_dataset_records_from_campaign_v1_observability_datasets__dataset_id__imports_from_campaign_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(202, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromDatasetRecords.js
+var require_betaObservabilityDatasetsImportFromDatasetRecords = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromDatasetRecords.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsImportFromDatasetRecords = betaObservabilityDatasetsImportFromDatasetRecords;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsImportFromDatasetRecords(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.PostDatasetRecordsFromDatasetV1ObservabilityDatasetsDatasetIdImportsFromDatasetPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetImportFromDatasetInSchema, { explode: true });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/imports/from-dataset")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "post_dataset_records_from_dataset_v1_observability_datasets__dataset_id__imports_from_dataset_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(202, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromExplorer.js
+var require_betaObservabilityDatasetsImportFromExplorer = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromExplorer.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsImportFromExplorer = betaObservabilityDatasetsImportFromExplorer;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsImportFromExplorer(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.PostDatasetRecordsFromExplorerV1ObservabilityDatasetsDatasetIdImportsFromExplorerPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetImportFromExplorerInSchema, { explode: true });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/imports/from-explorer")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "post_dataset_records_from_explorer_v1_observability_datasets__dataset_id__imports_from_explorer_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(202, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromFile.js
+var require_betaObservabilityDatasetsImportFromFile = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromFile.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsImportFromFile = betaObservabilityDatasetsImportFromFile;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsImportFromFile(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.PostDatasetRecordsFromFileV1ObservabilityDatasetsDatasetIdImportsFromFilePostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetImportFromFileInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/imports/from-file")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "post_dataset_records_from_file_v1_observability_datasets__dataset_id__imports_from_file_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(202, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromPlayground.js
+var require_betaObservabilityDatasetsImportFromPlayground = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsImportFromPlayground.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsImportFromPlayground = betaObservabilityDatasetsImportFromPlayground;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsImportFromPlayground(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.PostDatasetRecordsFromPlaygroundV1ObservabilityDatasetsDatasetIdImportsFromPlaygroundPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetImportFromPlaygroundInSchema, { explode: true });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/imports/from-playground")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "post_dataset_records_from_playground_v1_observability_datasets__dataset_id__imports_from_playground_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(202, components.DatasetImportTask$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsList.js
+var require_betaObservabilityDatasetsList = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsList.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsList = betaObservabilityDatasetsList;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsList(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetsV1ObservabilityDatasetsGetRequest$outboundSchema.optional().parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "page": payload?.page,
+        "page_size": payload?.page_size,
+        "q": payload?.q
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_datasets_v1_observability_datasets_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetPreviews$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsListRecords.js
+var require_betaObservabilityDatasetsListRecords = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsListRecords.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsListRecords = betaObservabilityDatasetsListRecords;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsListRecords(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetRecordsV1ObservabilityDatasetsDatasetIdRecordsGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/records")(pathParams);
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "page": payload.page,
+        "page_size": payload.page_size
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_dataset_records_v1_observability_datasets__dataset_id__records_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetRecords$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsListTasks.js
+var require_betaObservabilityDatasetsListTasks = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsListTasks.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsListTasks = betaObservabilityDatasetsListTasks;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsListTasks(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetImportTasksV1ObservabilityDatasetsDatasetIdTasksGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}/tasks")(pathParams);
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "page": payload.page,
+        "page_size": payload.page_size
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_dataset_import_tasks_v1_observability_datasets__dataset_id__tasks_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetImportTasks$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsUpdate.js
+var require_betaObservabilityDatasetsUpdate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsUpdate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsUpdate = betaObservabilityDatasetsUpdate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsUpdate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.UpdateDatasetV1ObservabilityDatasetsDatasetIdPatchRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PatchDatasetInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_id: (0, encodings_js_1.encodeSimple)("dataset_id", payload.dataset_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/datasets/{dataset_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "update_dataset_v1_observability_datasets__dataset_id__patch",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "PATCH",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetPreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsBulkDelete.js
+var require_betaObservabilityDatasetsRecordsBulkDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsBulkDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsBulkDelete = betaObservabilityDatasetsRecordsBulkDelete;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsBulkDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.DeleteDatasetRecordsInSchema$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/bulk-delete")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "delete_dataset_records_v1_observability_dataset_records_bulk_delete_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsDelete.js
+var require_betaObservabilityDatasetsRecordsDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsDelete = betaObservabilityDatasetsRecordsDelete;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.DeleteDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdDeleteRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_record_id: (0, encodings_js_1.encodeSimple)("dataset_record_id", payload.dataset_record_id, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/{dataset_record_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "delete_dataset_record_v1_observability_dataset_records__dataset_record_id__delete",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "DELETE",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsFetch.js
+var require_betaObservabilityDatasetsRecordsFetch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsFetch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsFetch = betaObservabilityDatasetsRecordsFetch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsFetch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        dataset_record_id: (0, encodings_js_1.encodeSimple)("dataset_record_id", payload.dataset_record_id, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/{dataset_record_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_dataset_record_v1_observability_dataset_records__dataset_record_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.DatasetRecord$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsJudge.js
+var require_betaObservabilityDatasetsRecordsJudge = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsJudge.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsJudge = betaObservabilityDatasetsRecordsJudge;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsJudge(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.JudgeDatasetRecordV1ObservabilityDatasetRecordsDatasetRecordIdLiveJudgingPostRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PostDatasetRecordJudgingInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_record_id: (0, encodings_js_1.encodeSimple)("dataset_record_id", payload.dataset_record_id, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/{dataset_record_id}/live-judging")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "judge_dataset_record_v1_observability_dataset_records__dataset_record_id__live_judging_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.JudgeOutput$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsUpdatePayload.js
+var require_betaObservabilityDatasetsRecordsUpdatePayload = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsUpdatePayload.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsUpdatePayload = betaObservabilityDatasetsRecordsUpdatePayload;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsUpdatePayload(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.UpdateDatasetRecordPayloadV1ObservabilityDatasetRecordsDatasetRecordIdPayloadPutRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PutDatasetRecordPayloadInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_record_id: (0, encodings_js_1.encodeSimple)("dataset_record_id", payload.dataset_record_id, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/{dataset_record_id}/payload")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "update_dataset_record_payload_v1_observability_dataset_records__dataset_record_id__payload_put",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "PUT",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsUpdateProperties.js
+var require_betaObservabilityDatasetsRecordsUpdateProperties = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityDatasetsRecordsUpdateProperties.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityDatasetsRecordsUpdateProperties = betaObservabilityDatasetsRecordsUpdateProperties;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityDatasetsRecordsUpdateProperties(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.UpdateDatasetRecordPropertiesV1ObservabilityDatasetRecordsDatasetRecordIdPropertiesPutRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PutDatasetRecordPropertiesInSchema, {
+        explode: true
+      });
+      const pathParams = {
+        dataset_record_id: (0, encodings_js_1.encodeSimple)("dataset_record_id", payload.dataset_record_id, { explode: false, charEncoding: "percent" })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/dataset-records/{dataset_record_id}/properties")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "update_dataset_record_properties_v1_observability_dataset_records__dataset_record_id__properties_put",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "PUT",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/records.js
+var require_records = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/records.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Records = void 0;
+    var betaObservabilityDatasetsRecordsBulkDelete_js_1 = require_betaObservabilityDatasetsRecordsBulkDelete();
+    var betaObservabilityDatasetsRecordsDelete_js_1 = require_betaObservabilityDatasetsRecordsDelete();
+    var betaObservabilityDatasetsRecordsFetch_js_1 = require_betaObservabilityDatasetsRecordsFetch();
+    var betaObservabilityDatasetsRecordsJudge_js_1 = require_betaObservabilityDatasetsRecordsJudge();
+    var betaObservabilityDatasetsRecordsUpdatePayload_js_1 = require_betaObservabilityDatasetsRecordsUpdatePayload();
+    var betaObservabilityDatasetsRecordsUpdateProperties_js_1 = require_betaObservabilityDatasetsRecordsUpdateProperties();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var Records = class extends sdks_js_1.ClientSDK {
+      /**
+       * Get the content of a given conversation from a dataset
+       */
+      async fetch(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsFetch_js_1.betaObservabilityDatasetsRecordsFetch)(this, request, options));
+      }
+      /**
+       * Delete a record from a dataset
+       */
+      async delete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsDelete_js_1.betaObservabilityDatasetsRecordsDelete)(this, request, options));
+      }
+      /**
+       * Delete multiple records from datasets
+       */
+      async bulkDelete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsBulkDelete_js_1.betaObservabilityDatasetsRecordsBulkDelete)(this, request, options));
+      }
+      /**
+       * Run Judge on a dataset record based on the given options
+       */
+      async judge(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsJudge_js_1.betaObservabilityDatasetsRecordsJudge)(this, request, options));
+      }
+      /**
+       * Update a dataset record conversation payload
+       */
+      async updatePayload(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsUpdatePayload_js_1.betaObservabilityDatasetsRecordsUpdatePayload)(this, request, options));
+      }
+      /**
+       * Update conversation properties
+       */
+      async updateProperties(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsRecordsUpdateProperties_js_1.betaObservabilityDatasetsRecordsUpdateProperties)(this, request, options));
+      }
+    };
+    exports2.Records = Records;
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/datasets.js
+var require_datasets = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/datasets.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Datasets = void 0;
+    var betaObservabilityDatasetsCreate_js_1 = require_betaObservabilityDatasetsCreate();
+    var betaObservabilityDatasetsCreateRecord_js_1 = require_betaObservabilityDatasetsCreateRecord();
+    var betaObservabilityDatasetsDelete_js_1 = require_betaObservabilityDatasetsDelete();
+    var betaObservabilityDatasetsExportToJsonl_js_1 = require_betaObservabilityDatasetsExportToJsonl();
+    var betaObservabilityDatasetsFetch_js_1 = require_betaObservabilityDatasetsFetch();
+    var betaObservabilityDatasetsFetchTask_js_1 = require_betaObservabilityDatasetsFetchTask();
+    var betaObservabilityDatasetsImportFromCampaign_js_1 = require_betaObservabilityDatasetsImportFromCampaign();
+    var betaObservabilityDatasetsImportFromDatasetRecords_js_1 = require_betaObservabilityDatasetsImportFromDatasetRecords();
+    var betaObservabilityDatasetsImportFromExplorer_js_1 = require_betaObservabilityDatasetsImportFromExplorer();
+    var betaObservabilityDatasetsImportFromFile_js_1 = require_betaObservabilityDatasetsImportFromFile();
+    var betaObservabilityDatasetsImportFromPlayground_js_1 = require_betaObservabilityDatasetsImportFromPlayground();
+    var betaObservabilityDatasetsList_js_1 = require_betaObservabilityDatasetsList();
+    var betaObservabilityDatasetsListRecords_js_1 = require_betaObservabilityDatasetsListRecords();
+    var betaObservabilityDatasetsListTasks_js_1 = require_betaObservabilityDatasetsListTasks();
+    var betaObservabilityDatasetsUpdate_js_1 = require_betaObservabilityDatasetsUpdate();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var records_js_1 = require_records();
+    var Datasets = class extends sdks_js_1.ClientSDK {
+      get records() {
+        return this._records ?? (this._records = new records_js_1.Records(this._options));
+      }
+      /**
+       * Create a new empty dataset
+       */
+      async create(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsCreate_js_1.betaObservabilityDatasetsCreate)(this, request, options));
+      }
+      /**
+       * List existing datasets
+       */
+      async list(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsList_js_1.betaObservabilityDatasetsList)(this, request, options));
+      }
+      /**
+       * Get dataset by id
+       */
+      async fetch(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsFetch_js_1.betaObservabilityDatasetsFetch)(this, request, options));
+      }
+      /**
+       * Delete a dataset
+       */
+      async delete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsDelete_js_1.betaObservabilityDatasetsDelete)(this, request, options));
+      }
+      /**
+       * Patch dataset
+       */
+      async update(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsUpdate_js_1.betaObservabilityDatasetsUpdate)(this, request, options));
+      }
+      /**
+       * List existing records in the dataset
+       */
+      async listRecords(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsListRecords_js_1.betaObservabilityDatasetsListRecords)(this, request, options));
+      }
+      /**
+       * Add a conversation to the dataset
+       */
+      async createRecord(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsCreateRecord_js_1.betaObservabilityDatasetsCreateRecord)(this, request, options));
+      }
+      /**
+       * Populate the dataset with a campaign
+       */
+      async importFromCampaign(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsImportFromCampaign_js_1.betaObservabilityDatasetsImportFromCampaign)(this, request, options));
+      }
+      /**
+       * Populate the dataset with samples from the explorer
+       */
+      async importFromExplorer(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsImportFromExplorer_js_1.betaObservabilityDatasetsImportFromExplorer)(this, request, options));
+      }
+      /**
+       * Populate the dataset with samples from an uploaded file
+       */
+      async importFromFile(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsImportFromFile_js_1.betaObservabilityDatasetsImportFromFile)(this, request, options));
+      }
+      /**
+       * Populate the dataset with samples from the playground
+       */
+      async importFromPlayground(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsImportFromPlayground_js_1.betaObservabilityDatasetsImportFromPlayground)(this, request, options));
+      }
+      /**
+       * Populate the dataset with samples from another dataset
+       */
+      async importFromDatasetRecords(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsImportFromDatasetRecords_js_1.betaObservabilityDatasetsImportFromDatasetRecords)(this, request, options));
+      }
+      /**
+       * Export to the Files API and retrieve presigned URL to download the resulting JSONL file
+       */
+      async exportToJsonl(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsExportToJsonl_js_1.betaObservabilityDatasetsExportToJsonl)(this, request, options));
+      }
+      /**
+       * Get status of a dataset import task
+       */
+      async fetchTask(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsFetchTask_js_1.betaObservabilityDatasetsFetchTask)(this, request, options));
+      }
+      /**
+       * List import tasks for the given dataset
+       */
+      async listTasks(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityDatasetsListTasks_js_1.betaObservabilityDatasetsListTasks)(this, request, options));
+      }
+    };
+    exports2.Datasets = Datasets;
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesCreate.js
+var require_betaObservabilityJudgesCreate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesCreate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityJudgesCreate = betaObservabilityJudgesCreate;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var async_js_1 = require_async2();
+    function betaObservabilityJudgesCreate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => components.PostJudgeInSchema$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload, { explode: true });
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/judges")();
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "create_judge_v1_observability_judges_post",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "POST",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(201, components.JudgePreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesDelete.js
+var require_betaObservabilityJudgesDelete = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesDelete.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityJudgesDelete = betaObservabilityJudgesDelete;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityJudgesDelete(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.DeleteJudgeV1ObservabilityJudgesJudgeIdDeleteRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        judge_id: (0, encodings_js_1.encodeSimple)("judge_id", payload.judge_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/judges/{judge_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "delete_judge_v1_observability_judges__judge_id__delete",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "DELETE",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesFetch.js
+var require_betaObservabilityJudgesFetch = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesFetch.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityJudgesFetch = betaObservabilityJudgesFetch;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityJudgesFetch(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetJudgeByIdV1ObservabilityJudgesJudgeIdGetRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const pathParams = {
+        judge_id: (0, encodings_js_1.encodeSimple)("judge_id", payload.judge_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/judges/{judge_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_judge_by_id_v1_observability_judges__judge_id__get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.JudgePreview$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesList.js
+var require_betaObservabilityJudgesList = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesList.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityJudgesList = betaObservabilityJudgesList;
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityJudgesList(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.GetJudgesV1ObservabilityJudgesGetRequest$outboundSchema.optional().parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/judges")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "model_filter": payload?.model_filter,
+        "page": payload?.page,
+        "page_size": payload?.page_size,
+        "q": payload?.q,
+        "type_filter": payload?.type_filter
+      });
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "get_judges_v1_observability_judges_get",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "GET",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        query,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.JudgePreviews$inboundSchema), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesUpdate.js
+var require_betaObservabilityJudgesUpdate = __commonJS({
+  "node_modules/@mistralai/mistralai/funcs/betaObservabilityJudgesUpdate.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      var desc = Object.getOwnPropertyDescriptor(m5, k7);
+      if (!desc || ("get" in desc ? !m5.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m5[k7];
+        } };
+      }
+      Object.defineProperty(o3, k22, desc);
+    }) : (function(o3, m5, k7, k22) {
+      if (k22 === void 0) k22 = k7;
+      o3[k22] = m5[k7];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o3, v5) {
+      Object.defineProperty(o3, "default", { enumerable: true, value: v5 });
+    }) : function(o3, v5) {
+      o3["default"] = v5;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o3) {
+        ownKeys = Object.getOwnPropertyNames || function(o4) {
+          var ar2 = [];
+          for (var k7 in o4) if (Object.prototype.hasOwnProperty.call(o4, k7)) ar2[ar2.length] = k7;
+          return ar2;
+        };
+        return ownKeys(o3);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k7 = ownKeys(mod), i3 = 0; i3 < k7.length; i3++) if (k7[i3] !== "default") __createBinding(result, mod, k7[i3]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.betaObservabilityJudgesUpdate = betaObservabilityJudgesUpdate;
+    var z5 = __importStar(require_v3());
+    var encodings_js_1 = require_encodings();
+    var M6 = __importStar(require_matchers());
+    var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
+    var security_js_1 = require_security();
+    var url_js_1 = require_url();
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
+    var async_js_1 = require_async2();
+    function betaObservabilityJudgesUpdate(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
+    }
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.UpdateJudgeV1ObservabilityJudgesJudgeIdPutRequest$outboundSchema.parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = (0, encodings_js_1.encodeJSON)("body", payload.PutJudgeInSchema, { explode: true });
+      const pathParams = {
+        judge_id: (0, encodings_js_1.encodeSimple)("judge_id", payload.judge_id, {
+          explode: false,
+          charEncoding: "percent"
+        })
+      };
+      const path6 = (0, url_js_1.pathToFunc)("/v1/observability/judges/{judge_id}")(pathParams);
+      const headers = new Headers((0, primitives_js_1.compactMap)({
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }));
+      const secConfig = await (0, security_js_1.extractSecurity)(client._options.apiKey);
+      const securityInput = secConfig == null ? {} : { apiKey: secConfig };
+      const requestSecurity = (0, security_js_1.resolveGlobalSecurity)(securityInput);
+      const context3 = {
+        options: client._options,
+        baseURL: options?.serverURL ?? client._baseURL ?? "",
+        operationID: "update_judge_v1_observability_judges__judge_id__put",
+        oAuth2Scopes: null,
+        resolvedSecurity: requestSecurity,
+        securitySource: client._options.apiKey,
+        retryConfig: options?.retries || client._options.retryConfig || { strategy: "none" },
+        retryCodes: options?.retryCodes || ["429", "500", "502", "503", "504"]
+      };
+      const requestRes = client._createRequest(context3, {
+        security: requestSecurity,
+        method: "PUT",
+        baseURL: options?.serverURL,
+        path: path6,
+        headers,
+        body,
+        userAgent: client._options.userAgent,
+        timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
+      }, options);
+      if (!requestRes.ok) {
+        return [requestRes, { status: "invalid" }];
+      }
+      const req = requestRes.value;
+      const doResult = await client._do(req, {
+        context: context3,
+        errorCodes: ["400", "404", "408", "409", "422", "4XX", "5XX"],
+        retryConfig: context3.retryConfig,
+        retryCodes: context3.retryCodes
+      });
+      if (!doResult.ok) {
+        return [doResult, { status: "request-error", request: req }];
+      }
+      const response = doResult.value;
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.nil(204, z5.void()), M6.jsonErr([400, 404, 408, 409, 422], errors.ObservabilityError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
+      if (!result.ok) {
+        return [result, { status: "complete", request: req, response }];
+      }
+      return [result, { status: "complete", request: req, response }];
+    }
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/judges.js
+var require_judges = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/judges.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Judges = void 0;
+    var betaObservabilityJudgesCreate_js_1 = require_betaObservabilityJudgesCreate();
+    var betaObservabilityJudgesDelete_js_1 = require_betaObservabilityJudgesDelete();
+    var betaObservabilityJudgesFetch_js_1 = require_betaObservabilityJudgesFetch();
+    var betaObservabilityJudgesList_js_1 = require_betaObservabilityJudgesList();
+    var betaObservabilityJudgesUpdate_js_1 = require_betaObservabilityJudgesUpdate();
+    var sdks_js_1 = require_sdks();
+    var fp_js_1 = require_fp();
+    var Judges = class extends sdks_js_1.ClientSDK {
+      /**
+       * Create a new judge
+       */
+      async create(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityJudgesCreate_js_1.betaObservabilityJudgesCreate)(this, request, options));
+      }
+      /**
+       * Get judges with optional filtering and search
+       */
+      async list(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityJudgesList_js_1.betaObservabilityJudgesList)(this, request, options));
+      }
+      /**
+       * Get judge by id
+       */
+      async fetch(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityJudgesFetch_js_1.betaObservabilityJudgesFetch)(this, request, options));
+      }
+      /**
+       * Delete a judge
+       */
+      async delete(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityJudgesDelete_js_1.betaObservabilityJudgesDelete)(this, request, options));
+      }
+      /**
+       * Update a judge
+       */
+      async update(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, betaObservabilityJudgesUpdate_js_1.betaObservabilityJudgesUpdate)(this, request, options));
+      }
+    };
+    exports2.Judges = Judges;
+  }
+});
+
+// node_modules/@mistralai/mistralai/sdk/observability.js
+var require_observability = __commonJS({
+  "node_modules/@mistralai/mistralai/sdk/observability.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Observability = void 0;
+    var sdks_js_1 = require_sdks();
+    var campaigns_js_1 = require_campaigns();
+    var chatcompletionevents_js_1 = require_chatcompletionevents2();
+    var datasets_js_1 = require_datasets();
+    var judges_js_1 = require_judges();
+    var Observability = class extends sdks_js_1.ClientSDK {
+      get chatCompletionEvents() {
+        return this._chatCompletionEvents ?? (this._chatCompletionEvents = new chatcompletionevents_js_1.ChatCompletionEvents(this._options));
+      }
+      get judges() {
+        return this._judges ?? (this._judges = new judges_js_1.Judges(this._options));
+      }
+      get campaigns() {
+        return this._campaigns ?? (this._campaigns = new campaigns_js_1.Campaigns(this._options));
+      }
+      get datasets() {
+        return this._datasets ?? (this._datasets = new datasets_js_1.Datasets(this._options));
+      }
+    };
+    exports2.Observability = Observability;
+  }
+});
+
 // node_modules/@mistralai/mistralai/sdk/beta.js
 var require_beta = __commonJS({
   "node_modules/@mistralai/mistralai/sdk/beta.js"(exports2) {
@@ -55605,9 +70815,11 @@ var require_beta = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Beta = void 0;
     var sdks_js_1 = require_sdks();
+    var connectors_js_1 = require_connectors();
     var conversations_js_1 = require_conversations();
     var libraries_js_1 = require_libraries();
     var mistralagents_js_1 = require_mistralagents();
+    var observability_js_1 = require_observability();
     var Beta3 = class extends sdks_js_1.ClientSDK {
       get conversations() {
         return this._conversations ?? (this._conversations = new conversations_js_1.Conversations(this._options));
@@ -55617,6 +70829,12 @@ var require_beta = __commonJS({
       }
       get libraries() {
         return this._libraries ?? (this._libraries = new libraries_js_1.Libraries(this._options));
+      }
+      get observability() {
+        return this._observability ?? (this._observability = new observability_js_1.Observability(this._options));
+      }
+      get connectors() {
+        return this._connectors ?? (this._connectors = new connectors_js_1.Connectors(this._options));
       }
     };
     exports2.Beta = Beta3;
@@ -59045,8 +74263,14 @@ var require_filesUpload = __commonJS({
         const contentType = (0, files_js_1.getContentTypeFromFileName)(payload.file.fileName) || "application/octet-stream";
         (0, encodings_js_1.appendForm)(body, "file", new Blob([payload.file.content], { type: contentType }), payload.file.fileName);
       }
+      if (payload.expiry !== void 0) {
+        (0, encodings_js_1.appendForm)(body, "expiry", payload.expiry);
+      }
       if (payload.purpose !== void 0) {
         (0, encodings_js_1.appendForm)(body, "purpose", payload.purpose);
+      }
+      if (payload.visibility !== void 0) {
+        (0, encodings_js_1.appendForm)(body, "visibility", payload.visibility);
       }
       const path6 = (0, url_js_1.pathToFunc)("/v1/files")();
       const headers = new Headers((0, primitives_js_1.compactMap)({
@@ -60402,17 +75626,31 @@ var require_modelsList = __commonJS({
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.modelsList = modelsList;
+    var encodings_js_1 = require_encodings();
     var M6 = __importStar(require_matchers());
     var primitives_js_1 = require_primitives();
+    var schemas_js_1 = require_schemas();
     var security_js_1 = require_security();
     var url_js_1 = require_url();
     var components = __importStar(require_components());
+    var errors = __importStar(require_errors2());
+    var operations = __importStar(require_operations());
     var async_js_1 = require_async2();
-    function modelsList(client, options) {
-      return new async_js_1.APIPromise($do(client, options));
+    function modelsList(client, request, options) {
+      return new async_js_1.APIPromise($do(client, request, options));
     }
-    async function $do(client, options) {
+    async function $do(client, request, options) {
+      const parsed = (0, schemas_js_1.safeParse)(request, (value) => operations.ListModelsV1ModelsGetRequest$outboundSchema.optional().parse(value), "Input validation failed");
+      if (!parsed.ok) {
+        return [parsed, { status: "invalid" }];
+      }
+      const payload = parsed.value;
+      const body = null;
       const path6 = (0, url_js_1.pathToFunc)("/v1/models")();
+      const query = (0, encodings_js_1.encodeFormQuery)({
+        "model": payload?.model,
+        "provider": payload?.provider
+      });
       const headers = new Headers((0, primitives_js_1.compactMap)({
         Accept: "application/json"
       }));
@@ -60435,6 +75673,8 @@ var require_modelsList = __commonJS({
         baseURL: options?.serverURL,
         path: path6,
         headers,
+        query,
+        body,
         userAgent: client._options.userAgent,
         timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1
       }, options);
@@ -60444,7 +75684,7 @@ var require_modelsList = __commonJS({
       const req = requestRes.value;
       const doResult = await client._do(req, {
         context: context3,
-        errorCodes: ["4XX", "5XX"],
+        errorCodes: ["422", "4XX", "5XX"],
         retryConfig: context3.retryConfig,
         retryCodes: context3.retryCodes
       });
@@ -60452,7 +75692,10 @@ var require_modelsList = __commonJS({
         return [doResult, { status: "request-error", request: req }];
       }
       const response = doResult.value;
-      const [result] = await M6.match(M6.json(200, components.ModelList$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req);
+      const responseFields = {
+        HttpMeta: { Response: response, Request: req }
+      };
+      const [result] = await M6.match(M6.json(200, components.ModelList$inboundSchema), M6.jsonErr(422, errors.HTTPValidationError$inboundSchema), M6.fail("4XX"), M6.fail("5XX"))(response, req, { extraFields: responseFields });
       if (!result.ok) {
         return [result, { status: "complete", request: req, response }];
       }
@@ -60839,8 +76082,8 @@ var require_models = __commonJS({
        * @remarks
        * List all models available to the user.
        */
-      async list(options) {
-        return (0, fp_js_1.unwrapAsync)((0, modelsList_js_1.modelsList)(this, options));
+      async list(request, options) {
+        return (0, fp_js_1.unwrapAsync)((0, modelsList_js_1.modelsList)(this, request, options));
       }
       /**
        * Retrieve Model
@@ -61143,6 +76386,7 @@ var require_mistralai = __commonJS({
       return http_js_1.HTTPClient;
     } });
     __exportStar(require_sdk(), exports2);
+    __exportStar(require_type_constants(), exports2);
   }
 });
 
@@ -62383,20 +77627,20 @@ var package_default = {
     "@types/ini": "^1.3.34",
     "@types/inquirer": "^9.0.9",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.0",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "@typescript-eslint/parser": "^8.56.1",
+    "@types/node": "^22.19.17",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
     "cli-testing-library": "^2.0.2",
     "cross-env": "^10.1.0",
     dotenv: "^16.6.1",
-    esbuild: "^0.27.3",
-    eslint: "^9.39.3",
+    esbuild: "^0.27.7",
+    eslint: "^9.39.4",
     jest: "^29.7.0",
-    prettier: "^3.5.3",
+    prettier: "^3.8.3",
     rimraf: "^6.1.3",
-    "ts-jest": "^29.4.6",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
-    typescript: "^5.8.3"
+    typescript: "^5.9.3"
   },
   dependencies: {
     "@actions/core": "^1.11.1",
@@ -62407,10 +77651,10 @@ var package_default = {
     "@clack/prompts": "^0.11.0",
     "@dqbd/tiktoken": "^1.0.22",
     "@google/generative-ai": "^0.24.1",
-    "@mistralai/mistralai": "^1.14.1",
+    "@mistralai/mistralai": "^1.15.1",
     "@octokit/webhooks-schemas": "^6.11.0",
     "@octokit/webhooks-types": "^6.11.0",
-    axios: "^1.13.6",
+    axios: "^1.15.2",
     chalk: "^5.6.2",
     cleye: "^1.3.4",
     crypto: "^1.0.1",
@@ -65216,8 +80460,14 @@ var configValidators = {
     return value;
   },
   ["OCO_DEBUG" /* OCO_DEBUG */](value) {
-    const parsed = typeof value === "boolean" ? value : value === "true" || value === true;
-    return parsed;
+    if (typeof value === "boolean") return value;
+    const str2 = String(value).toLowerCase().trim();
+    validateConfig(
+      "OCO_DEBUG" /* OCO_DEBUG */,
+      ["true", "false", "1", "0", "yes", "no", "on", "off"].includes(str2),
+      "Must be a boolean (true/false/1/0/yes/no)"
+    );
+    return ["true", "1", "yes", "on"].includes(str2);
   },
   ["OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */](value) {
     validateConfig("OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */, typeof value === "string", "Must be a string");
@@ -65259,7 +80509,7 @@ var configValidators = {
     const n2 = Number(value);
     validateConfig(
       "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */,
-      !isNaN(n2) && n2 >= 1,
+      Number.isInteger(n2) && n2 >= 1,
       "Must be a positive integer (minimum 1)"
     );
     return n2;
@@ -65268,7 +80518,7 @@ var configValidators = {
     const n2 = Number(value);
     validateConfig(
       "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */,
-      !isNaN(n2) && n2 >= 1,
+      Number.isInteger(n2) && n2 >= 1,
       "Must be a positive integer (minimum 1)"
     );
     return n2;
@@ -65399,6 +80649,7 @@ var DEFAULT_CONFIG = {
   OCO_FALLBACK_PROVIDER: ""
 };
 var initGlobalConfig = (configPath = defaultConfigPath) => {
+  (0, import_fs.mkdirSync)((0, import_path.dirname)(configPath), { recursive: true });
   (0, import_fs.writeFileSync)(configPath, (0, import_ini.stringify)(DEFAULT_CONFIG), "utf8");
   return DEFAULT_CONFIG;
 };
@@ -65927,7 +81178,10 @@ var configCommand = G3(
           }
         }
         await setConfig(
-          normalized.map((kv) => kv.split("="))
+          normalized.map((kv) => {
+            const eqIdx = kv.indexOf("=");
+            return eqIdx === -1 ? [kv, ""] : [kv.slice(0, eqIdx), kv.slice(eqIdx + 1)];
+          })
         );
       } else {
         throw new Error(
@@ -70882,9 +86136,14 @@ function getGlobal() {
 var G6 = getGlobal();
 var FormDataCtor = typeof G6.FormData !== "undefined" ? G6.FormData : void 0;
 var isFormData = (thing) => {
-  let kind2;
-  return thing && (FormDataCtor && thing instanceof FormDataCtor || isFunction(thing.append) && ((kind2 = kindOf(thing)) === "formdata" || // detect form-data instance
-  kind2 === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
+  if (!thing) return false;
+  if (FormDataCtor && thing instanceof FormDataCtor) return true;
+  const proto2 = getPrototypeOf(thing);
+  if (!proto2 || proto2 === Object.prototype) return false;
+  if (!isFunction(thing.append)) return false;
+  const kind2 = kindOf(thing);
+  return kind2 === "formdata" || // detect form-data instance
+  kind2 === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]";
 };
 var isURLSearchParams = kindOfTest("URLSearchParams");
 var [isReadableStream, isRequest, isResponse, isHeaders] = [
@@ -71313,6 +86572,7 @@ AxiosError.ERR_BAD_REQUEST = "ERR_BAD_REQUEST";
 AxiosError.ERR_CANCELED = "ERR_CANCELED";
 AxiosError.ERR_NOT_SUPPORT = "ERR_NOT_SUPPORT";
 AxiosError.ERR_INVALID_URL = "ERR_INVALID_URL";
+AxiosError.ERR_FORM_DATA_DEPTH_EXCEEDED = "ERR_FORM_DATA_DEPTH_EXCEEDED";
 var AxiosError_default = AxiosError;
 
 // node_modules/axios/lib/platform/node/classes/FormData.js
@@ -71361,6 +86621,7 @@ function toFormData(obj, formData, options) {
   const dots = options.dots;
   const indexes = options.indexes;
   const _Blob = options.Blob || typeof Blob !== "undefined" && Blob;
+  const maxDepth = options.maxDepth === void 0 ? 100 : options.maxDepth;
   const useBlob = _Blob && utils_default.isSpecCompliantForm(formData);
   if (!utils_default.isFunction(visitor)) {
     throw new TypeError("visitor must be a function");
@@ -71415,8 +86676,14 @@ function toFormData(obj, formData, options) {
     convertValue,
     isVisitable
   });
-  function build(value, path6) {
+  function build(value, path6, depth = 0) {
     if (utils_default.isUndefined(value)) return;
+    if (depth > maxDepth) {
+      throw new AxiosError_default(
+        "Object is too deeply nested (" + depth + " levels). Max depth: " + maxDepth,
+        AxiosError_default.ERR_FORM_DATA_DEPTH_EXCEEDED
+      );
+    }
     if (stack.indexOf(value) !== -1) {
       throw Error("Circular reference detected in " + path6.join("."));
     }
@@ -71424,7 +86691,7 @@ function toFormData(obj, formData, options) {
     utils_default.forEach(value, function each(el, key) {
       const result = !(utils_default.isUndefined(el) || el === null) && visitor.call(formData, el, utils_default.isString(key) ? key.trim() : key, path6, exposedHelpers);
       if (result === true) {
-        build(el, path6 ? path6.concat(key) : [key]);
+        build(el, path6 ? path6.concat(key) : [key], depth + 1);
       }
     });
     stack.pop();
@@ -71445,10 +86712,9 @@ function encode(str2) {
     "(": "%28",
     ")": "%29",
     "~": "%7E",
-    "%20": "+",
-    "%00": "\0"
+    "%20": "+"
   };
-  return encodeURIComponent(str2).replace(/[!'()~]|%20|%00/g, function replacer(match) {
+  return encodeURIComponent(str2).replace(/[!'()~]|%20/g, function replacer(match) {
     return charMap[match];
   });
 }
@@ -71674,7 +86940,7 @@ function formDataToJSON(formData) {
     name = !name && utils_default.isArray(target) ? target.length : name;
     if (isLast) {
       if (utils_default.hasOwnProp(target, name)) {
-        target[name] = [target[name], value];
+        target[name] = utils_default.isArray(target[name]) ? target[name].concat(value) : [target[name], value];
       } else {
         target[name] = value;
       }
@@ -71701,6 +86967,7 @@ function formDataToJSON(formData) {
 var formDataToJSON_default = formDataToJSON;
 
 // node_modules/axios/lib/defaults/index.js
+var own = (obj, key) => obj != null && utils_default.hasOwnProp(obj, key) ? obj[key] : void 0;
 function stringifySafely(rawValue, parser, encoder) {
   if (utils_default.isString(rawValue)) {
     try {
@@ -71741,15 +87008,17 @@ var defaults = {
       }
       let isFileList2;
       if (isObjectPayload) {
+        const formSerializer = own(this, "formSerializer");
         if (contentType.indexOf("application/x-www-form-urlencoded") > -1) {
-          return toURLEncodedForm(data, this.formSerializer).toString();
+          return toURLEncodedForm(data, formSerializer).toString();
         }
         if ((isFileList2 = utils_default.isFileList(data)) || contentType.indexOf("multipart/form-data") > -1) {
-          const _FormData = this.env && this.env.FormData;
+          const env2 = own(this, "env");
+          const _FormData = env2 && env2.FormData;
           return toFormData_default(
             isFileList2 ? { "files[]": data } : data,
             _FormData && new _FormData(),
-            this.formSerializer
+            formSerializer
           );
         }
       }
@@ -71762,21 +87031,22 @@ var defaults = {
   ],
   transformResponse: [
     function transformResponse(data) {
-      const transitional2 = this.transitional || defaults.transitional;
+      const transitional2 = own(this, "transitional") || defaults.transitional;
       const forcedJSONParsing = transitional2 && transitional2.forcedJSONParsing;
-      const JSONRequested = this.responseType === "json";
+      const responseType = own(this, "responseType");
+      const JSONRequested = responseType === "json";
       if (utils_default.isResponse(data) || utils_default.isReadableStream(data)) {
         return data;
       }
-      if (data && utils_default.isString(data) && (forcedJSONParsing && !this.responseType || JSONRequested)) {
+      if (data && utils_default.isString(data) && (forcedJSONParsing && !responseType || JSONRequested)) {
         const silentJSONParsing = transitional2 && transitional2.silentJSONParsing;
         const strictJSONParsing = !silentJSONParsing && JSONRequested;
         try {
-          return JSON.parse(data, this.parseReviver);
+          return JSON.parse(data, own(this, "parseReviver"));
         } catch (e3) {
           if (strictJSONParsing) {
             if (e3.name === "SyntaxError") {
-              throw AxiosError_default.from(e3, AxiosError_default.ERR_BAD_RESPONSE, this, null, this.response);
+              throw AxiosError_default.from(e3, AxiosError_default.ERR_BAD_RESPONSE, this, null, own(this, "response"));
             }
             throw e3;
           }
@@ -71860,14 +87130,37 @@ var parseHeaders_default = (rawHeaders) => {
 
 // node_modules/axios/lib/core/AxiosHeaders.js
 var $internals = /* @__PURE__ */ Symbol("internals");
+var INVALID_HEADER_VALUE_CHARS_RE = /[^\x09\x20-\x7E\x80-\xFF]/g;
+function trimSPorHTAB(str2) {
+  let start = 0;
+  let end = str2.length;
+  while (start < end) {
+    const code = str2.charCodeAt(start);
+    if (code !== 9 && code !== 32) {
+      break;
+    }
+    start += 1;
+  }
+  while (end > start) {
+    const code = str2.charCodeAt(end - 1);
+    if (code !== 9 && code !== 32) {
+      break;
+    }
+    end -= 1;
+  }
+  return start === 0 && end === str2.length ? str2 : str2.slice(start, end);
+}
 function normalizeHeader(header) {
   return header && String(header).trim().toLowerCase();
+}
+function sanitizeHeaderValue(str2) {
+  return trimSPorHTAB(str2.replace(INVALID_HEADER_VALUE_CHARS_RE, ""));
 }
 function normalizeValue(value) {
   if (value === false || value == null) {
     return value;
   }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value);
+  return utils_default.isArray(value) ? value.map(normalizeValue) : sanitizeHeaderValue(String(value));
 }
 function parseTokens(str2) {
   const tokens = /* @__PURE__ */ Object.create(null);
@@ -72165,23 +87458,90 @@ function combineURLs(baseURL, relativeURL) {
 // node_modules/axios/lib/core/buildFullPath.js
 function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
   let isRelativeUrl = !isAbsoluteURL2(requestedURL);
-  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls === false)) {
     return combineURLs(baseURL, requestedURL);
   }
   return requestedURL;
 }
 
+// node_modules/proxy-from-env/index.js
+var DEFAULT_PORTS = {
+  ftp: 21,
+  gopher: 70,
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443
+};
+function parseUrl(urlString) {
+  try {
+    return new URL(urlString);
+  } catch {
+    return null;
+  }
+}
+function getProxyForUrl(url2) {
+  var parsedUrl = (typeof url2 === "string" ? parseUrl(url2) : url2) || {};
+  var proto2 = parsedUrl.protocol;
+  var hostname = parsedUrl.host;
+  var port = parsedUrl.port;
+  if (typeof hostname !== "string" || !hostname || typeof proto2 !== "string") {
+    return "";
+  }
+  proto2 = proto2.split(":", 1)[0];
+  hostname = hostname.replace(/:\d*$/, "");
+  port = parseInt(port) || DEFAULT_PORTS[proto2] || 0;
+  if (!shouldProxy(hostname, port)) {
+    return "";
+  }
+  var proxy = getEnv2(proto2 + "_proxy") || getEnv2("all_proxy");
+  if (proxy && proxy.indexOf("://") === -1) {
+    proxy = proto2 + "://" + proxy;
+  }
+  return proxy;
+}
+function shouldProxy(hostname, port) {
+  var NO_PROXY2 = getEnv2("no_proxy").toLowerCase();
+  if (!NO_PROXY2) {
+    return true;
+  }
+  if (NO_PROXY2 === "*") {
+    return false;
+  }
+  return NO_PROXY2.split(/[,\s]/).every(function(proxy) {
+    if (!proxy) {
+      return true;
+    }
+    var parsedProxy = proxy.match(/^(.+):(\d+)$/);
+    var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
+    var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
+    if (parsedProxyPort && parsedProxyPort !== port) {
+      return true;
+    }
+    if (!/^[.*]/.test(parsedProxyHostname)) {
+      return hostname !== parsedProxyHostname;
+    }
+    if (parsedProxyHostname.charAt(0) === "*") {
+      parsedProxyHostname = parsedProxyHostname.slice(1);
+    }
+    return !hostname.endsWith(parsedProxyHostname);
+  });
+}
+function getEnv2(key) {
+  return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
+}
+
 // node_modules/axios/lib/adapters/http.js
-var import_proxy_from_env = __toESM(require_proxy_from_env(), 1);
 var import_http = __toESM(require("http"), 1);
 var import_https = __toESM(require("https"), 1);
 var import_http2 = __toESM(require("http2"), 1);
 var import_util2 = __toESM(require("util"), 1);
+var import_path9 = require("path");
 var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION2 = "1.13.6";
+var VERSION2 = "1.15.2";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -72380,7 +87740,8 @@ var FormDataPart = class {
     if (isStringValue) {
       value = textEncoder.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF));
     } else {
-      headers += `Content-Type: ${value.type || "application/octet-stream"}${CRLF}`;
+      const safeType = String(value.type || "application/octet-stream").replace(/[\r\n]/g, "");
+      headers += `Content-Type: ${safeType}${CRLF}`;
     }
     this.headers = textEncoder.encode(headers + CRLF);
     this.contentLength = isStringValue ? value.byteLength : value.size;
@@ -72487,6 +87848,114 @@ var callbackify = (fn, reducer) => {
 };
 var callbackify_default = callbackify;
 
+// node_modules/axios/lib/helpers/shouldBypassProxy.js
+var LOOPBACK_HOSTNAMES = /* @__PURE__ */ new Set(["localhost"]);
+var isIPv4Loopback = (host) => {
+  const parts = host.split(".");
+  if (parts.length !== 4) return false;
+  if (parts[0] !== "127") return false;
+  return parts.every((p4) => /^\d+$/.test(p4) && Number(p4) >= 0 && Number(p4) <= 255);
+};
+var isIPv6Loopback = (host) => {
+  if (host === "::1") return true;
+  const v4MappedDotted = host.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  if (v4MappedDotted) return isIPv4Loopback(v4MappedDotted[1]);
+  const v4MappedHex = host.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i);
+  if (v4MappedHex) {
+    const high = parseInt(v4MappedHex[1], 16);
+    return high >= 32512 && high <= 32767;
+  }
+  const groups = host.split(":");
+  if (groups.length === 8) {
+    for (let i3 = 0; i3 < 7; i3++) {
+      if (!/^0+$/.test(groups[i3])) return false;
+    }
+    return /^0*1$/.test(groups[7]);
+  }
+  return false;
+};
+var isLoopback = (host) => {
+  if (!host) return false;
+  if (LOOPBACK_HOSTNAMES.has(host)) return true;
+  if (isIPv4Loopback(host)) return true;
+  return isIPv6Loopback(host);
+};
+var DEFAULT_PORTS2 = {
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443,
+  ftp: 21
+};
+var parseNoProxyEntry = (entry) => {
+  let entryHost = entry;
+  let entryPort = 0;
+  if (entryHost.charAt(0) === "[") {
+    const bracketIndex = entryHost.indexOf("]");
+    if (bracketIndex !== -1) {
+      const host = entryHost.slice(1, bracketIndex);
+      const rest = entryHost.slice(bracketIndex + 1);
+      if (rest.charAt(0) === ":" && /^\d+$/.test(rest.slice(1))) {
+        entryPort = Number.parseInt(rest.slice(1), 10);
+      }
+      return [host, entryPort];
+    }
+  }
+  const firstColon = entryHost.indexOf(":");
+  const lastColon = entryHost.lastIndexOf(":");
+  if (firstColon !== -1 && firstColon === lastColon && /^\d+$/.test(entryHost.slice(lastColon + 1))) {
+    entryPort = Number.parseInt(entryHost.slice(lastColon + 1), 10);
+    entryHost = entryHost.slice(0, lastColon);
+  }
+  return [entryHost, entryPort];
+};
+var normalizeNoProxyHost = (hostname) => {
+  if (!hostname) {
+    return hostname;
+  }
+  if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
+    hostname = hostname.slice(1, -1);
+  }
+  return hostname.replace(/\.+$/, "");
+};
+function shouldBypassProxy(location) {
+  let parsed;
+  try {
+    parsed = new URL(location);
+  } catch (_err) {
+    return false;
+  }
+  const noProxy = (process.env.no_proxy || process.env.NO_PROXY || "").toLowerCase();
+  if (!noProxy) {
+    return false;
+  }
+  if (noProxy === "*") {
+    return true;
+  }
+  const port = Number.parseInt(parsed.port, 10) || DEFAULT_PORTS2[parsed.protocol.split(":", 1)[0]] || 0;
+  const hostname = normalizeNoProxyHost(parsed.hostname.toLowerCase());
+  return noProxy.split(/[\s,]+/).some((entry) => {
+    if (!entry) {
+      return false;
+    }
+    let [entryHost, entryPort] = parseNoProxyEntry(entry);
+    entryHost = normalizeNoProxyHost(entryHost);
+    if (!entryHost) {
+      return false;
+    }
+    if (entryPort && entryPort !== port) {
+      return false;
+    }
+    if (entryHost.charAt(0) === "*") {
+      entryHost = entryHost.slice(1);
+    }
+    if (entryHost.charAt(0) === ".") {
+      return hostname.endsWith(entryHost);
+    }
+    return hostname === entryHost || isLoopback(hostname) && isLoopback(entryHost);
+  });
+}
+
 // node_modules/axios/lib/helpers/speedometer.js
 function speedometer(samplesCount, min) {
   samplesCount = samplesCount || 10;
@@ -72563,19 +88032,19 @@ var progressEventReducer = (listener, isDownloadStream, freq = 3) => {
   let bytesNotified = 0;
   const _speedometer = speedometer_default(50, 250);
   return throttle_default((e3) => {
-    const loaded = e3.loaded;
+    const rawLoaded = e3.loaded;
     const total = e3.lengthComputable ? e3.total : void 0;
-    const progressBytes = loaded - bytesNotified;
+    const loaded = total != null ? Math.min(rawLoaded, total) : rawLoaded;
+    const progressBytes = Math.max(0, loaded - bytesNotified);
     const rate = _speedometer(progressBytes);
-    const inRange = loaded <= total;
-    bytesNotified = loaded;
+    bytesNotified = Math.max(bytesNotified, loaded);
     const data = {
       loaded,
       total,
       progress: total ? loaded / total : void 0,
       bytes: progressBytes,
       rate: rate ? rate : void 0,
-      estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
+      estimated: rate && total ? (total - loaded) / rate : void 0,
       event: e3,
       lengthComputable: total != null,
       [isDownloadStream ? "download" : "upload"]: true
@@ -72659,6 +88128,8 @@ var brotliOptions = {
 var isBrotliSupported = utils_default.isFunction(import_zlib.default.createBrotliDecompress);
 var { http: httpFollow, https: httpsFollow } = import_follow_redirects.default;
 var isHttps = /https:?/;
+var kAxiosSocketListener = /* @__PURE__ */ Symbol("axios.http.socketListener");
+var kAxiosCurrentReq = /* @__PURE__ */ Symbol("axios.http.currentReq");
 var supportedProtocols = platform_default.protocols.map((protocol) => {
   return protocol + ":";
 });
@@ -72701,6 +88172,9 @@ var Http2Sessions = class {
             delete this.sessions[authority];
           } else {
             entries.splice(i3, 1);
+          }
+          if (!session.closed) {
+            session.close();
           }
           return;
         }
@@ -72747,9 +88221,11 @@ function dispatchBeforeRedirect(options, responseDetails) {
 function setProxy(options, configProxy, location) {
   let proxy = configProxy;
   if (!proxy && proxy !== false) {
-    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
+    const proxyUrl = getProxyForUrl(location);
     if (proxyUrl) {
-      proxy = new URL(proxyUrl);
+      if (!shouldBypassProxy(location)) {
+        proxy = new URL(proxyUrl);
+      }
     }
   }
   if (proxy) {
@@ -72840,8 +88316,15 @@ var http2Transport = {
 };
 var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
   return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
-    let { data, lookup, family, httpVersion = 1, http2Options } = config5;
-    const { responseType, responseEncoding } = config5;
+    const own2 = (key) => utils_default.hasOwnProp(config5, key) ? config5[key] : void 0;
+    let data = own2("data");
+    let lookup = own2("lookup");
+    let family = own2("family");
+    let httpVersion = own2("httpVersion");
+    if (httpVersion === void 0) httpVersion = 1;
+    let http2Options = own2("http2Options");
+    const responseType = own2("responseType");
+    const responseEncoding = own2("responseEncoding");
     const method = config5.method.toUpperCase();
     let isDone;
     let rejected = false;
@@ -72982,7 +88465,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
           boundary: userBoundary && userBoundary[1] || void 0
         }
       );
-    } else if (utils_default.isFormData(data) && utils_default.isFunction(data.getHeaders)) {
+    } else if (utils_default.isFormData(data) && utils_default.isFunction(data.getHeaders) && data.getHeaders !== Object.prototype.getHeaders) {
       headers.set(data.getHeaders());
       if (!headers.hasContentLength()) {
         try {
@@ -73053,9 +88536,10 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
       );
     }
     let auth = void 0;
-    if (config5.auth) {
-      const username = config5.auth.username || "";
-      const password = config5.auth.password || "";
+    const configAuth = own2("auth");
+    if (configAuth) {
+      const username = configAuth.username || "";
+      const password = configAuth.password || "";
       auth = username + ":" + password;
     }
     if (!auth && parsed.username) {
@@ -73083,7 +88567,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
       "gzip, compress, deflate" + (isBrotliSupported ? ", br" : ""),
       false
     );
-    const options = {
+    const options = Object.assign(/* @__PURE__ */ Object.create(null), {
       path: path6,
       method,
       headers: headers.toJSON(),
@@ -73092,11 +88576,32 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
       protocol,
       family,
       beforeRedirect: dispatchBeforeRedirect,
-      beforeRedirects: {},
+      beforeRedirects: /* @__PURE__ */ Object.create(null),
       http2Options
-    };
+    });
     !utils_default.isUndefined(lookup) && (options.lookup = lookup);
     if (config5.socketPath) {
+      if (typeof config5.socketPath !== "string") {
+        return reject(new AxiosError_default(
+          "socketPath must be a string",
+          AxiosError_default.ERR_BAD_OPTION_VALUE,
+          config5
+        ));
+      }
+      if (config5.allowedSocketPaths != null) {
+        const allowed = Array.isArray(config5.allowedSocketPaths) ? config5.allowedSocketPaths : [config5.allowedSocketPaths];
+        const resolvedSocket = (0, import_path9.resolve)(config5.socketPath);
+        const isAllowed = allowed.some(
+          (entry) => typeof entry === "string" && (0, import_path9.resolve)(entry) === resolvedSocket
+        );
+        if (!isAllowed) {
+          return reject(new AxiosError_default(
+            `socketPath "${config5.socketPath}" is not permitted by allowedSocketPaths`,
+            AxiosError_default.ERR_BAD_OPTION_VALUE,
+            config5
+          ));
+        }
+      }
       options.socketPath = config5.socketPath;
     } else {
       options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
@@ -73113,16 +88618,18 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
     if (isHttp2) {
       transport = http2Transport;
     } else {
-      if (config5.transport) {
-        transport = config5.transport;
+      const configTransport = own2("transport");
+      if (configTransport) {
+        transport = configTransport;
       } else if (config5.maxRedirects === 0) {
         transport = isHttpsRequest ? import_https.default : import_http.default;
       } else {
         if (config5.maxRedirects) {
           options.maxRedirects = config5.maxRedirects;
         }
-        if (config5.beforeRedirect) {
-          options.beforeRedirects.config = config5.beforeRedirect;
+        const configBeforeRedirect = own2("beforeRedirect");
+        if (configBeforeRedirect) {
+          options.beforeRedirects.config = configBeforeRedirect;
         }
         transport = isHttpsRequest ? httpsFollow : httpFollow;
       }
@@ -73132,9 +88639,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
     } else {
       options.maxBodyLength = Infinity;
     }
-    if (config5.insecureHTTPParser) {
-      options.insecureHTTPParser = config5.insecureHTTPParser;
-    }
+    options.insecureHTTPParser = Boolean(own2("insecureHTTPParser"));
     req = transport.request(options, function handleResponse(res) {
       if (req.destroyed) return;
       const streams = [res];
@@ -73191,6 +88696,28 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
         request: lastRequest
       };
       if (responseType === "stream") {
+        if (config5.maxContentLength > -1) {
+          const limit2 = config5.maxContentLength;
+          const source = responseStream;
+          async function* enforceMaxContentLength() {
+            let totalResponseBytes = 0;
+            for await (const chunk of source) {
+              totalResponseBytes += chunk.length;
+              if (totalResponseBytes > limit2) {
+                throw new AxiosError_default(
+                  "maxContentLength size of " + limit2 + " exceeded",
+                  AxiosError_default.ERR_BAD_RESPONSE,
+                  config5,
+                  lastRequest
+                );
+              }
+              yield chunk;
+            }
+          }
+          responseStream = import_stream5.default.Readable.from(enforceMaxContentLength(), {
+            objectMode: false
+          });
+        }
         response.data = responseStream;
         settle(resolve, reject, response);
       } else {
@@ -73264,6 +88791,21 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
     });
     req.on("socket", function handleRequestSocket(socket) {
       socket.setKeepAlive(true, 1e3 * 60);
+      if (!socket[kAxiosSocketListener]) {
+        socket.on("error", function handleSocketError(err) {
+          const current = socket[kAxiosCurrentReq];
+          if (current && !current.destroyed) {
+            current.destroy(err);
+          }
+        });
+        socket[kAxiosSocketListener] = true;
+      }
+      socket[kAxiosCurrentReq] = req;
+      req.once("close", function clearCurrentReq() {
+        if (socket[kAxiosCurrentReq] === req) {
+          socket[kAxiosCurrentReq] = null;
+        }
+      });
     });
     if (config5.timeout) {
       const timeout = parseInt(config5.timeout, 10);
@@ -73312,7 +88854,37 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
           abort(new CanceledError_default("Request stream has been aborted", config5, req));
         }
       });
-      data.pipe(req);
+      let uploadStream = data;
+      if (config5.maxBodyLength > -1 && config5.maxRedirects === 0) {
+        const limit2 = config5.maxBodyLength;
+        let bytesSent = 0;
+        uploadStream = import_stream5.default.pipeline(
+          [
+            data,
+            new import_stream5.default.Transform({
+              transform(chunk, _enc, cb) {
+                bytesSent += chunk.length;
+                if (bytesSent > limit2) {
+                  return cb(
+                    new AxiosError_default(
+                      "Request body larger than maxBodyLength limit",
+                      AxiosError_default.ERR_BAD_REQUEST,
+                      config5,
+                      req
+                    )
+                  );
+                }
+                cb(null, chunk);
+              }
+            })
+          ],
+          utils_default.noop
+        );
+        uploadStream.on("error", (err) => {
+          if (!req.destroyed) req.destroy(err);
+        });
+      }
+      uploadStream.pipe(req);
     } else {
       data && req.write(data);
       req.end();
@@ -73379,7 +88951,13 @@ var cookies_default = platform_default.hasStandardBrowserEnv ? (
 var headersToObject = (thing) => thing instanceof AxiosHeaders_default ? { ...thing } : thing;
 function mergeConfig(config1, config22) {
   config22 = config22 || {};
-  const config5 = {};
+  const config5 = /* @__PURE__ */ Object.create(null);
+  Object.defineProperty(config5, "hasOwnProperty", {
+    value: Object.prototype.hasOwnProperty,
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
   function getMergedValue(target, source, prop, caseless) {
     if (utils_default.isPlainObject(target) && utils_default.isPlainObject(source)) {
       return utils_default.merge.call({ caseless }, target, source);
@@ -73410,9 +88988,9 @@ function mergeConfig(config1, config22) {
     }
   }
   function mergeDirectKeys(a2, b7, prop) {
-    if (prop in config22) {
+    if (utils_default.hasOwnProp(config22, prop)) {
       return getMergedValue(a2, b7);
-    } else if (prop in config1) {
+    } else if (utils_default.hasOwnProp(config1, prop)) {
       return getMergedValue(void 0, a2);
     }
   }
@@ -73443,6 +89021,7 @@ function mergeConfig(config1, config22) {
     httpsAgent: defaultToConfig2,
     cancelToken: defaultToConfig2,
     socketPath: defaultToConfig2,
+    allowedSocketPaths: defaultToConfig2,
     responseEncoding: defaultToConfig2,
     validateStatus: mergeDirectKeys,
     headers: (a2, b7, prop) => mergeDeepProperties(headersToObject(a2), headersToObject(b7), prop, true)
@@ -73450,7 +89029,9 @@ function mergeConfig(config1, config22) {
   utils_default.forEach(Object.keys({ ...config1, ...config22 }), function computeConfigValue(prop) {
     if (prop === "__proto__" || prop === "constructor" || prop === "prototype") return;
     const merge2 = utils_default.hasOwnProp(mergeMap, prop) ? mergeMap[prop] : mergeDeepProperties;
-    const configValue = merge2(config1[prop], config22[prop], prop);
+    const a2 = utils_default.hasOwnProp(config1, prop) ? config1[prop] : void 0;
+    const b7 = utils_default.hasOwnProp(config22, prop) ? config22[prop] : void 0;
+    const configValue = merge2(a2, b7, prop);
     utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config5[prop] = configValue);
   });
   return config5;
@@ -73459,10 +89040,19 @@ function mergeConfig(config1, config22) {
 // node_modules/axios/lib/helpers/resolveConfig.js
 var resolveConfig_default = (config5) => {
   const newConfig = mergeConfig({}, config5);
-  let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
+  const own2 = (key) => utils_default.hasOwnProp(newConfig, key) ? newConfig[key] : void 0;
+  const data = own2("data");
+  let withXSRFToken = own2("withXSRFToken");
+  const xsrfHeaderName = own2("xsrfHeaderName");
+  const xsrfCookieName = own2("xsrfCookieName");
+  let headers = own2("headers");
+  const auth = own2("auth");
+  const baseURL = own2("baseURL");
+  const allowAbsoluteUrls = own2("allowAbsoluteUrls");
+  const url2 = own2("url");
   newConfig.headers = headers = AxiosHeaders_default.from(headers);
   newConfig.url = buildURL(
-    buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls),
+    buildFullPath(baseURL, url2, allowAbsoluteUrls),
     config5.params,
     config5.paramsSerializer
   );
@@ -73488,8 +89078,11 @@ var resolveConfig_default = (config5) => {
     }
   }
   if (platform_default.hasStandardBrowserEnv) {
-    withXSRFToken && utils_default.isFunction(withXSRFToken) && (withXSRFToken = withXSRFToken(newConfig));
-    if (withXSRFToken || withXSRFToken !== false && isURLSameOrigin_default(newConfig.url)) {
+    if (utils_default.isFunction(withXSRFToken)) {
+      withXSRFToken = withXSRFToken(newConfig);
+    }
+    const shouldSendXSRF = withXSRFToken === true || withXSRFToken == null && isURLSameOrigin_default(newConfig.url);
+    if (shouldSendXSRF) {
       const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies_default.read(xsrfCookieName);
       if (xsrfValue) {
         headers.set(xsrfHeaderName, xsrfValue);
@@ -73793,14 +89386,18 @@ var factory = (env2) => {
   const encodeText = isFetchSupported && (typeof TextEncoder2 === "function" ? /* @__PURE__ */ ((encoder) => (str2) => encoder.encode(str2))(new TextEncoder2()) : async (str2) => new Uint8Array(await new Request4(str2).arrayBuffer()));
   const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
     let duplexAccessed = false;
-    const hasContentType = new Request4(platform_default.origin, {
+    const request = new Request4(platform_default.origin, {
       body: new ReadableStream2(),
       method: "POST",
       get duplex() {
         duplexAccessed = true;
         return "half";
       }
-    }).headers.has("Content-Type");
+    });
+    const hasContentType = request.headers.has("Content-Type");
+    if (request.body != null) {
+      request.body.cancel();
+    }
     return duplexAccessed && !hasContentType;
   });
   const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils_default.isReadableStream(new Response4("").body));
@@ -73899,6 +89496,12 @@ var factory = (env2) => {
         withCredentials = withCredentials ? "include" : "omit";
       }
       const isCredentialsSupported = isRequestSupported && "credentials" in Request4.prototype;
+      if (utils_default.isFormData(data)) {
+        const contentType = headers.getContentType();
+        if (contentType && /^multipart\/form-data/i.test(contentType) && !/boundary=/i.test(contentType)) {
+          headers.delete("content-type");
+        }
+      }
       const resolvedOptions = {
         ...fetchOptions,
         signal: composedSignal,
@@ -74132,7 +89735,7 @@ function assertOptions(options, schema, allowUnknown) {
   let i3 = keys.length;
   while (i3-- > 0) {
     const opt = keys[i3];
-    const validator = schema[opt];
+    const validator = Object.prototype.hasOwnProperty.call(schema, opt) ? schema[opt] : void 0;
     if (validator) {
       const value = options[opt];
       const result = value === void 0 || validator(value, opt, options);
@@ -74179,12 +89782,23 @@ var Axios = class {
       if (err instanceof Error) {
         let dummy = {};
         Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
-        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
+        const stack = (() => {
+          if (!dummy.stack) {
+            return "";
+          }
+          const firstNewlineIndex = dummy.stack.indexOf("\n");
+          return firstNewlineIndex === -1 ? "" : dummy.stack.slice(firstNewlineIndex + 1);
+        })();
         try {
           if (!err.stack) {
             err.stack = stack;
-          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
-            err.stack += "\n" + stack;
+          } else if (stack) {
+            const firstNewlineIndex = stack.indexOf("\n");
+            const secondNewlineIndex = firstNewlineIndex === -1 ? -1 : stack.indexOf("\n", firstNewlineIndex + 1);
+            const stackWithoutTwoTopLines = secondNewlineIndex === -1 ? "" : stack.slice(secondNewlineIndex + 1);
+            if (!String(err.stack).endsWith(stackWithoutTwoTopLines)) {
+              err.stack += "\n" + stack;
+            }
           }
         } catch (e3) {
         }
@@ -80512,6 +96126,7 @@ var GeminiEngine = class {
         role: m5.role === "user" ? m5.role : "model"
       })
     );
+    const temperature = this.config.temperature ?? 0;
     try {
       const result = await gemini.generateContent({
         contents,
@@ -80535,8 +96150,8 @@ var GeminiEngine = class {
         ],
         generationConfig: {
           maxOutputTokens: this.config.maxTokensOutput,
-          temperature: this.config.temperature ?? 0,
-          topP: (this.config.temperature ?? 0) === 0 ? 0.1 : void 0
+          temperature,
+          topP: temperature === 0 ? 0.1 : void 0
         }
       });
       const content = result.response.text();
@@ -87360,14 +102975,15 @@ var AimlApiEngine = class {
 // src/utils/debugLog.ts
 var import_fs3 = require("fs");
 var import_os2 = require("os");
-var import_path10 = require("path");
+var import_path11 = require("path");
 function writeDebugLog(entry) {
-  const debugDir = (0, import_path10.join)((0, import_os2.homedir)(), ".opencommitx-data", "debug");
+  const debugDir = (0, import_path11.join)((0, import_os2.homedir)(), ".opencommitx-data", "debug");
   try {
     (0, import_fs3.mkdirSync)(debugDir, { recursive: true });
     const ts = (/* @__PURE__ */ new Date()).toISOString();
     const slug = ts.replace(/[:.]/g, "-");
-    const filepath = (0, import_path10.join)(debugDir, `${slug}-${entry.event}.json`);
+    const safeEvent = entry.event.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filepath = (0, import_path11.join)(debugDir, `${slug}-${safeEvent}.json`);
     const payload = { timestamp: ts, ...entry };
     (0, import_fs3.writeFileSync)(filepath, JSON.stringify(payload, null, 2), {
       encoding: "utf-8"
@@ -87431,25 +103047,27 @@ var OpenRouterEngine = class {
         return cleaned || null;
       } catch (error) {
         if (debugEnabled) {
+          const errMeta = typeof error === "object" && error !== null ? error : {};
           writeDebugLog({
             event: "api-error",
             provider: "openrouter",
             model: this.config.model,
             error: error instanceof Error ? error.message : String(error),
             meta: {
-              status: error?.status,
-              code: error?.code,
-              errorBody: error?.error
+              status: errMeta.status,
+              code: errMeta.code,
+              errorBody: errMeta.error
             }
           });
         }
         throw normalizeEngineError(error, "openrouter", this.config.model);
       }
     };
+    const timeoutMs = (getConfig().OCO_GENERATION_TIMEOUT_SECONDS ?? 60) * 1e3;
     this.client = new openai_default({
       apiKey: config5.apiKey,
       baseURL: "https://openrouter.ai/api/v1",
-      timeout: 6e4,
+      timeout: timeoutMs,
       defaultHeaders: {
         "HTTP-Referer": "https://github.com/xwberry/opencommitx",
         "X-Title": "OpenCommitX",
@@ -87679,12 +103297,12 @@ var commitlintPrompts = {
 
 // src/modules/commitlint/pwd-commitlint.ts
 var import_promises = __toESM(require("fs/promises"), 1);
-var import_path11 = __toESM(require("path"), 1);
+var import_path12 = __toESM(require("path"), 1);
 var findModulePath = (moduleName) => {
   const searchPaths = [
-    import_path11.default.join("node_modules", moduleName),
-    import_path11.default.join("node_modules", ".pnpm"),
-    import_path11.default.resolve(__dirname, "../..")
+    import_path12.default.join("node_modules", moduleName),
+    import_path12.default.join("node_modules", ".pnpm"),
+    import_path12.default.resolve(__dirname, "../..")
   ];
   for (const basePath of searchPaths) {
     try {
@@ -87944,9 +103562,10 @@ var INIT_MAIN_PROMPT2 = (language, fullGitMojiSpec, context3) => ({
     const conventionGuidelines = getCommitConvention(fullGitMojiSpec);
     const descriptionGuideline = getDescriptionInstruction();
     const oneLineCommitGuideline = getOneLineCommitInstruction();
-    const whyInstruction = getWhyInstruction();
-    const scopeInstruction = getScopeInstruction();
     const detailInstruction = getDetailInstruction();
+    const isConcise = (getConfig().OCO_COMMIT_DETAIL ?? "normal") === "concise";
+    const whyInstruction = isConcise ? "" : getWhyInstruction();
+    const scopeInstruction = getScopeInstruction();
     const generalGuidelines = `Use the present tense. Lines must not be longer than 74 characters. Use ${language} for the commit message.`;
     const userInputContext = userInputCodeContext(context3);
     return `${missionStatement}
@@ -88072,16 +103691,17 @@ function splitDiff(diff, maxChangeLength) {
   let currentDiff = "";
   for (let line of lines) {
     while (tokenCount(line) > maxChangeLength) {
-      const charBudget = maxChangeLength * 4;
+      const lineTokens = tokenCount(line);
+      const charBudget = Math.max(Math.floor(line.length * maxChangeLength / lineTokens), 1);
       const subLine = line.substring(0, charBudget);
       line = line.substring(charBudget);
       splitDiffs.push(subLine);
     }
-    if (tokenCount(currentDiff) + tokenCount("\n" + line) > maxChangeLength) {
+    if (currentDiff && tokenCount(currentDiff) + tokenCount("\n" + line) > maxChangeLength) {
       splitDiffs.push(currentDiff);
       currentDiff = line;
     } else {
-      currentDiff += "\n" + line;
+      currentDiff = currentDiff ? currentDiff + "\n" + line : line;
     }
   }
   if (currentDiff) {
@@ -88116,11 +103736,11 @@ function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength
 }
 async function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, buildMessages) {
   const separator = "diff --git ";
-  const diffByFiles = diff.split(separator).slice(1);
+  const diffByFiles = diff.split(separator).slice(1).map((s2) => separator + s2);
   const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
   const commitMessagePromises = [];
   for (const fileDiff of mergedFilesDiffs) {
-    if (tokenCount(fileDiff) >= maxDiffLength) {
+    if (tokenCount(fileDiff) > maxDiffLength) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
@@ -88129,7 +103749,7 @@ async function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, buildMess
       );
       commitMessagePromises.push(...messagesPromises);
     } else {
-      const messages = await buildMessages(separator + fileDiff);
+      const messages = await buildMessages(fileDiff);
       const engine = getEngine();
       commitMessagePromises.push(engine.generateCommitMessage(messages));
     }
@@ -88143,14 +103763,14 @@ function delay3(ms) {
 // src/utils/pythonDocstringExtractor.ts
 var import_child_process = require("child_process");
 var import_fs4 = require("fs");
-var import_path12 = require("path");
+var import_path13 = require("path");
 var SCRIPT_NAME = "extract_docstrings.py";
 function findScriptPath() {
   const candidates = [
-    (0, import_path12.join)(process.cwd(), "scripts", SCRIPT_NAME)
+    (0, import_path13.join)(process.cwd(), "scripts", SCRIPT_NAME)
   ];
   if (typeof __dirname !== "undefined") {
-    candidates.push((0, import_path12.join)(__dirname, "..", "scripts", SCRIPT_NAME));
+    candidates.push((0, import_path13.join)(__dirname, "..", "scripts", SCRIPT_NAME));
   }
   for (const candidate of candidates) {
     if ((0, import_fs4.existsSync)(candidate)) return candidate;
@@ -88481,7 +104101,7 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context3
             }
           });
         }
-        commitMessages.push(msg);
+        if (msg) commitMessages.push(msg);
         await delay3(2e3);
       }
       return commitMessages.join("\n\n");
@@ -88562,7 +104182,7 @@ var generateCommitMessageByDiff = async (diff, fullGitMojiSpec = false, context3
     const fallbackModel = currentConfig.OCO_FALLBACK_MODEL;
     const fallbackProvider = currentConfig.OCO_FALLBACK_PROVIDER;
     if (fallbackModel && !retryWithModel) {
-      const errMsg = error instanceof Error ? error.message : String(error);
+      const errMsg = (error instanceof Error ? error.message : String(error)).toLowerCase();
       const isRetriable = errMsg.includes("rate limit") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("unavailable") || errMsg.includes("timeout") || isModelNotFoundError(error);
       if (isRetriable) {
         const isModelNameMismatch = errMsg.includes("not a valid model") || errMsg.includes("model not found") || errMsg.includes("no such model") || errMsg.includes("invalid model");
@@ -88599,7 +104219,7 @@ Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
             const keyInput = await he({ message: keyMessage, placeholder: "sk-..." });
             if (!pD2(keyInput) && keyInput) {
               const providerKeyName = `OCO_${effectiveFallbackProvider.toUpperCase()}_KEY`;
-              setGlobalConfig({ ...cfgNow, OCO_API_KEY: keyInput, [providerKeyName]: keyInput });
+              setGlobalConfig({ ...cfgNow, [providerKeyName]: keyInput });
             }
           }
         }
@@ -88642,12 +104262,12 @@ function combineCommitMessages(messages) {
 
 // src/commands/commit.ts
 var import_fs7 = require("fs");
-var import_path15 = require("path");
+var import_path16 = require("path");
 
 // src/utils/git.ts
 var import_fs5 = require("fs");
 var import_ignore = __toESM(require_ignore(), 1);
-var import_path13 = require("path");
+var import_path14 = require("path");
 init_dist2();
 var assertGitRepo = async () => {
   try {
@@ -88661,7 +104281,7 @@ var getOpenCommitIgnore = async () => {
   const ig = (0, import_ignore.default)();
   try {
     ig.add(
-      (0, import_fs5.readFileSync)((0, import_path13.join)(gitDir, ".opencommitignore")).toString().split("\n")
+      (0, import_fs5.readFileSync)((0, import_path14.join)(gitDir, ".opencommitignore")).toString().split("\n")
     );
   } catch (e3) {
   }
@@ -88772,9 +104392,10 @@ var getStagedFilesStatus = async () => {
   const ig = await getOpenCommitIgnore();
   return stdout.split("\n").filter((line) => line.trim()).map((line) => {
     const parts = line.split("	");
-    const rawStatus = parts[0]?.trim()[0] ?? "M";
+    const raw = parts[0]?.trim()[0] ?? "M";
+    const status = raw === "A" || raw === "M" || raw === "D" || raw === "R" || raw === "C" || raw === "U" ? raw : "M";
     const file = parts[parts.length - 1]?.trim() ?? "";
-    return { file, status: rawStatus };
+    return { file, status };
   }).filter((e3) => e3.file && !ig.ignores(e3.file));
 };
 
@@ -88783,8 +104404,8 @@ var import_crypto4 = require("crypto");
 var import_child_process2 = require("child_process");
 var import_fs6 = require("fs");
 var import_os3 = require("os");
-var import_path14 = require("path");
-var CACHE_BASE_DIR = (0, import_path14.join)((0, import_os3.homedir)(), ".opencommitx-data");
+var import_path15 = require("path");
+var CACHE_BASE_DIR = (0, import_path15.join)((0, import_os3.homedir)(), ".opencommitx-data");
 function filesFromDiff(diff) {
   const matches = diff.matchAll(/^diff --git a\/.+ b\/(.+)$/gm);
   return [...matches].map((m5) => m5[1]);
@@ -88803,28 +104424,28 @@ function getRepoCacheDir() {
   (0, import_fs6.mkdirSync)(CACHE_BASE_DIR, { recursive: true });
   const repoRoot = getRepoRootSync();
   if (!repoRoot) {
-    const dir2 = (0, import_path14.join)(CACHE_BASE_DIR, "global");
+    const dir2 = (0, import_path15.join)(CACHE_BASE_DIR, "global");
     (0, import_fs6.mkdirSync)(dir2, { recursive: true });
     return dir2;
   }
-  const repoName = (0, import_path14.basename)(repoRoot);
+  const repoName = (0, import_path15.basename)(repoRoot);
   const repoHash = (0, import_crypto4.createHash)("sha256").update(repoRoot).digest("hex").slice(0, 8);
-  const dir = (0, import_path14.join)(CACHE_BASE_DIR, `${repoName}-${repoHash}`);
+  const dir = (0, import_path15.join)(CACHE_BASE_DIR, `${repoName}-${repoHash}`);
   (0, import_fs6.mkdirSync)(dir, { recursive: true });
   return dir;
 }
 function getArchiveDir() {
-  const dir = (0, import_path14.join)(getRepoCacheDir(), "archived");
+  const dir = (0, import_path15.join)(getRepoCacheDir(), "archived");
   (0, import_fs6.mkdirSync)(dir, { recursive: true });
   return dir;
 }
 function getCacheFilePath(diffHash) {
-  return (0, import_path14.join)(getRepoCacheDir(), `${diffHash}.json`);
+  return (0, import_path15.join)(getRepoCacheDir(), `${diffHash}.json`);
 }
 function normalizeForHashing(diff) {
   return diff.split("\n").map((line) => {
     if (line.startsWith("+") && !line.startsWith("+++") || line.startsWith("-") && !line.startsWith("---")) {
-      return line[0] + line.slice(1).replace(/[ \t]+/g, " ").trimEnd();
+      return line[0] + line.slice(1).trimEnd();
     }
     return line;
   }).join("\n");
@@ -88862,7 +104483,7 @@ function getCachedCommitMessage(diff) {
     try {
       const file = getCacheFilePath(key);
       if ((0, import_fs6.existsSync)(file)) {
-        const archiveFile = (0, import_path14.join)(getArchiveDir(), `${key}.json`);
+        const archiveFile = (0, import_path15.join)(getArchiveDir(), `${key}.json`);
         (0, import_fs6.renameSync)(file, archiveFile);
       }
     } catch {
@@ -88888,7 +104509,7 @@ function archiveCacheEntry(diff) {
   try {
     const file = getCacheFilePath(key);
     if (!(0, import_fs6.existsSync)(file)) return;
-    const archiveFile = (0, import_path14.join)(getArchiveDir(), `${key}.json`);
+    const archiveFile = (0, import_path15.join)(getArchiveDir(), `${key}.json`);
     (0, import_fs6.renameSync)(file, archiveFile);
   } catch {
   }
@@ -88899,7 +104520,7 @@ function pruneArchivedCache(retentionDays = 7) {
     const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1e3;
     for (const file of (0, import_fs6.readdirSync)(archiveDir)) {
       if (!file.endsWith(".json")) continue;
-      const filePath = (0, import_path14.join)(archiveDir, file);
+      const filePath = (0, import_path15.join)(archiveDir, file);
       try {
         const entry = JSON.parse((0, import_fs6.readFileSync)(filePath, "utf-8"));
         if (entry.timestamp < cutoff) {
@@ -89013,11 +104634,20 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
   const maxLinesPerGroup = config5.OCO_MAX_LINES_PER_GROUP ?? 1500;
   const lockFiles = stats.filter((s2) => isBinaryOrGenerated(s2.file));
   const relevantStats = stats.filter((s2) => !isBinaryOrGenerated(s2.file));
-  if (mode === "never" || relevantStats.length === 0) {
+  if (mode === "never") {
+    const allFiles = [...relevantStats, ...lockFiles].map((s2) => s2.file);
     return {
       usePerFile: false,
-      fileGroups: [{ files: relevantStats.map((s2) => s2.file), totalLines: 0 }],
-      reason: mode === "never" ? "per-file mode disabled" : "no relevant files"
+      fileGroups: [{ files: allFiles, totalLines: 0 }],
+      reason: "per-file mode disabled"
+    };
+  }
+  if (relevantStats.length === 0) {
+    const lockOnlyFiles = lockFiles.map((s2) => s2.file);
+    return {
+      usePerFile: mode === "always",
+      fileGroups: lockOnlyFiles.length ? [{ files: lockOnlyFiles, totalLines: lockFiles.reduce((a2, s2) => a2 + s2.added + s2.deleted, 0) }] : [],
+      reason: "no relevant files"
     };
   }
   if (mode === "always") {
@@ -89262,7 +104892,7 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
     const committingChangesSpinner = Y3();
     try {
       const gitDir = await getGitDir();
-      if ((0, import_fs7.existsSync)((0, import_path15.join)(gitDir, ".pre-commit-config.yaml"))) {
+      if ((0, import_fs7.existsSync)((0, import_path16.join)(gitDir, ".pre-commit-config.yaml"))) {
         Me("Pre-commit hooks are configured and will run now.");
       }
     } catch {
@@ -89473,7 +105103,8 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
               { value: "regenerate", label: `Regenerate with ${currentModel}` }
             ]
           });
-          if (pD2(reuseAction) || reuseAction === "use") {
+          if (pD2(reuseAction)) process.exit(1);
+          if (reuseAction === "use") {
             rawMessages.push(cached.message);
             if (fileGroups.indexOf(group) < fileGroups.length - 1) {
               genSpinner.start(`Generating commit messages for ${fileGroups.length} file group(s)...`);
@@ -89783,13 +105414,13 @@ var commitlintConfigCommand = G3(
 init_dist2();
 var import_fs8 = require("fs");
 var import_promises3 = __toESM(require("fs/promises"), 1);
-var import_path16 = __toESM(require("path"), 1);
+var import_path17 = __toESM(require("path"), 1);
 var HOOK_NAME = "prepare-commit-msg";
-var DEFAULT_SYMLINK_URL = import_path16.default.join(".git", "hooks", HOOK_NAME);
+var DEFAULT_SYMLINK_URL = import_path17.default.join(".git", "hooks", HOOK_NAME);
 var getHooksPath = async () => {
   try {
     const hooksPath = await getCoreHooksPath();
-    return import_path16.default.join(hooksPath, HOOK_NAME);
+    return import_path17.default.join(hooksPath, HOOK_NAME);
   } catch (error) {
     return DEFAULT_SYMLINK_URL;
   }
@@ -89829,7 +105460,7 @@ var hookCommand = G3(
             `Different ${HOOK_NAME} is already set. Remove it before setting opencommit as '${HOOK_NAME}' hook.`
           );
         }
-        await import_promises3.default.mkdir(import_path16.default.dirname(SYMLINK_URL), { recursive: true });
+        await import_promises3.default.mkdir(import_path17.default.dirname(SYMLINK_URL), { recursive: true });
         await import_promises3.default.symlink(HOOK_URL, SYMLINK_URL, "file");
         await import_promises3.default.chmod(SYMLINK_URL, 493);
         return Se(`${source_default.green("\u2714")} Hook set`);
@@ -89923,9 +105554,9 @@ init_dist2();
 // src/utils/modelCache.ts
 var import_fs9 = require("fs");
 var import_os4 = require("os");
-var import_path17 = require("path");
-var MODEL_CACHE_DIR = (0, import_path17.join)((0, import_os4.homedir)(), ".opencommitx-data");
-var MODEL_CACHE_PATH = (0, import_path17.join)(MODEL_CACHE_DIR, "models.json");
+var import_path18 = require("path");
+var MODEL_CACHE_DIR = (0, import_path18.join)((0, import_os4.homedir)(), ".opencommitx-data");
+var MODEL_CACHE_PATH = (0, import_path18.join)(MODEL_CACHE_DIR, "models.json");
 var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1e3;
 function readCache() {
   try {
@@ -90819,8 +106450,8 @@ init_dist2();
 // src/utils/customModels.ts
 var import_fs10 = require("fs");
 var import_os5 = require("os");
-var import_path18 = require("path");
-var CUSTOM_MODELS_FILE = (0, import_path18.join)((0, import_os5.homedir)(), ".opencommitx-custom-models.json");
+var import_path19 = require("path");
+var CUSTOM_MODELS_FILE = (0, import_path19.join)((0, import_os5.homedir)(), ".opencommitx-custom-models.json");
 function readCustomModels() {
   if (!(0, import_fs10.existsSync)(CUSTOM_MODELS_FILE)) return {};
   try {
@@ -91022,12 +106653,12 @@ Add custom models: ${source_default.cyan("ocox models add <provider> <model>")}`
 // src/commands/benchmark.ts
 init_dist2();
 var import_fs12 = require("fs");
-var import_path20 = require("path");
+var import_path21 = require("path");
 
 // src/utils/benchmarkRunner.ts
 var import_fs11 = require("fs");
 var import_os6 = require("os");
-var import_path19 = require("path");
+var import_path20 = require("path");
 
 // src/prompts/benchmark.ts
 function buildEvaluatorMessages(diff, candidates) {
@@ -91077,7 +106708,7 @@ Evaluate all ${candidates.length} candidates and return the JSON results array.`
 }
 
 // src/utils/benchmarkRunner.ts
-var BENCHMARK_CONFIG_PATH = (0, import_path19.join)((0, import_os6.homedir)(), ".opencommitx-data", "benchmark.json");
+var BENCHMARK_CONFIG_PATH = (0, import_path20.join)((0, import_os6.homedir)(), ".opencommitx-data", "benchmark.json");
 var DEFAULT_BENCHMARK_CONFIG = {
   eval_model: "anthropic/claude-opus-4-20250514",
   eval_provider: "openrouter",
@@ -91095,7 +106726,7 @@ function readBenchmarkConfig() {
   }
 }
 function writeBenchmarkConfig(cfg) {
-  (0, import_fs11.mkdirSync)((0, import_path19.join)((0, import_os6.homedir)(), ".opencommitx-data"), { recursive: true });
+  (0, import_fs11.mkdirSync)((0, import_path20.join)((0, import_os6.homedir)(), ".opencommitx-data"), { recursive: true });
   (0, import_fs11.writeFileSync)(BENCHMARK_CONFIG_PATH, JSON.stringify(cfg, null, 2), {
     encoding: "utf-8",
     mode: 384
@@ -91151,14 +106782,17 @@ async function runEvaluator(cfg, diff, candidateResults) {
     OCO_TEMPERATURE: cfg.eval_temperature
   });
   try {
-    const candidates = candidateResults.filter((r3) => !r3.error && r3.message).map((r3) => ({ model: r3.candidate.model, message: r3.message }));
+    const candidates = candidateResults.filter((r3) => !r3.error && r3.message).map((r3) => ({ model: `${r3.candidate.model}@${r3.candidate.provider}`, message: r3.message }));
     const messages = buildEvaluatorMessages(diff, candidates);
     const engine = getEngine();
     const evalConfig = getConfig();
     let rawApiKey = getProviderApiKey(evalConfig, cfg.eval_provider);
     const baseURL = cfg.eval_provider === "openrouter" ? "https://openrouter.ai/api/v1" : void 0;
+    if (!rawApiKey) {
+      throw new Error(`Missing API key for evaluator provider: ${cfg.eval_provider}`);
+    }
     const client = new openai_default({
-      apiKey: rawApiKey ?? "none",
+      apiKey: rawApiKey,
       baseURL,
       defaultHeaders: cfg.eval_provider === "openrouter" ? { "HTTP-Referer": "https://github.com/xwberry/opencommitx", "X-Title": "OpenCommitX Benchmark" } : {}
     });
@@ -91186,17 +106820,18 @@ function formatBenchmarkMarkdown(diff, candidateResults, evalResults, timestamp)
   const evalMap = new Map(
     evalResults.results.map((r3) => [r3.model, r3])
   );
+  const candidateKey = (r3) => `${r3.candidate.model}@${r3.candidate.provider}`;
   const sorted = [...candidateResults].sort((a2, b7) => {
-    const sa = evalMap.get(a2.candidate.model)?.score ?? 0;
-    const sb = evalMap.get(b7.candidate.model)?.score ?? 0;
+    const sa = evalMap.get(candidateKey(a2))?.score ?? 0;
+    const sb = evalMap.get(candidateKey(b7))?.score ?? 0;
     return sb - sa;
   });
   const summaryRows = sorted.map((r3, i3) => {
-    const ev = evalMap.get(r3.candidate.model);
+    const ev = evalMap.get(candidateKey(r3));
     return `| ${i3 + 1} | ${r3.candidate.model} | ${ev?.score ?? "N/A"} | ${ev?.accuracy ?? "-"}/10 | ${ev?.completeness ?? "-"}/10 | ${ev?.hallucinations ? "Yes" : "No"} | ${(r3.latencyMs / 1e3).toFixed(1)}s | ${r3.promptTokens}/${r3.completionTokens} | ${r3.cost != null ? `$${r3.cost.toFixed(5)}` : "N/A"} |`;
   }).join("\n");
   const modelSections = sorted.map((r3) => {
-    const ev = evalMap.get(r3.candidate.model);
+    const ev = evalMap.get(candidateKey(r3));
     const missing = ev?.missing_key_details?.length ? ev.missing_key_details.map((d7) => `  - ${d7}`).join("\n") : "  none";
     return `## Model: ${r3.candidate.model}${ev ? ` \u2014 Score: ${ev.score}/100` : ""}
 ${r3.error ? `**Error:** ${r3.error}` : `**Commit message:**
@@ -91279,16 +106914,28 @@ async function runBenchmarkSetup() {
     placeholder: "0.1",
     defaultValue: String(existing.eval_temperature)
   });
+  if (pD2(evalTemp)) {
+    Se("Setup cancelled");
+    return;
+  }
   const evalMaxIn = await he({
     message: `Evaluator max input tokens (current: ${existing.eval_max_tokens_input}):`,
     placeholder: "32000",
     defaultValue: String(existing.eval_max_tokens_input)
   });
+  if (pD2(evalMaxIn)) {
+    Se("Setup cancelled");
+    return;
+  }
   const evalMaxOut = await he({
     message: `Evaluator max output tokens (current: ${existing.eval_max_tokens_output}):`,
     placeholder: "8000",
     defaultValue: String(existing.eval_max_tokens_output)
   });
+  if (pD2(evalMaxOut)) {
+    Se("Setup cancelled");
+    return;
+  }
   console.log(source_default.bold("\n\u2500\u2500 Candidate Models (up to 10) \u2500\u2500"));
   const candidates = [...existing.candidates ?? []];
   const addAnother = async () => {
@@ -91312,10 +106959,12 @@ async function runBenchmarkSetup() {
       placeholder: "0",
       defaultValue: "0"
     });
+    if (pD2(cTemp)) return;
+    const parsedTemp = Number(cTemp);
     candidates.push({
       model: String(cModel),
       provider: String(cProvider),
-      temperature: Number(cTemp) || 0
+      temperature: !isNaN(parsedTemp) ? parsedTemp : 0
     });
     await addAnother();
   };
@@ -91430,14 +107079,14 @@ This will use real API tokens and incur costs.`,
     }
   }
   const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
-  const resultsFile = (0, import_path20.join)(process.cwd(), `benchmark_results_${timestamp}.md`);
+  const resultsFile = (0, import_path21.join)(process.cwd(), `benchmark_results_${timestamp}.md`);
   const markdown = formatBenchmarkMarkdown(diff, candidateResults, evalResults, (/* @__PURE__ */ new Date()).toISOString());
   (0, import_fs12.writeFileSync)(resultsFile, markdown, "utf-8");
   console.log("\n" + source_default.dim(`  Results written to: ${resultsFile}`));
   const winnerOptions = [
-    ...successful.map((r3) => ({
-      value: r3.candidate.model,
-      label: `${r3.candidate.model}${evalResults.results.find((e3) => e3.model === r3.candidate.model) ? ` (score: ${evalResults.results.find((e3) => e3.model === r3.candidate.model).score})` : ""}`
+    ...successful.map((r3, idx) => ({
+      value: String(idx),
+      label: `${r3.candidate.model} [${r3.candidate.provider}]${evalResults.results.find((e3) => e3.model === r3.candidate.model) ? ` (score: ${evalResults.results.find((e3) => e3.model === r3.candidate.model).score})` : ""}`
     })),
     { value: "__skip__", label: "Don't change current model" }
   ];
@@ -91446,14 +107095,14 @@ This will use real API tokens and incur costs.`,
     options: winnerOptions
   });
   if (!pD2(winner) && winner !== "__skip__") {
-    const winnerCandidate = cfg.candidates.find((c3) => c3.model === winner);
+    const winnerCandidate = successful[Number(winner)].candidate;
     const existingConfig = getGlobalConfig();
     setGlobalConfig({
       ...existingConfig,
       OCO_AI_PROVIDER: winnerCandidate.provider,
       OCO_MODEL: winnerCandidate.model
     });
-    Se(`${source_default.green("\u2714")} Default model set to ${winner} (provider: ${winnerCandidate.provider})`);
+    Se(`${source_default.green("\u2714")} Default model set to ${winnerCandidate.model} (provider: ${winnerCandidate.provider})`);
   } else {
     Se(`${source_default.green("\u2714")} Benchmark complete \u2014 no config change`);
   }
@@ -91515,7 +107164,7 @@ Current version: ${currentVersion}. Latest version: ${latestVersion}.
 // src/migrations/_run.ts
 var import_fs14 = __toESM(require("fs"), 1);
 var import_os8 = require("os");
-var import_path22 = require("path");
+var import_path23 = require("path");
 
 // src/migrations/00_use_single_api_key_and_url.ts
 function use_single_api_key_and_url_default() {
@@ -91606,16 +107255,20 @@ function migration03() {
 // src/migrations/04_migrate_config_location.ts
 var import_fs13 = require("fs");
 var import_os7 = require("os");
-var import_path21 = require("path");
-var OLD_CONFIG_PATH = (0, import_path21.join)((0, import_os7.homedir)(), ".opencommitx");
-var NEW_CONFIG_DIR = (0, import_path21.join)((0, import_os7.homedir)(), ".opencommitx-data");
-var NEW_CONFIG_PATH = (0, import_path21.join)(NEW_CONFIG_DIR, "config.ini");
+var import_path22 = require("path");
+var OLD_CONFIG_PATH = (0, import_path22.join)((0, import_os7.homedir)(), ".opencommitx");
+var NEW_CONFIG_DIR = (0, import_path22.join)((0, import_os7.homedir)(), ".opencommitx-data");
+var NEW_CONFIG_PATH = (0, import_path22.join)(NEW_CONFIG_DIR, "config.ini");
 function migration04() {
   if (!(0, import_fs13.existsSync)(OLD_CONFIG_PATH)) return;
   if ((0, import_fs13.existsSync)(NEW_CONFIG_PATH)) return;
-  (0, import_fs13.mkdirSync)(NEW_CONFIG_DIR, { recursive: true });
-  const content = (0, import_fs13.readFileSync)(OLD_CONFIG_PATH, "utf8");
-  (0, import_fs13.writeFileSync)(NEW_CONFIG_PATH, content, { encoding: "utf8", mode: 384 });
+  try {
+    (0, import_fs13.mkdirSync)(NEW_CONFIG_DIR, { recursive: true });
+    const content = (0, import_fs13.readFileSync)(OLD_CONFIG_PATH, "utf8");
+    (0, import_fs13.writeFileSync)(NEW_CONFIG_PATH, content, { encoding: "utf8", mode: 384 });
+  } catch (err) {
+    console.error(`Migration 04 failed: could not migrate config to ${NEW_CONFIG_PATH}`, err);
+  }
 }
 
 // src/migrations/_migrations.ts
@@ -91644,8 +107297,8 @@ var migrations = [
 
 // src/migrations/_run.ts
 init_dist2();
-var migrationsFile = (0, import_path22.join)((0, import_os8.homedir)(), ".opencommitx_migrations");
-var legacyMigrationsFile = (0, import_path22.join)((0, import_os8.homedir)(), ".opencommit_migrations");
+var migrationsFile = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommitx_migrations");
+var legacyMigrationsFile = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommit_migrations");
 var migrateLegacyMigrationsFile = () => {
   const newExists = import_fs14.default.existsSync(migrationsFile);
   const oldExists = import_fs14.default.existsSync(legacyMigrationsFile);
