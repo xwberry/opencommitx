@@ -35,7 +35,11 @@ const migrateLegacyMigrationsFile = (): void => {
 
   // Always clean up the legacy file to avoid confusion.
   if (oldExists) {
-    try { fs.unlinkSync(legacyMigrationsFile); } catch { /* non-fatal */ }
+    try {
+      fs.unlinkSync(legacyMigrationsFile);
+    } catch {
+      /* non-fatal */
+    }
   }
 };
 
@@ -76,7 +80,9 @@ export const runMigrations = async () => {
   migrateLegacyMigrationsFile();
 
   const completedMigrations = getCompletedMigrations();
-  const skipMigration00 = SKIP_MIGRATION00_PROVIDERS.has(config.OCO_AI_PROVIDER);
+  const skipMigration00 = SKIP_MIGRATION00_PROVIDERS.has(
+    config.OCO_AI_PROVIDER
+  );
 
   let isMigrated = false;
 
