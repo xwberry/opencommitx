@@ -8,25 +8,25 @@ Repository: [github.com/xwberry/opencommitx](https://github.com/xwberry/opencomm
 
 ## What's Different from Upstream
 
-| Feature | opencommit | opencommitx |
-|---|---|---|
-| CLI aliases | `oco`, `opencommit` | `ocox`, `opencommitx` |
-| Config file | `~/.opencommit` | `~/.opencommitx-data/config.ini` |
-| Pre-commit cache | None | Per-group JSON files; survives hook failures; archives on commit |
-| Diff routing | Always aggregate | Smart per-file routing + subdirectory-aware grouping |
-| Per-file commit loop | Not supported | Optional per-file messages with Accept/Skip/Accept All |
-| Multi-commit file association | Not supported | `buildCommitPlan` correctly stages each file group before committing |
-| Python large files | Full diff always sent | Docstring-only extraction when diff ≥ ratio of file |
-| Per-provider API keys | Single `OCO_API_KEY` | `OCO_OPENAI_KEY`, `OCO_ANTHROPIC_KEY`, etc. |
-| Fallback model | Not supported | `OCO_FALLBACK_MODEL` auto-retries on rate-limit/unavailability |
-| Temperature control | Hardcoded 0 | `OCO_TEMPERATURE` (0.0–2.0) |
-| Verbosity control | Not available | `OCO_COMMIT_DETAIL` (concise/normal/detailed) |
-| Staged-files table | Not available | Pre-generation table showing +/- lines, new file?, docstring mode, group# |
-| Regeneration | Simple Y/N prompt | Sub-menu with concise/detailed/feedback options |
-| Benchmark | Not available | `ocox benchmark` — test up to 10 models against a diff with AI grading |
-| `config describe` | Shows default only | Shows current value, thematic order |
-| `setup full` | Not available | Full walkthrough of all config keys |
-| Generation timeout | Hardcoded 90s | `OCO_GENERATION_TIMEOUT_SECONDS` |
+| Feature                       | opencommit            | opencommitx                                                               |
+| ----------------------------- | --------------------- | ------------------------------------------------------------------------- |
+| CLI aliases                   | `oco`, `opencommit`   | `ocox`, `opencommitx`                                                     |
+| Config file                   | `~/.opencommit`       | `~/.opencommitx-data/config.ini`                                          |
+| Pre-commit cache              | None                  | Per-group JSON files; survives hook failures; archives on commit          |
+| Diff routing                  | Always aggregate      | Smart per-file routing + subdirectory-aware grouping                      |
+| Per-file commit loop          | Not supported         | Optional per-file messages with Accept/Skip/Accept All                    |
+| Multi-commit file association | Not supported         | `buildCommitPlan` correctly stages each file group before committing      |
+| Python large files            | Full diff always sent | Docstring-only extraction when diff ≥ ratio of file                       |
+| Per-provider API keys         | Single `OCO_API_KEY`  | `OCO_OPENAI_KEY`, `OCO_ANTHROPIC_KEY`, etc.                               |
+| Fallback model                | Not supported         | `OCO_FALLBACK_MODEL` auto-retries on rate-limit/unavailability            |
+| Temperature control           | Hardcoded 0           | `OCO_TEMPERATURE` (0.0–2.0)                                               |
+| Verbosity control             | Not available         | `OCO_COMMIT_DETAIL` (concise/normal/detailed)                             |
+| Staged-files table            | Not available         | Pre-generation table showing +/- lines, new file?, docstring mode, group# |
+| Regeneration                  | Simple Y/N prompt     | Sub-menu with concise/detailed/feedback options                           |
+| Benchmark                     | Not available         | `ocox benchmark` — test up to 10 models against a diff with AI grading    |
+| `config describe`             | Shows default only    | Shows current value, thematic order                                       |
+| `setup full`                  | Not available         | Full walkthrough of all config keys                                       |
+| Generation timeout            | Hardcoded 90s         | `OCO_GENERATION_TIMEOUT_SECONDS`                                          |
 
 ---
 
@@ -119,100 +119,100 @@ All settings are stored in `~/.opencommitx-data/config.ini` (INI format). Enviro
 
 ### Provider & Model
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_AI_PROVIDER` | `openai` | Provider: `openai`, `anthropic`, `openrouter`, `gemini`, `groq`, `mistral`, `deepseek`, `aimlapi`, `azure`, `ollama`, `mlx`, `flowise`, `test` |
-| `OCO_MODEL` | `gpt-4o-mini` | Model name for the selected provider |
-| `OCO_API_KEY` | — | Generic API key (fallback if provider-specific key not set) |
-| `OCO_API_URL` | — | Custom base URL (proxy, Azure endpoint, etc.) |
+| Key               | Default       | Description                                                                                                                                    |
+| ----------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OCO_AI_PROVIDER` | `openai`      | Provider: `openai`, `anthropic`, `openrouter`, `gemini`, `groq`, `mistral`, `deepseek`, `aimlapi`, `azure`, `ollama`, `mlx`, `flowise`, `test` |
+| `OCO_MODEL`       | `gpt-4o-mini` | Model name for the selected provider                                                                                                           |
+| `OCO_API_KEY`     | —             | Generic API key (fallback if provider-specific key not set)                                                                                    |
+| `OCO_API_URL`     | —             | Custom base URL (proxy, Azure endpoint, etc.)                                                                                                  |
 
 ### Fallback Model
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_FALLBACK_MODEL` | — | Model ID to retry on rate-limit/timeout errors |
-| `OCO_FALLBACK_PROVIDER` | — | Provider for the fallback model (required when naming convention differs from primary) |
+| Key                     | Default | Description                                                                            |
+| ----------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `OCO_FALLBACK_MODEL`    | —       | Model ID to retry on rate-limit/timeout errors                                         |
+| `OCO_FALLBACK_PROVIDER` | —       | Provider for the fallback model (required when naming convention differs from primary) |
 
 ### Per-Provider API Keys
 
 Provider-specific keys take precedence over `OCO_API_KEY`.
 
-| Key | Provider |
-|---|---|
-| `OCO_OPENAI_KEY` | OpenAI |
-| `OCO_ANTHROPIC_KEY` | Anthropic |
-| `OCO_OPENROUTER_KEY` | OpenRouter |
-| `OCO_GEMINI_KEY` | Google Gemini |
-| `OCO_GROQ_KEY` | Groq |
-| `OCO_MISTRAL_KEY` | Mistral AI |
-| `OCO_DEEPSEEK_KEY` | DeepSeek |
-| `OCO_AIMLAPI_KEY` | AI/ML API |
-| `OCO_AZURE_KEY` | Azure OpenAI |
+| Key                  | Provider      |
+| -------------------- | ------------- |
+| `OCO_OPENAI_KEY`     | OpenAI        |
+| `OCO_ANTHROPIC_KEY`  | Anthropic     |
+| `OCO_OPENROUTER_KEY` | OpenRouter    |
+| `OCO_GEMINI_KEY`     | Google Gemini |
+| `OCO_GROQ_KEY`       | Groq          |
+| `OCO_MISTRAL_KEY`    | Mistral AI    |
+| `OCO_DEEPSEEK_KEY`   | DeepSeek      |
+| `OCO_AIMLAPI_KEY`    | AI/ML API     |
+| `OCO_AZURE_KEY`      | Azure OpenAI  |
 
 ### Token Limits
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_TOKENS_MAX_INPUT` | `4096` | Maximum input tokens |
-| `OCO_TOKENS_MAX_OUTPUT` | `500` | Maximum output tokens |
+| Key                     | Default | Description           |
+| ----------------------- | ------- | --------------------- |
+| `OCO_TOKENS_MAX_INPUT`  | `4096`  | Maximum input tokens  |
+| `OCO_TOKENS_MAX_OUTPUT` | `500`   | Maximum output tokens |
 
 ### Generation
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_TEMPERATURE` | `0` | Sampling temperature (0.0–2.0). 0 = deterministic |
-| `OCO_COMMIT_DETAIL` | `normal` | Verbosity: `concise` (one-liner), `normal`, `detailed` (full description) |
-| `OCO_GENERATION_TIMEOUT_SECONDS` | `90` | Per-group generation timeout; increase for slow models/networks |
+| Key                              | Default  | Description                                                               |
+| -------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `OCO_TEMPERATURE`                | `0`      | Sampling temperature (0.0–2.0). 0 = deterministic                         |
+| `OCO_COMMIT_DETAIL`              | `normal` | Verbosity: `concise` (one-liner), `normal`, `detailed` (full description) |
+| `OCO_GENERATION_TIMEOUT_SECONDS` | `90`     | Per-group generation timeout; increase for slow models/networks           |
 
 ### Commit Format
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_PROMPT_MODULE` | `conventional-commit` | `conventional-commit` or `@commitlint` |
-| `OCO_EMOJI` | `false` | Prefix with GitMoji emoji |
-| `OCO_ONE_LINE_COMMIT` | `false` | Force single-line commit message |
-| `OCO_DESCRIPTION` | `false` | Add ~3 sentence body explaining WHY |
-| `OCO_WHY` | `false` | Add explicit "Why:" section after message |
-| `OCO_OMIT_SCOPE` | `false` | Drop `(<scope>)` from conventional commit format |
-| `OCO_LANGUAGE` | `en` | Output language for commit messages |
+| Key                   | Default               | Description                                      |
+| --------------------- | --------------------- | ------------------------------------------------ |
+| `OCO_PROMPT_MODULE`   | `conventional-commit` | `conventional-commit` or `@commitlint`           |
+| `OCO_EMOJI`           | `false`               | Prefix with GitMoji emoji                        |
+| `OCO_ONE_LINE_COMMIT` | `false`               | Force single-line commit message                 |
+| `OCO_DESCRIPTION`     | `false`               | Add ~3 sentence body explaining WHY              |
+| `OCO_WHY`             | `false`               | Add explicit "Why:" section after message        |
+| `OCO_OMIT_SCOPE`      | `false`               | Drop `(<scope>)` from conventional commit format |
+| `OCO_LANGUAGE`        | `en`                  | Output language for commit messages              |
 
 ### Smart Diff Routing
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_PER_FILE_COMMIT_MODE` | `auto` | `auto` (threshold-based), `always` (per-file with boilerplate grouping), `never` (aggregate) |
-| `OCO_PER_FILE_THRESHOLD_LINES` | `300` | Total changed lines (added+deleted) above which a file gets its own group |
-| `OCO_MAX_FILES_PER_GROUP` | `10` | Max files per commit group in auto mode |
-| `OCO_MAX_LINES_PER_GROUP` | `1500` | Max total changed lines per group in auto mode — prevents oversized groups |
-| `OCO_MULTI_COMMIT_STRATEGY` | `single` | `single` (combine all group messages into one commit) or `sequential` (one commit per file group) |
+| Key                            | Default  | Description                                                                                       |
+| ------------------------------ | -------- | ------------------------------------------------------------------------------------------------- |
+| `OCO_PER_FILE_COMMIT_MODE`     | `auto`   | `auto` (threshold-based), `always` (per-file with boilerplate grouping), `never` (aggregate)      |
+| `OCO_PER_FILE_THRESHOLD_LINES` | `300`    | Total changed lines (added+deleted) above which a file gets its own group                         |
+| `OCO_MAX_FILES_PER_GROUP`      | `10`     | Max files per commit group in auto mode                                                           |
+| `OCO_MAX_LINES_PER_GROUP`      | `1500`   | Max total changed lines per group in auto mode — prevents oversized groups                        |
+| `OCO_MULTI_COMMIT_STRATEGY`    | `single` | `single` (combine all group messages into one commit) or `sequential` (one commit per file group) |
 
 In `auto` mode, small-file groups are sorted by directory path before binning, so files in the same subdirectory naturally end up together. Lock files (`pixi.lock`, `package-lock.json`, etc.) are attached to the group containing their manifest.
 
 ### Python Docstring Extraction
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_PYTHON_DOCSTRING_MODE` | `auto` | `auto`, `always`, `never` |
-| `OCO_PYTHON_DOCSTRING_THRESHOLD` | `500` | Min changed lines before extraction is considered |
-| `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` | `0.9` | `changedLines / totalLines` must be ≥ ratio — prevents extraction on partial refactors |
+| Key                                     | Default | Description                                                                          |
+| --------------------------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `OCO_PYTHON_DOCSTRING_MODE`             | `auto`  | `auto`, `always`, `never`                                                            |
+| `OCO_PYTHON_DOCSTRING_THRESHOLD`        | `500`   | Min added lines before extraction is considered                                      |
+| `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` | `0.9`   | `addedLines / totalLines` must be ≥ ratio — prevents extraction on partial refactors |
 
 ### Cache
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_CACHE_ENABLED` | `true` | Cache LLM results by diff hash |
-| `OCO_CACHE_TTL_SECONDS` | `3600` | Cache TTL in seconds (1 hour) |
+| Key                     | Default | Description                    |
+| ----------------------- | ------- | ------------------------------ |
+| `OCO_CACHE_ENABLED`     | `true`  | Cache LLM results by diff hash |
+| `OCO_CACHE_TTL_SECONDS` | `3600`  | Cache TTL in seconds (1 hour)  |
 
 Cache is stored per-repo at `~/.opencommitx-data/<repo>/<diffhash>.json`. Each file group gets its own cache entry. On successful commit, entries are archived to `archived/` and pruned after the TTL. If the cached model differs from the current model, a warning is shown with an option to regenerate.
 
 ### Developer / Testing
 
-| Key | Default | Description |
-|---|---|---|
-| `OCO_DEBUG` | `false` | Write full prompts/responses to `~/.opencommitx-data/debug/` |
-| `OCO_TEST_MOCK_TYPE` | `commit-message` | Mock type for `--dry-run` and test provider |
-| `OCO_HOOK_AUTO_UNCOMMENT` | `false` | Auto-uncomment message in prepare-commit-msg hook |
-| `OCO_GITPUSH` | `true` | Prompt to push after committing (deprecated) |
+| Key                       | Default          | Description                                                  |
+| ------------------------- | ---------------- | ------------------------------------------------------------ |
+| `OCO_DEBUG`               | `false`          | Write full prompts/responses to `~/.opencommitx-data/debug/` |
+| `OCO_TEST_MOCK_TYPE`      | `commit-message` | Mock type for `--dry-run` and test provider                  |
+| `OCO_HOOK_AUTO_UNCOMMENT` | `false`          | Auto-uncomment message in prepare-commit-msg hook            |
+| `OCO_GITPUSH`             | `true`           | Prompt to push after committing (deprecated)                 |
 
 ---
 
@@ -263,8 +263,8 @@ Different providers use different naming conventions. OpenRouter uses `provider/
 
 For large Python files, opencommitx extracts docstrings instead of sending the full diff, saving tokens. Both conditions must be true:
 
-1. `changedLines > OCO_PYTHON_DOCSTRING_THRESHOLD` (default 500)
-2. `changedLines / totalFileLines >= OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9)
+1. `addedLines > OCO_PYTHON_DOCSTRING_THRESHOLD` (default 500)
+2. `addedLines / totalFileLines >= OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9)
 
 The ratio prevents extraction on partial refactors — it only triggers for near-complete rewrites. Requires Python 3 in `PATH`.
 
