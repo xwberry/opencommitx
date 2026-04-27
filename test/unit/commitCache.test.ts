@@ -18,7 +18,9 @@ function wipeCacheDir() {
   try {
     const dir = getRepoCacheDir();
     rmSync(dir, { recursive: true, force: true });
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 describe('commitCache', () => {
@@ -52,17 +54,22 @@ describe('commitCache', () => {
       expect(hashDiff('diff A')).not.toBe(hashDiff('diff B'));
     });
 
-    it('returns the same hash for diffs that differ only in internal whitespace (formatter tolerance)', () => {
-      // The normalizer collapses multiple consecutive spaces/tabs to a single space.
+    it('preserves internal whitespace so whitespace-significant edits do not collide', () => {
       const before =
         'diff --git a/x.py b/x.py\n' +
-        '+x  =  1\n' +          // multiple spaces around =
-        '+y     =  "hello"\n';  // multiple spaces
+        '+x  =  1\n' + // multiple spaces around =
+        '+y     =  "hello"\n'; // multiple spaces
       const afterRuff =
         'diff --git a/x.py b/x.py\n' +
-        '+x = 1\n' +            // single spaces (ruff normalized)
+        '+x = 1\n' + // single spaces (ruff normalized)
         '+y = "hello"\n';
-      expect(hashDiff(before)).toBe(hashDiff(afterRuff));
+      expect(hashDiff(before)).not.toBe(hashDiff(afterRuff));
+    });
+
+    it('ignores trailing whitespace on added or removed lines', () => {
+      const before = 'diff --git a/x.py b/x.py\n+x = 1   \n-y = 2\t\n';
+      const after = 'diff --git a/x.py b/x.py\n+x = 1\n-y = 2\n';
+      expect(hashDiff(before)).toBe(hashDiff(after));
     });
 
     it('returns different hashes when content (not just whitespace) changes', () => {
@@ -91,7 +98,12 @@ describe('commitCache', () => {
 
     it('stores the model name when provided', () => {
       const diff = 'diff --git a/bar.ts b/bar.ts\n+const y = 2;';
-      setCachedCommitMessage(diff, 'feat: add y', ['bar.ts'], 'claude-3-5-haiku-20241022');
+      setCachedCommitMessage(
+        diff,
+        'feat: add y',
+        ['bar.ts'],
+        'claude-3-5-haiku-20241022'
+      );
 
       const cached = getCachedCommitMessage(diff);
       expect(cached).not.toBeNull();
