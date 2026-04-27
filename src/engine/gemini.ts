@@ -41,7 +41,7 @@ export class GeminiEngine implements AiEngine {
           ({
             parts: [{ text: m.content } as Part],
             role: m.role === 'user' ? m.role : 'model'
-          } as Content)
+          }) as Content
       );
 
     const temperature = this.config.temperature ?? 0;
