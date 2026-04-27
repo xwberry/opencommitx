@@ -78,9 +78,7 @@ async function handleModelNotFoundError(
   provider: string,
   currentModel: string
 ): Promise<string | null> {
-  console.log(
-    chalk.red(`\n✖ Model '${currentModel}' not found\n`)
-  );
+  console.log(chalk.red(`\n✖ Model '${currentModel}' not found\n`));
 
   const suggestedModels = getSuggestedModels(provider, currentModel);
   const recommended =
@@ -272,7 +270,10 @@ export const generateCommitMessageByDiff = async (
         // Line-based truncation: remove trailing lines until content fits.
         const lines = diff.split('\n');
         let truncated = diff;
-        while (tokenCount(truncated) >= MAX_REQUEST_TOKENS && lines.length > 1) {
+        while (
+          tokenCount(truncated) >= MAX_REQUEST_TOKENS &&
+          lines.length > 1
+        ) {
           lines.pop();
           truncated = lines.join('\n');
         }
@@ -303,7 +304,8 @@ export const generateCommitMessageByDiff = async (
           });
         }
         const truncEngine = getEngine();
-        const truncCommit = await truncEngine.generateCommitMessage(truncMessages);
+        const truncCommit =
+          await truncEngine.generateCommitMessage(truncMessages);
         if (debugEnabled) {
           writeDebugLog({
             event: 'llm-response-pre-processed',
@@ -354,11 +356,12 @@ export const generateCommitMessageByDiff = async (
               docSections.join('\n\n');
 
             if (tokenCount(docPayload) < MAX_REQUEST_TOKENS) {
-              const docMessages = await generateCommitMessageChatCompletionPrompt(
-                docPayload,
-                fullGitMojiSpec,
-                context
-              );
+              const docMessages =
+                await generateCommitMessageChatCompletionPrompt(
+                  docPayload,
+                  fullGitMojiSpec,
+                  context
+                );
               const docEngine = getEngine();
               if (debugEnabled) {
                 writeDebugLog({
@@ -366,10 +369,14 @@ export const generateCommitMessageByDiff = async (
                   provider,
                   model: currentModel,
                   messages: docMessages,
-                  meta: { docFiles: pyFiles, tokenCount: tokenCount(docPayload) }
+                  meta: {
+                    docFiles: pyFiles,
+                    tokenCount: tokenCount(docPayload)
+                  }
                 });
               }
-              const docCommit = await docEngine.generateCommitMessage(docMessages);
+              const docCommit =
+                await docEngine.generateCommitMessage(docMessages);
               if (debugEnabled) {
                 writeDebugLog({
                   event: 'llm-response-docstring-fallback',
@@ -388,7 +395,8 @@ export const generateCommitMessageByDiff = async (
       const commitMessagePromises = await _getCommitMsgsPromisesFromFileDiffs(
         diff,
         MAX_REQUEST_TOKENS,
-        (d) => generateCommitMessageChatCompletionPrompt(d, fullGitMojiSpec, context)
+        (d) =>
+          generateCommitMessageChatCompletionPrompt(d, fullGitMojiSpec, context)
       );
 
       const commitMessages = [] as string[];
@@ -409,6 +417,15 @@ export const generateCommitMessageByDiff = async (
         }
         if (msg) commitMessages.push(msg);
         await delay(2000);
+      }
+
+      if (commitMessages.length === 0) {
+        throw new Error(
+          `${GenerateCommitMessageErrorEnum.emptyMessage}\n` +
+            `  Provider: ${provider}, Model: ${currentModel}\n` +
+            `  All chunked generation requests returned empty responses. ` +
+            `Try a different model or increase OCO_TOKENS_MAX_OUTPUT.`
+        );
       }
 
       return commitMessages.join('\n\n');
@@ -492,14 +509,20 @@ export const generateCommitMessageByDiff = async (
         setGlobalConfig({
           ...existingConfig,
           OCO_MODEL: newModel
-        } as any);
+        });
 
-        return generateCommitMessageByDiff(
-          diff,
-          fullGitMojiSpec,
-          context,
-          newModel
-        );
+        try {
+          const result = await generateCommitMessageByDiff(
+            diff,
+            fullGitMojiSpec,
+            context,
+            newModel
+          );
+          lastUsedModel = lastUsedModel ?? newModel;
+          return result;
+        } finally {
+          setGlobalConfig(existingConfig);
+        }
       }
     }
 
@@ -507,7 +530,9 @@ export const generateCommitMessageByDiff = async (
     const fallbackModel = currentConfig.OCO_FALLBACK_MODEL;
     const fallbackProvider = currentConfig.OCO_FALLBACK_PROVIDER;
     if (fallbackModel && !retryWithModel) {
-      const errMsg = (error instanceof Error ? error.message : String(error)).toLowerCase();
+      const errMsg = (
+        error instanceof Error ? error.message : String(error)
+      ).toLowerCase();
       const isRetriable =
         errMsg.includes('rate limit') ||
         errMsg.includes('429') ||
@@ -525,10 +550,10 @@ export const generateCommitMessageByDiff = async (
         if (isModelNameMismatch && !fallbackProvider) {
           note(
             `Fallback model "${fallbackModel}" was not recognized by the current provider.\n` +
-            `Different providers use different naming conventions:\n` +
-            `  Anthropic native: "claude-3-5-haiku-20241022"\n` +
-            `  OpenRouter:       "anthropic/claude-haiku-4.5"\n` +
-            `Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
+              `Different providers use different naming conventions:\n` +
+              `  Anthropic native: "claude-3-5-haiku-20241022"\n` +
+              `  OpenRouter:       "anthropic/claude-haiku-4.5"\n` +
+              `Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
             chalk.yellow('⚠  Model naming mismatch')
           );
 
@@ -538,49 +563,84 @@ export const generateCommitMessageByDiff = async (
             options: [
               { value: '', label: 'Skip (keep current provider)' },
               ...Object.values(OCO_AI_PROVIDER_ENUM)
-                .filter(p => p !== 'test')
-                .map(p => ({ value: p, label: p }))
+                .filter((p) => p !== 'test')
+                .map((p) => ({ value: p, label: p }))
             ]
           });
           if (!isCancel(providerInput) && providerInput) {
             const cfgToUpdate = getGlobalConfig();
-            setGlobalConfig({ ...cfgToUpdate, OCO_FALLBACK_PROVIDER: providerInput } as any);
+            setGlobalConfig({
+              ...cfgToUpdate,
+              OCO_FALLBACK_PROVIDER: providerInput
+            } as any);
             // Use the newly selected provider for this retry.
-            Object.assign(currentConfig, { OCO_FALLBACK_PROVIDER: providerInput });
+            Object.assign(currentConfig, {
+              OCO_FALLBACK_PROVIDER: providerInput
+            });
           }
         }
 
         // Determine effective fallback provider for this retry.
-        const effectiveFallbackProvider = (currentConfig.OCO_FALLBACK_PROVIDER as string) || fallbackProvider || '';
+        const effectiveFallbackProvider =
+          (currentConfig.OCO_FALLBACK_PROVIDER as string) ||
+          fallbackProvider ||
+          '';
 
         // Check if the fallback provider has an API key set; if not, prompt for one.
-        if (effectiveFallbackProvider && effectiveFallbackProvider !== provider) {
+        if (
+          effectiveFallbackProvider &&
+          effectiveFallbackProvider !== provider
+        ) {
           const cfgNow = getGlobalConfig();
-          const existingKey = getProviderApiKey(cfgNow as any, effectiveFallbackProvider);
+          const existingKey = getProviderApiKey(
+            cfgNow as any,
+            effectiveFallbackProvider
+          );
           if (!existingKey) {
-            const keyUrl = PROVIDER_API_KEY_URLS[effectiveFallbackProvider as keyof typeof PROVIDER_API_KEY_URLS];
+            const keyUrl =
+              PROVIDER_API_KEY_URLS[
+                effectiveFallbackProvider as keyof typeof PROVIDER_API_KEY_URLS
+              ];
             const keyMessage = keyUrl
               ? `API key for ${effectiveFallbackProvider}:\n  Get your key at: ${keyUrl}`
               : `API key for ${effectiveFallbackProvider}:`;
-            const keyInput = await text({ message: keyMessage, placeholder: 'sk-...' });
+            const keyInput = await text({
+              message: keyMessage,
+              placeholder: 'sk-...'
+            });
             if (!isCancel(keyInput) && keyInput) {
               const providerKeyName = `OCO_${effectiveFallbackProvider.toUpperCase()}_KEY`;
-              setGlobalConfig({ ...cfgNow, [providerKeyName]: keyInput } as any);
+              setGlobalConfig({
+                ...cfgNow,
+                [providerKeyName]: keyInput
+              } as any);
             }
           }
         }
 
-        console.log(chalk.yellow(`Primary model failed. Retrying with fallback: ${fallbackModel}\n`));
+        console.log(
+          chalk.yellow(
+            `Primary model failed. Retrying with fallback: ${fallbackModel}\n`
+          )
+        );
         const existingConfig = getGlobalConfig();
         setGlobalConfig({
           ...existingConfig,
           OCO_MODEL: fallbackModel,
           ...(effectiveFallbackProvider
-            ? { OCO_AI_PROVIDER: effectiveFallbackProvider as OCO_AI_PROVIDER_ENUM }
+            ? {
+                OCO_AI_PROVIDER:
+                  effectiveFallbackProvider as OCO_AI_PROVIDER_ENUM
+              }
             : {})
         });
         try {
-          const result = await generateCommitMessageByDiff(diff, fullGitMojiSpec, context, fallbackModel);
+          const result = await generateCommitMessageByDiff(
+            diff,
+            fullGitMojiSpec,
+            context,
+            fallbackModel
+          );
           // Record that the fallback model was used so callers can pass it to setCachedCommitMessage.
           lastUsedModel = fallbackModel;
           return result;
