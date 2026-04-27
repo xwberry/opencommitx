@@ -18,8 +18,16 @@ export interface RoutingResult {
 }
 
 const BINARY_OR_GENERATED_EXTENSIONS = new Set([
-  '.lock', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif',
-  '.wasm', '.min.js', '.min.css'
+  '.lock',
+  '.svg',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.gif',
+  '.wasm',
+  '.min.js',
+  '.min.css'
 ]);
 
 function isBinaryOrGenerated(file: string): boolean {
@@ -36,11 +44,17 @@ function isBinaryOrGenerated(file: string): boolean {
 
 /** Files that are always boilerplate (grouped together even in always/individual mode). */
 const BOILERPLATE_BASENAMES = new Set([
-  '__init__.py', '__init__.pyi',
-  'index.ts', 'index.tsx', 'index.js', 'index.jsx',
+  '__init__.py',
+  '__init__.pyi',
+  'index.ts',
+  'index.tsx',
+  'index.js',
+  'index.jsx',
   'mod.rs',
-  'types.ts', 'types.js',
-  'constants.ts', 'constants.js',
+  'types.ts',
+  'types.js',
+  'constants.ts',
+  'constants.js'
 ]);
 
 function isBoilerplateFile(file: string): boolean {
@@ -62,7 +76,7 @@ const LOCK_TO_MANIFEST: Record<string, string> = {
   'Gemfile.lock': 'Gemfile',
   'go.sum': 'go.mod',
   'poetry.lock': 'pyproject.toml',
-  'uv.lock': 'pyproject.toml',
+  'uv.lock': 'pyproject.toml'
 };
 
 /**
@@ -73,7 +87,9 @@ function getLockManifestPath(lockFile: string): string | null {
   const basename = lockFile.split('/').pop() ?? lockFile;
   const manifest = LOCK_TO_MANIFEST[basename];
   if (!manifest) return null;
-  const dir = lockFile.includes('/') ? lockFile.substring(0, lockFile.lastIndexOf('/') + 1) : '';
+  const dir = lockFile.includes('/')
+    ? lockFile.substring(0, lockFile.lastIndexOf('/') + 1)
+    : '';
   return dir + manifest;
 }
 
@@ -110,7 +126,8 @@ function groupByDirectory(
   for (const stat of sorted) {
     const statLines = stat.added + stat.deleted;
     const wouldExceedFiles = currentFiles.length >= maxFiles;
-    const wouldExceedLines = currentLines + statLines > maxLines && currentFiles.length > 0;
+    const wouldExceedLines =
+      currentLines + statLines > maxLines && currentFiles.length > 0;
 
     if (wouldExceedFiles || wouldExceedLines) {
       groups.push(currentFiles);
@@ -166,7 +183,12 @@ export function routeDiff(
     return {
       usePerFile: mode === 'always',
       fileGroups: lockOnlyFiles.length
-        ? [{ files: lockOnlyFiles, totalLines: lockFiles.reduce((a, s) => a + s.added + s.deleted, 0) }]
+        ? [
+            {
+              files: lockOnlyFiles,
+              totalLines: lockFiles.reduce((a, s) => a + s.added + s.deleted, 0)
+            }
+          ]
         : [],
       reason: 'no relevant files'
     };
@@ -175,7 +197,9 @@ export function routeDiff(
   // always mode: every file gets its own group except boilerplate files,
   // which are grouped together.
   if (mode === 'always') {
-    const boilerplateFiles = relevantStats.filter((s) => isBoilerplateFile(s.file));
+    const boilerplateFiles = relevantStats.filter((s) =>
+      isBoilerplateFile(s.file)
+    );
     const normalFiles = relevantStats.filter((s) => !isBoilerplateFile(s.file));
 
     const groups: FileGroupResult[] = normalFiles.map((s) => ({
@@ -186,7 +210,10 @@ export function routeDiff(
     if (boilerplateFiles.length > 0) {
       groups.push({
         files: boilerplateFiles.map((s) => s.file),
-        totalLines: boilerplateFiles.reduce((acc, s) => acc + s.added + s.deleted, 0)
+        totalLines: boilerplateFiles.reduce(
+          (acc, s) => acc + s.added + s.deleted,
+          0
+        )
       });
     }
 
@@ -210,7 +237,11 @@ export function routeDiff(
 
   if (largeFiles.length === 0) {
     // All files are small — group by directory with caps.
-    const chunks = groupByDirectory(relevantStats, maxFilesPerGroup, maxLinesPerGroup);
+    const chunks = groupByDirectory(
+      relevantStats,
+      maxFilesPerGroup,
+      maxLinesPerGroup
+    );
     const groups: FileGroupResult[] = chunks.map((files) => ({
       files,
       totalLines: files.reduce((acc, f) => {
@@ -232,7 +263,7 @@ export function routeDiff(
     const totalLines = s.added + s.deleted;
     // Pass only s.added — deleted lines must not inflate the ratio.
     const docstringOverride = _shouldUse(s.file, s.added)
-      ? _extract(s.file) ?? undefined
+      ? (_extract(s.file) ?? undefined)
       : undefined;
     return {
       files: [s.file],
@@ -243,7 +274,11 @@ export function routeDiff(
 
   if (smallFiles.length > 0) {
     // Group small files by directory with both caps.
-    const chunks = groupByDirectory(smallFiles, maxFilesPerGroup, maxLinesPerGroup);
+    const chunks = groupByDirectory(
+      smallFiles,
+      maxFilesPerGroup,
+      maxLinesPerGroup
+    );
     chunks.forEach((files) => {
       groups.push({
         files,
@@ -268,7 +303,10 @@ export function routeDiff(
  * Attach lock files to the group that contains their manifest file.
  * Lock files without a matching manifest are appended to the last group.
  */
-function attachLockFiles(lockStats: FileStats[], groups: FileGroupResult[]): void {
+function attachLockFiles(
+  lockStats: FileStats[],
+  groups: FileGroupResult[]
+): void {
   if (lockStats.length === 0 || groups.length === 0) return;
 
   for (const lockStat of lockStats) {
@@ -284,5 +322,6 @@ function attachLockFiles(lockStats: FileStats[], groups: FileGroupResult[]): voi
     }
 
     targetGroup.files.push(lockStat.file);
+    targetGroup.totalLines += lockStat.added + lockStat.deleted;
   }
 }
