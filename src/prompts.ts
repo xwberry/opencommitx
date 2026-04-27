@@ -168,12 +168,12 @@ const INIT_MAIN_PROMPT = (
     const diffInstruction =
       "I'll send you an output of 'git diff --staged' command, and you are to convert it into a commit message. An example input/output pair follows to demonstrate the expected format. Your actual task will be the final user message.";
     const conventionGuidelines = getCommitConvention(fullGitMojiSpec);
-    const descriptionGuideline = getDescriptionInstruction();
-    const oneLineCommitGuideline = getOneLineCommitInstruction();
     const detailInstruction = getDetailInstruction();
     // In concise mode the detail instruction already prohibits a Why section and
     // descriptions — don't also inject conflicting instructions.
     const isConcise = (getConfig().OCO_COMMIT_DETAIL ?? 'normal') === 'concise';
+    const descriptionGuideline = isConcise ? '' : getDescriptionInstruction();
+    const oneLineCommitGuideline = getOneLineCommitInstruction();
     const whyInstruction = isConcise ? '' : getWhyInstruction();
     const scopeInstruction = getScopeInstruction();
     const generalGuidelines = `Use the present tense. Lines must not be longer than 74 characters. Use ${language} for the commit message.`;
@@ -244,9 +244,7 @@ const getConsistencyContent = (translation: ConsistencyPrompt) => {
     ? ''
     : generateCommitString('feat', featMessage);
 
-  const description = cfg.OCO_DESCRIPTION
-    ? translation.commitDescription
-    : '';
+  const description = cfg.OCO_DESCRIPTION ? translation.commitDescription : '';
 
   return [fix, feat, description].filter(Boolean).join('\n');
 };
