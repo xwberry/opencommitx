@@ -470,17 +470,50 @@ PR #2 is currently mergeable (`mergeStateStatus: CLEAN`) and CodeRabbit's overal
 | `src/utils/benchmarkRunner.ts` (`thinkBlock`) | Always rendered "Evaluator Raw Response" section. | **✓ Fixed** — line 300 condition is `rawEval.trim().length > 0`. | None. |
 | `src/utils/diffRouter.ts:286` (totalLines on attach) | Lock file attached without updating group `totalLines`. | **✓ Fixed** — `attachLockFiles` at line 325 now does `targetGroup.totalLines += lockStat.added + lockStat.deleted`. | None. |
 
-### 9.4 Burndown summary
+### 9.4 Source B — review-body items from the most recent review (2026-04-29)
 
-- **Must-do before merge:** none. PR is mergeable.
-- **Should-do soon (still flagged in current code):**
-  1. `utils/diffRouter.ts:170` — stop attaching arbitrary `.png`/`.wasm`/`.min.*` files to an unrelated group (give them their own group).
-  2. `commands/config.ts:939` — `OCO_DEBUG` validator should reject genuinely invalid values, not coerce them.
-  3. `commands/setup.ts:846` — enforce `OCO_GENERATION_TIMEOUT_SECONDS ≥ 10` at the wizard level.
+The 4 Apr-29 inline comments are already accounted for above (they're items in §9.2/§9.3). The review's **body** (Source B in `/fetch-reviews`) carried 1 duplicate (re-flag) and 11 nitpicks that aren't inline. Each verified against HEAD:
+
+| Severity | File:line | Issue | Status @ HEAD | Decision |
+| --- | --- | --- | --- | --- |
+| Major (re-flag) | `src/utils/diffChunking.ts:46-47` | `getMessagesPromisesByChangesInFile` prepends `separator` (`'diff --git '`) onto a `lineDiff` that already starts with that prefix (from the caller's earlier `.map((s) => separator + s)` on line 64) → final payload becomes `'diff --git diff --git ...'`. Only fires on the chunking fallback path (huge diffs). | **Not fixed** — confirmed line 47: `await buildMessages(separator + lineDiff)`. | **Active.** Real bug; fix by dropping the `separator +` here (or pass `''` from the caller). |
+| Nitpick | `src/utils/diffChunking.ts:67-77` | "Also applies to" — the `else` branch on line 80 does `await buildMessages(separator + fileDiff)` even though `fileDiff` already includes `diff --git `. Same root cause as above. | **Not fixed** — line 80. | **Active.** Folds into the same fix. |
+| Nitpick | `src/generateCommitMessageFromGitDiff.ts:11` | Unused `MODEL_LIST` import. | **Not fixed** — line 11. | Active (cosmetic). |
+| Nitpick | `src/migrations/04_migrate_config_location.ts:3` | Unused `dirname` import. | **Not fixed** — line 3. | Active (cosmetic). |
+| Nitpick | `test/unit/commitCache.test.ts:1-3` | Unused imports `mkdirSync`, `homedir`, `pathJoin`. | **Not fixed** — confirmed by grep. | Active (cosmetic). |
+| Nitpick | `src/commands/benchmark.ts:17-37` | Unused imports `CONFIG_KEYS`, `PROVIDER_API_KEY_URLS`, `getConfig`, `setConfig`, `getProviderApiKey`. | **Not fixed** — all 5 still imported, none used. | Active (cosmetic). |
+| Nitpick | `src/commands/benchmark.ts:231` | `const estimatedInputTokens` computed but never read — only `evalEstimate` is shown in the note. | **Not fixed.** | Active. Either delete or include in the user-facing note (the note text would read better with both numbers). |
+| Nitpick | `src/utils/commitCache.ts:219` | Stale comment "Use unlinkSync via dynamic import to avoid direct fs import" left over from before `unlinkSync` was added to the top-level import. | **Not fixed.** | Active (cosmetic). |
+| Nitpick | `src/commands/commit.ts:890` | `let stats` never reassigned — should be `const`. | **Not fixed.** | Active (cosmetic). |
+| Nitpick | `src/commands/setup.ts:832-835` | Temperature wizard silently swallows invalid input (e.g. `5.0`) instead of warning the user. | **Not fixed.** | Active. Same pattern as the other "Should-do" item below for `OCO_GENERATION_TIMEOUT_SECONDS`; both should at least warn. |
+| Nitpick | `src/utils/modelCache.ts:130, 151, 174-179, 200` | Provider-list fetch responses parsed as inline `(m: { id: string })`. Coding guidelines call for Zod schema validation at the API boundary. | **Not fixed.** | **Deferred.** Lots of churn for low real-world impact (these calls already fall back to `MODEL_LIST` on any error). Reasonable cleanup if/when modelCache gets refactored, but not blocking. |
+| Nitpick | `src/prompts/benchmark.ts:57-58` | Evaluator system prompt says "Return ONLY valid JSON" *and* "Do NOT omit the `<think>` tag if you use one". `benchmarkRunner.ts:227` works around it with a regex extract, so output is parseable, but the prompt itself is contradictory and may degrade JSON quality on smaller models. | **Not fixed.** | Active (low priority). Worth tightening to "if you use a `<think>` block, place it before the JSON object — extraction will pull the JSON out". |
+| **Skipped** | `xdocs/README.md:294` (Apr 29 nitpick) | "Capitalize 'GitHub'" — the suggested diff is literally identical to the existing line; the heading on line 292 already reads `## CI / GitHub Actions`; line 294 doesn't contain the word "GitHub" at all (only the directory `.github/workflows/`). | n/a | **Skip — false positive.** The CR suggestion is malformed. |
+| **Skipped** | `xdocs/todo.md:25-26` (Apr 27 nitpick) | "TOO_MUCH_TOKENS" → "TOO_MANY_TOKENS" naming. The actual enum value in `generateCommitMessageFromGitDiff.ts:71` is `tooMuchTokens = 'TOO_MUCH_TOKENS'` so the docs reference is accurate. Renaming the enum is wider scope than a doc fix. | n/a | **Skip — defer.** Doc reference matches code; renaming the enum is a separate (low-value) refactor. |
+
+### 9.5 Updated burndown summary
+
+- **Must-do before merge:** none — PR is technically mergeable, but the `diffChunking` duplicated-prefix bug is a real Major that affects chunking-fallback prompt quality. Worth burning down too.
+- **Should-do soon (Major or behaviour-affecting):**
+  1. `src/utils/diffChunking.ts:46-47` and `:80` — drop the extra `separator +` prefix when the caller already supplied a `diff --git`-prefixed payload (Apr 29 duplicate-flag).
+  2. `src/utils/diffRouter.ts:170` — stop attaching arbitrary `.png`/`.wasm`/`.min.*` to an unrelated commit group; give them their own group when no manifest matches.
+  3. `src/commands/config.ts:939` — `OCO_DEBUG` validator should reject invalid values, not silently coerce to `false`.
+  4. `src/commands/setup.ts:846` — enforce `OCO_GENERATION_TIMEOUT_SECONDS ≥ 10` at wizard time (not just at config-set time).
+  5. `src/commands/setup.ts:832-835` — surface a "value ignored" warning when a temperature outside `0–2` is entered (mirrors the timeout pattern).
+- **Cosmetic cleanup (lint/imports — fast, batchable):**
+  - Remove unused imports in `generateCommitMessageFromGitDiff.ts:11` (`MODEL_LIST`), `migrations/04_migrate_config_location.ts:3` (`dirname`), `test/unit/commitCache.test.ts:1-3` (`mkdirSync`, `homedir`, `pathJoin`), `commands/benchmark.ts:17-37` (5 symbols).
+  - Remove unused `estimatedInputTokens` in `benchmark.ts:231` (or include it in the note alongside `evalEstimate`).
+  - Remove stale "dynamic import" comment in `commitCache.ts:219`.
+  - `let stats` → `const stats` in `commit.ts:890`.
+  - Replace empty `interface X extends AiEngineConfig {}` declarations with `type X = AiEngineConfig;` across `engine/openrouter.ts:8`, `groq.ts`, `deepseek.ts`, `mistral.ts`, `aimlapi.ts`, `azure.ts`, `flowise.ts`, `gemini.ts`, `mlx.ts`, `ollama.ts`.
 - **Nice-to-have:**
-  - Replace empty `interface` declarations across engines with type aliases.
+  - Tighten `prompts/benchmark.ts:57-58` evaluator instruction to remove the contradiction.
   - Add CJK/dense-token test for `splitDiff`.
   - Add explicit empty-chunk guard in `splitDiff.push(subLine)`.
+- **Deferred / skipped:**
+  - `modelCache.ts` Zod-validation refactor (low value; falls back gracefully today).
+  - `xdocs/README.md:294` "GitHub" capitalisation (CR false positive — pre/post diff identical).
+  - `xdocs/todo.md:25-26` `TOO_MUCH_TOKENS` rename (matches the actual enum value; not a doc bug).
 
 ---
 
