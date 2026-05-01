@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C D:\\\\projects\\\\opencommitx status)",
+      "Bash(git -C D:\\\\projects\\\\opencommitx log --oneline -20)",
+      "Bash(git -C D:\\\\projects\\\\opencommitx branch --show-current)"
+    ]
+  }
+}
