@@ -887,7 +887,7 @@ export async function commit(
   let fileGroups: FileGroupResult[] = [];
 
   // Always fetch stats so we can render the upfront table.
-  let stats = await getStagedFilesStats().catch(() => []);
+  const stats = await getStagedFilesStats().catch(() => []);
 
   if (perFileMode !== 'never') {
     try {
