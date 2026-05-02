@@ -164,32 +164,50 @@ export function routeDiff(
   const maxFilesPerGroup = config.OCO_MAX_FILES_PER_GROUP ?? 10;
   const maxLinesPerGroup = config.OCO_MAX_LINES_PER_GROUP ?? 1500;
 
-  // Lock files are excluded from diff by git (binary/generated) but we want
-  // them committed alongside their manifest. Collect them separately.
-  const lockFiles = stats.filter((s) => isBinaryOrGenerated(s.file));
+  // Generated files split into two buckets:
+  //   - "true lock files": have a manifest mapping (e.g. package-lock.json → package.json).
+  //     Attach to the manifest's group so dependency changes commit together.
+  //   - "standalone generated": no manifest mapping (e.g. logo.png, .min.js, .wasm).
+  //     Each gets its own group — bundling these into an unrelated source commit
+  //     produces misleading commit messages.
+  const lockFiles = stats.filter(
+    (s) => isBinaryOrGenerated(s.file) && getLockManifestPath(s.file) !== null
+  );
+  const standaloneGenerated = stats.filter(
+    (s) => isBinaryOrGenerated(s.file) && getLockManifestPath(s.file) === null
+  );
   const relevantStats = stats.filter((s) => !isBinaryOrGenerated(s.file));
 
   if (mode === 'never') {
-    const allFiles = [...relevantStats, ...lockFiles].map((s) => s.file);
+    const allFiles = [
+      ...relevantStats,
+      ...lockFiles,
+      ...standaloneGenerated
+    ].map((s) => s.file);
     return {
       usePerFile: false,
-      fileGroups: [{ files: allFiles, totalLines: 0 }],
+      fileGroups: allFiles.length ? [{ files: allFiles, totalLines: 0 }] : [],
       reason: 'per-file mode disabled'
     };
   }
 
   if (relevantStats.length === 0) {
-    const lockOnlyFiles = lockFiles.map((s) => s.file);
+    const groups: FileGroupResult[] = [];
+    if (lockFiles.length) {
+      groups.push({
+        files: lockFiles.map((s) => s.file),
+        totalLines: lockFiles.reduce((a, s) => a + s.added + s.deleted, 0)
+      });
+    }
+    for (const gen of standaloneGenerated) {
+      groups.push({
+        files: [gen.file],
+        totalLines: gen.added + gen.deleted
+      });
+    }
     return {
-      usePerFile: mode === 'always',
-      fileGroups: lockOnlyFiles.length
-        ? [
-            {
-              files: lockOnlyFiles,
-              totalLines: lockFiles.reduce((a, s) => a + s.added + s.deleted, 0)
-            }
-          ]
-        : [],
+      usePerFile: mode === 'always' || standaloneGenerated.length > 0,
+      fileGroups: groups,
       reason: 'no relevant files'
     };
   }
@@ -218,6 +236,7 @@ export function routeDiff(
     }
 
     attachLockFiles(lockFiles, groups);
+    attachStandaloneGenerated(standaloneGenerated, groups);
 
     return {
       usePerFile: true,
@@ -251,9 +270,10 @@ export function routeDiff(
     }));
 
     attachLockFiles(lockFiles, groups);
+    attachStandaloneGenerated(standaloneGenerated, groups);
 
     return {
-      usePerFile: false,
+      usePerFile: standaloneGenerated.length > 0,
       fileGroups: groups,
       reason: `all files under ${threshold} line threshold`
     };
@@ -291,6 +311,7 @@ export function routeDiff(
   }
 
   attachLockFiles(lockFiles, groups);
+  attachStandaloneGenerated(standaloneGenerated, groups);
 
   return {
     usePerFile: true,
@@ -301,7 +322,9 @@ export function routeDiff(
 
 /**
  * Attach lock files to the group that contains their manifest file.
- * Lock files without a matching manifest are appended to the last group.
+ * Lock files without a matching manifest are appended to the last group
+ * (intentional — a lone lockfile change usually accompanies the most recent
+ * dependency-related commit).
  */
 function attachLockFiles(
   lockStats: FileStats[],
@@ -323,5 +346,22 @@ function attachLockFiles(
 
     targetGroup.files.push(lockStat.file);
     targetGroup.totalLines += lockStat.added + lockStat.deleted;
+  }
+}
+
+/**
+ * Append each standalone generated asset (no manifest mapping — e.g. .png,
+ * .min.js, .wasm) as its own group. Bundling these into an unrelated source
+ * commit produces misleading commit messages.
+ */
+function attachStandaloneGenerated(
+  generatedStats: FileStats[],
+  groups: FileGroupResult[]
+): void {
+  for (const stat of generatedStats) {
+    groups.push({
+      files: [stat.file],
+      totalLines: stat.added + stat.deleted
+    });
   }
 }
