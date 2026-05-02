@@ -5,7 +5,7 @@ import { removeContentTags } from '../utils/removeContentTags';
 import { tokenCount } from '../utils/tokenCount';
 import { OpenAiEngine, OpenAiConfig } from './openAi';
 
-export interface DeepseekConfig extends OpenAiConfig {}
+export type DeepseekConfig = OpenAiConfig;
 
 export class DeepseekEngine extends OpenAiEngine {
   constructor(config: DeepseekConfig) {
