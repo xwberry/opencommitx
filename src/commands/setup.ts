@@ -831,7 +831,15 @@ async function runFullSetup(): Promise<void> {
   });
   if (!isCancel(temperature) && temperature !== undefined) {
     const t = Number(temperature);
-    if (!isNaN(t) && t >= 0 && t <= 2) (updates as any).OCO_TEMPERATURE = t;
+    if (!isNaN(t) && t >= 0 && t <= 2) {
+      (updates as any).OCO_TEMPERATURE = t;
+    } else if (String(temperature).trim() !== '') {
+      console.log(
+        chalk.yellow(
+          `  ⚠  Invalid temperature "${temperature}" — must be a number 0.0–2.0. Keeping current value.`
+        )
+      );
+    }
   }
 
   const genTimeout = await text({
@@ -842,13 +850,15 @@ async function runFullSetup(): Promise<void> {
     )
   });
   if (!isCancel(genTimeout) && genTimeout) {
-    try {
-      (updates as any).OCO_GENERATION_TIMEOUT_SECONDS = toPositiveNumber(
-        genTimeout as string,
-        'OCO_GENERATION_TIMEOUT_SECONDS'
+    const n = Number(genTimeout);
+    if (Number.isInteger(n) && n >= 10) {
+      (updates as any).OCO_GENERATION_TIMEOUT_SECONDS = n;
+    } else {
+      console.log(
+        chalk.yellow(
+          `  ⚠  Invalid timeout "${genTimeout}" — must be an integer >= 10 seconds. Keeping current value.`
+        )
       );
-    } catch {
-      /* keep default */
     }
   }
 
