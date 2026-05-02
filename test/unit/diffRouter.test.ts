@@ -234,5 +234,35 @@ describe('diffRouter', () => {
       expect(manifestGroup!.files).toContain('package-lock.json');
       expect(manifestGroup!.totalLines).toBe(505);
     });
+
+    it('puts standalone generated assets in their own group, not bundled with source', () => {
+      const stats: FileStats[] = [
+        { added: 50, deleted: 10, file: 'src/index.ts' },
+        { added: 5, deleted: 0, file: 'assets/logo.png' },
+        { added: 200, deleted: 0, file: 'public/app.min.js' }
+      ];
+      const result = routeDiff(stats, baseConfig);
+
+      const pngGroup = result.fileGroups.find((g) =>
+        g.files.includes('assets/logo.png')
+      );
+      const minJsGroup = result.fileGroups.find((g) =>
+        g.files.includes('public/app.min.js')
+      );
+      const tsGroup = result.fileGroups.find((g) =>
+        g.files.includes('src/index.ts')
+      );
+
+      expect(pngGroup).toBeDefined();
+      expect(minJsGroup).toBeDefined();
+      expect(tsGroup).toBeDefined();
+      expect(pngGroup!.files).toEqual(['assets/logo.png']);
+      expect(minJsGroup!.files).toEqual(['public/app.min.js']);
+      // logo.png and app.min.js should not be attached to the source group
+      expect(tsGroup!.files).not.toContain('assets/logo.png');
+      expect(tsGroup!.files).not.toContain('public/app.min.js');
+      // Each standalone generated asset gets its own group → triggers per-file mode
+      expect(result.usePerFile).toBe(true);
+    });
   });
 });
