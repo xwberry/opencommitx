@@ -216,7 +216,6 @@ export function pruneArchivedCache(retentionDays: number = 7): void {
       try {
         const entry: CacheEntry = JSON.parse(readFileSync(filePath, 'utf-8'));
         if (entry.timestamp < cutoff) {
-          // Use unlinkSync via dynamic import to avoid direct fs import
           unlinkSync(filePath);
         }
       } catch {
