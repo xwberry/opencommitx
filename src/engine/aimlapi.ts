@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface AimlApiConfig extends AiEngineConfig {}
+type AimlApiConfig = AiEngineConfig;
 
 export class AimlApiEngine implements AiEngine {
   client: AxiosInstance;
