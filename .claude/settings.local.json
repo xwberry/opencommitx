@@ -8,7 +8,9 @@
       "Bash(bun run *)",
       "Bash(awk '/^D:/{file=$0; print \"\\\\n=== \"file\" ===\"; next} /error/{print}')",
       "Bash(bunx tsc *)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(echo \"tsc=$?\")",
+      "Bash(bunx ts-node *)"
     ]
   }
 }
