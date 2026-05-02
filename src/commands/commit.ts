@@ -935,10 +935,37 @@ export async function commit(
       }
     }
 
-    const colWidths = { file: 40, lines: 10, status: 4, ds: 3, grp: 4 };
+    // In smart mode, show an extra column with each group's reason/type so
+    // the user can sanity-check why files clustered the way they did.
+    const showThemeCol = perFileMode === 'smart' && fileGroups.length > 0;
+
+    // Build file → group metadata lookup for the Theme column.
+    const groupMetaByFile = new Map<
+      string,
+      { reason?: string; type?: string }
+    >();
+    if (showThemeCol) {
+      for (const g of fileGroups) {
+        for (const f of g.files) {
+          groupMetaByFile.set(f, { reason: g.reason, type: g.type });
+        }
+      }
+    }
+
+    const colWidths = {
+      file: 40,
+      lines: 10,
+      status: 4,
+      ds: 3,
+      grp: 4,
+      theme: 24
+    };
     const pad = (s: string, n: number) => s.slice(0, n).padEnd(n);
 
-    const header = `${pad('File', colWidths.file)}  ${pad('+/-', colWidths.lines)}  New  DS  Grp`;
+    const themeHeader = showThemeCol
+      ? `  ${pad('Theme', colWidths.theme)}`
+      : '';
+    const header = `${pad('File', colWidths.file)}  ${pad('+/-', colWidths.lines)}  New  DS  Grp${themeHeader}`;
     const divider = '─'.repeat(header.length);
 
     const rows = stagedFiles.map((f) => {
@@ -947,7 +974,16 @@ export async function commit(
       const isNew = (statusMap.get(f) ?? 'M') === 'A' ? 'Y' : ' ';
       const isDs = docstringFiles.has(f) ? 'Y' : ' ';
       const grp = String(groupIndexMap.get(f) ?? 1);
-      return `${pad(f, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}`;
+      let themeCell = '';
+      if (showThemeCol) {
+        const meta = groupMetaByFile.get(f);
+        const parts: string[] = [];
+        if (meta?.type) parts.push(meta.type);
+        if (meta?.reason && meta.reason !== 'singleton')
+          parts.push(meta.reason);
+        themeCell = `  ${pad(parts.join(':') || '—', colWidths.theme)}`;
+      }
+      return `${pad(f, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
     });
 
     note(`${header}\n${divider}\n${rows.join('\n')}`, 'Staged files');

@@ -45,6 +45,9 @@ export enum CONFIG_KEYS {
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP = 'OCO_MAX_FILES_PER_GROUP',
   OCO_MAX_LINES_PER_GROUP = 'OCO_MAX_LINES_PER_GROUP',
+  // Smart routing (Phase 1)
+  OCO_ROUTING_THEME_MIN_TOKENS = 'OCO_ROUTING_THEME_MIN_TOKENS',
+  OCO_ROUTING_REBALANCE_THRESHOLD = 'OCO_ROUTING_REBALANCE_THRESHOLD',
   // LLM generation
   OCO_TEMPERATURE = 'OCO_TEMPERATURE',
   OCO_COMMIT_DETAIL = 'OCO_COMMIT_DETAIL',
@@ -893,8 +896,8 @@ export const configValidators = {
   [CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_PER_FILE_COMMIT_MODE,
-      ['auto', 'always', 'never'].includes(value),
-      "Must be 'auto', 'always', or 'never'"
+      ['auto', 'always', 'never', 'smart'].includes(value),
+      "Must be 'auto', 'always', 'never', or 'smart'"
     );
     return value;
   },
@@ -1048,6 +1051,26 @@ export const configValidators = {
     return n;
   },
 
+  [CONFIG_KEYS.OCO_ROUTING_THEME_MIN_TOKENS](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_ROUTING_THEME_MIN_TOKENS,
+      Number.isInteger(n) && n >= 1,
+      'Must be a positive integer (minimum 1)'
+    );
+    return n;
+  },
+
+  [CONFIG_KEYS.OCO_ROUTING_REBALANCE_THRESHOLD](value: any) {
+    const n = Number(value);
+    validateConfig(
+      CONFIG_KEYS.OCO_ROUTING_REBALANCE_THRESHOLD,
+      !isNaN(n) && n >= 0 && n <= 1,
+      'Must be a number between 0 and 1'
+    );
+    return n;
+  },
+
   [CONFIG_KEYS.OCO_TEMPERATURE](value: any) {
     const n = Number(value);
     validateConfig(
@@ -1174,6 +1197,9 @@ export type ConfigType = {
   // Diff routing extras
   [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP]: number;
   [CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP]: number;
+  // Smart routing
+  [CONFIG_KEYS.OCO_ROUTING_THEME_MIN_TOKENS]: number;
+  [CONFIG_KEYS.OCO_ROUTING_REBALANCE_THRESHOLD]: number;
   // LLM generation
   [CONFIG_KEYS.OCO_TEMPERATURE]: number;
   [CONFIG_KEYS.OCO_COMMIT_DETAIL]: string;
@@ -1265,6 +1291,11 @@ export const DEFAULT_CONFIG = {
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
+  // Smart routing (Phase 1) — min shared theme tokens to merge two clusters,
+  // and re-balance threshold (fraction of caps below which adjacent groups
+  // can merge if their themes overlap).
+  OCO_ROUTING_THEME_MIN_TOKENS: 1,
+  OCO_ROUTING_REBALANCE_THRESHOLD: 0.3,
   // LLM generation
   OCO_TEMPERATURE: 0,
   OCO_COMMIT_DETAIL: 'normal',
@@ -1351,6 +1382,13 @@ const getEnvConfig = (envPath: string) => {
     ),
     OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(
       process.env.OCO_MAX_LINES_PER_GROUP
+    ),
+    // Smart routing
+    OCO_ROUTING_THEME_MIN_TOKENS: parseConfigVarValue(
+      process.env.OCO_ROUTING_THEME_MIN_TOKENS
+    ),
+    OCO_ROUTING_REBALANCE_THRESHOLD: parseConfigVarValue(
+      process.env.OCO_ROUTING_REBALANCE_THRESHOLD
     ),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
@@ -1644,7 +1682,8 @@ function getConfigKeyDetails(key) {
         description:
           'Controls whether files are committed individually or aggregated',
         values: [
-          'auto (smart routing)',
+          'auto (line-threshold based; large files own group, small files packed by directory)',
+          'smart (file-pair aware + theme clustering across directories; recommended for multi-file changes)',
           'always (always per-file)',
           'never (always aggregate)'
         ]
@@ -1766,6 +1805,18 @@ function getConfigKeyDetails(key) {
           'Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.',
         values: ['Positive integer (default: 1500)']
       };
+    case CONFIG_KEYS.OCO_ROUTING_THEME_MIN_TOKENS:
+      return {
+        description:
+          'Smart routing only: minimum number of shared non-generic theme tokens (path basename / dir tokens, after filtering generics like src/utils/test) required to merge two file-pair clusters into a single thematic group.',
+        values: ['Positive integer (default: 1)']
+      };
+    case CONFIG_KEYS.OCO_ROUTING_REBALANCE_THRESHOLD:
+      return {
+        description:
+          'Smart routing only: fraction of OCO_MAX_FILES_PER_GROUP / OCO_MAX_LINES_PER_GROUP below which adjacent groups will merge if they share at least one theme token. Lower = stricter merging.',
+        values: ['Number between 0 and 1 (default: 0.3)']
+      };
     case CONFIG_KEYS.OCO_FALLBACK_MODEL:
       return {
         description:
@@ -1877,6 +1928,8 @@ const THEMATIC_KEY_ORDER: CONFIG_KEYS[] = [
   CONFIG_KEYS.OCO_PER_FILE_THRESHOLD_LINES,
   CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP,
   CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP,
+  CONFIG_KEYS.OCO_ROUTING_THEME_MIN_TOKENS,
+  CONFIG_KEYS.OCO_ROUTING_REBALANCE_THRESHOLD,
   // Multi-commit
   CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY,
   // Python docstrings
