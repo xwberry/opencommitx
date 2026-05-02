@@ -77557,7 +77557,7 @@ function G3(t2, e3) {
 // package.json
 var package_default = {
   name: "opencommitx",
-  version: "1.0.3",
+  version: "1.0.4",
   description: "AI-powered commit message generator with smart diff routing, caching, and per-provider API keys. Fork of opencommit.",
   keywords: [
     "git",
@@ -79600,51 +79600,51 @@ function getI18nLocal(value) {
 }
 
 // src/commands/config.ts
-var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS3) => {
-  CONFIG_KEYS3["OCO_API_KEY"] = "OCO_API_KEY";
-  CONFIG_KEYS3["OCO_TOKENS_MAX_INPUT"] = "OCO_TOKENS_MAX_INPUT";
-  CONFIG_KEYS3["OCO_TOKENS_MAX_OUTPUT"] = "OCO_TOKENS_MAX_OUTPUT";
-  CONFIG_KEYS3["OCO_DESCRIPTION"] = "OCO_DESCRIPTION";
-  CONFIG_KEYS3["OCO_EMOJI"] = "OCO_EMOJI";
-  CONFIG_KEYS3["OCO_MODEL"] = "OCO_MODEL";
-  CONFIG_KEYS3["OCO_LANGUAGE"] = "OCO_LANGUAGE";
-  CONFIG_KEYS3["OCO_WHY"] = "OCO_WHY";
-  CONFIG_KEYS3["OCO_MESSAGE_TEMPLATE_PLACEHOLDER"] = "OCO_MESSAGE_TEMPLATE_PLACEHOLDER";
-  CONFIG_KEYS3["OCO_PROMPT_MODULE"] = "OCO_PROMPT_MODULE";
-  CONFIG_KEYS3["OCO_AI_PROVIDER"] = "OCO_AI_PROVIDER";
-  CONFIG_KEYS3["OCO_ONE_LINE_COMMIT"] = "OCO_ONE_LINE_COMMIT";
-  CONFIG_KEYS3["OCO_TEST_MOCK_TYPE"] = "OCO_TEST_MOCK_TYPE";
-  CONFIG_KEYS3["OCO_API_URL"] = "OCO_API_URL";
-  CONFIG_KEYS3["OCO_API_CUSTOM_HEADERS"] = "OCO_API_CUSTOM_HEADERS";
-  CONFIG_KEYS3["OCO_OMIT_SCOPE"] = "OCO_OMIT_SCOPE";
-  CONFIG_KEYS3["OCO_GITPUSH"] = "OCO_GITPUSH";
-  CONFIG_KEYS3["OCO_HOOK_AUTO_UNCOMMENT"] = "OCO_HOOK_AUTO_UNCOMMENT";
-  CONFIG_KEYS3["OCO_CACHE_ENABLED"] = "OCO_CACHE_ENABLED";
-  CONFIG_KEYS3["OCO_CACHE_TTL_SECONDS"] = "OCO_CACHE_TTL_SECONDS";
-  CONFIG_KEYS3["OCO_PER_FILE_THRESHOLD_LINES"] = "OCO_PER_FILE_THRESHOLD_LINES";
-  CONFIG_KEYS3["OCO_PER_FILE_COMMIT_MODE"] = "OCO_PER_FILE_COMMIT_MODE";
-  CONFIG_KEYS3["OCO_PYTHON_DOCSTRING_THRESHOLD"] = "OCO_PYTHON_DOCSTRING_THRESHOLD";
-  CONFIG_KEYS3["OCO_PYTHON_DOCSTRING_MODE"] = "OCO_PYTHON_DOCSTRING_MODE";
-  CONFIG_KEYS3["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
-  CONFIG_KEYS3["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
-  CONFIG_KEYS3["OCO_DEBUG"] = "OCO_DEBUG";
-  CONFIG_KEYS3["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
-  CONFIG_KEYS3["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
-  CONFIG_KEYS3["OCO_TEMPERATURE"] = "OCO_TEMPERATURE";
-  CONFIG_KEYS3["OCO_COMMIT_DETAIL"] = "OCO_COMMIT_DETAIL";
-  CONFIG_KEYS3["OCO_GENERATION_TIMEOUT_SECONDS"] = "OCO_GENERATION_TIMEOUT_SECONDS";
-  CONFIG_KEYS3["OCO_FALLBACK_MODEL"] = "OCO_FALLBACK_MODEL";
-  CONFIG_KEYS3["OCO_FALLBACK_PROVIDER"] = "OCO_FALLBACK_PROVIDER";
-  CONFIG_KEYS3["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
-  CONFIG_KEYS3["OCO_ANTHROPIC_KEY"] = "OCO_ANTHROPIC_KEY";
-  CONFIG_KEYS3["OCO_OPENROUTER_KEY"] = "OCO_OPENROUTER_KEY";
-  CONFIG_KEYS3["OCO_GEMINI_KEY"] = "OCO_GEMINI_KEY";
-  CONFIG_KEYS3["OCO_GROQ_KEY"] = "OCO_GROQ_KEY";
-  CONFIG_KEYS3["OCO_MISTRAL_KEY"] = "OCO_MISTRAL_KEY";
-  CONFIG_KEYS3["OCO_DEEPSEEK_KEY"] = "OCO_DEEPSEEK_KEY";
-  CONFIG_KEYS3["OCO_AIMLAPI_KEY"] = "OCO_AIMLAPI_KEY";
-  CONFIG_KEYS3["OCO_AZURE_KEY"] = "OCO_AZURE_KEY";
-  return CONFIG_KEYS3;
+var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
+  CONFIG_KEYS2["OCO_API_KEY"] = "OCO_API_KEY";
+  CONFIG_KEYS2["OCO_TOKENS_MAX_INPUT"] = "OCO_TOKENS_MAX_INPUT";
+  CONFIG_KEYS2["OCO_TOKENS_MAX_OUTPUT"] = "OCO_TOKENS_MAX_OUTPUT";
+  CONFIG_KEYS2["OCO_DESCRIPTION"] = "OCO_DESCRIPTION";
+  CONFIG_KEYS2["OCO_EMOJI"] = "OCO_EMOJI";
+  CONFIG_KEYS2["OCO_MODEL"] = "OCO_MODEL";
+  CONFIG_KEYS2["OCO_LANGUAGE"] = "OCO_LANGUAGE";
+  CONFIG_KEYS2["OCO_WHY"] = "OCO_WHY";
+  CONFIG_KEYS2["OCO_MESSAGE_TEMPLATE_PLACEHOLDER"] = "OCO_MESSAGE_TEMPLATE_PLACEHOLDER";
+  CONFIG_KEYS2["OCO_PROMPT_MODULE"] = "OCO_PROMPT_MODULE";
+  CONFIG_KEYS2["OCO_AI_PROVIDER"] = "OCO_AI_PROVIDER";
+  CONFIG_KEYS2["OCO_ONE_LINE_COMMIT"] = "OCO_ONE_LINE_COMMIT";
+  CONFIG_KEYS2["OCO_TEST_MOCK_TYPE"] = "OCO_TEST_MOCK_TYPE";
+  CONFIG_KEYS2["OCO_API_URL"] = "OCO_API_URL";
+  CONFIG_KEYS2["OCO_API_CUSTOM_HEADERS"] = "OCO_API_CUSTOM_HEADERS";
+  CONFIG_KEYS2["OCO_OMIT_SCOPE"] = "OCO_OMIT_SCOPE";
+  CONFIG_KEYS2["OCO_GITPUSH"] = "OCO_GITPUSH";
+  CONFIG_KEYS2["OCO_HOOK_AUTO_UNCOMMENT"] = "OCO_HOOK_AUTO_UNCOMMENT";
+  CONFIG_KEYS2["OCO_CACHE_ENABLED"] = "OCO_CACHE_ENABLED";
+  CONFIG_KEYS2["OCO_CACHE_TTL_SECONDS"] = "OCO_CACHE_TTL_SECONDS";
+  CONFIG_KEYS2["OCO_PER_FILE_THRESHOLD_LINES"] = "OCO_PER_FILE_THRESHOLD_LINES";
+  CONFIG_KEYS2["OCO_PER_FILE_COMMIT_MODE"] = "OCO_PER_FILE_COMMIT_MODE";
+  CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_THRESHOLD"] = "OCO_PYTHON_DOCSTRING_THRESHOLD";
+  CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_MODE"] = "OCO_PYTHON_DOCSTRING_MODE";
+  CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
+  CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
+  CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
+  CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
+  CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
+  CONFIG_KEYS2["OCO_TEMPERATURE"] = "OCO_TEMPERATURE";
+  CONFIG_KEYS2["OCO_COMMIT_DETAIL"] = "OCO_COMMIT_DETAIL";
+  CONFIG_KEYS2["OCO_GENERATION_TIMEOUT_SECONDS"] = "OCO_GENERATION_TIMEOUT_SECONDS";
+  CONFIG_KEYS2["OCO_FALLBACK_MODEL"] = "OCO_FALLBACK_MODEL";
+  CONFIG_KEYS2["OCO_FALLBACK_PROVIDER"] = "OCO_FALLBACK_PROVIDER";
+  CONFIG_KEYS2["OCO_OPENAI_KEY"] = "OCO_OPENAI_KEY";
+  CONFIG_KEYS2["OCO_ANTHROPIC_KEY"] = "OCO_ANTHROPIC_KEY";
+  CONFIG_KEYS2["OCO_OPENROUTER_KEY"] = "OCO_OPENROUTER_KEY";
+  CONFIG_KEYS2["OCO_GEMINI_KEY"] = "OCO_GEMINI_KEY";
+  CONFIG_KEYS2["OCO_GROQ_KEY"] = "OCO_GROQ_KEY";
+  CONFIG_KEYS2["OCO_MISTRAL_KEY"] = "OCO_MISTRAL_KEY";
+  CONFIG_KEYS2["OCO_DEEPSEEK_KEY"] = "OCO_DEEPSEEK_KEY";
+  CONFIG_KEYS2["OCO_AIMLAPI_KEY"] = "OCO_AIMLAPI_KEY";
+  CONFIG_KEYS2["OCO_AZURE_KEY"] = "OCO_AZURE_KEY";
+  return CONFIG_KEYS2;
 })(CONFIG_KEYS || {});
 var MODEL_LIST = {
   openai: [
@@ -103830,7 +103830,7 @@ function splitDiff(diff, maxChangeLength) {
 }
 
 // src/utils/diffChunking.ts
-function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, buildMessages) {
+function getMessagesPromisesByChangesInFile(fileDiff, maxChangeLength, buildMessages) {
   const hunkHeaderSeparator = "@@ ";
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
   const mergedChanges = mergeDiffs(
@@ -103849,7 +103849,7 @@ function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength
   }
   const engine = getEngine();
   return lineDiffsWithHeader.map(async (lineDiff) => {
-    const messages = await buildMessages(separator + lineDiff);
+    const messages = await buildMessages(lineDiff);
     return engine.generateCommitMessage(messages);
   });
 }
@@ -103862,7 +103862,6 @@ async function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, buildMess
     if (tokenCount(fileDiff) > maxDiffLength) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
-        separator,
         maxDiffLength,
         buildMessages
       );
@@ -104788,26 +104787,42 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
   const threshold = config5.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
   const maxFilesPerGroup = config5.OCO_MAX_FILES_PER_GROUP ?? 10;
   const maxLinesPerGroup = config5.OCO_MAX_LINES_PER_GROUP ?? 1500;
-  const lockFiles = stats.filter((s2) => isBinaryOrGenerated(s2.file));
+  const lockFiles = stats.filter(
+    (s2) => isBinaryOrGenerated(s2.file) && getLockManifestPath(s2.file) !== null
+  );
+  const standaloneGenerated = stats.filter(
+    (s2) => isBinaryOrGenerated(s2.file) && getLockManifestPath(s2.file) === null
+  );
   const relevantStats = stats.filter((s2) => !isBinaryOrGenerated(s2.file));
   if (mode === "never") {
-    const allFiles = [...relevantStats, ...lockFiles].map((s2) => s2.file);
+    const allFiles = [
+      ...relevantStats,
+      ...lockFiles,
+      ...standaloneGenerated
+    ].map((s2) => s2.file);
     return {
       usePerFile: false,
-      fileGroups: [{ files: allFiles, totalLines: 0 }],
+      fileGroups: allFiles.length ? [{ files: allFiles, totalLines: 0 }] : [],
       reason: "per-file mode disabled"
     };
   }
   if (relevantStats.length === 0) {
-    const lockOnlyFiles = lockFiles.map((s2) => s2.file);
+    const groups2 = [];
+    if (lockFiles.length) {
+      groups2.push({
+        files: lockFiles.map((s2) => s2.file),
+        totalLines: lockFiles.reduce((a2, s2) => a2 + s2.added + s2.deleted, 0)
+      });
+    }
+    for (const gen of standaloneGenerated) {
+      groups2.push({
+        files: [gen.file],
+        totalLines: gen.added + gen.deleted
+      });
+    }
     return {
-      usePerFile: mode === "always",
-      fileGroups: lockOnlyFiles.length ? [
-        {
-          files: lockOnlyFiles,
-          totalLines: lockFiles.reduce((a2, s2) => a2 + s2.added + s2.deleted, 0)
-        }
-      ] : [],
+      usePerFile: mode === "always" || standaloneGenerated.length > 0,
+      fileGroups: groups2,
       reason: "no relevant files"
     };
   }
@@ -104830,6 +104845,7 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
       });
     }
     attachLockFiles(lockFiles, groups2);
+    attachStandaloneGenerated(standaloneGenerated, groups2);
     return {
       usePerFile: true,
       fileGroups: groups2,
@@ -104856,8 +104872,9 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
       }, 0)
     }));
     attachLockFiles(lockFiles, groups2);
+    attachStandaloneGenerated(standaloneGenerated, groups2);
     return {
-      usePerFile: false,
+      usePerFile: standaloneGenerated.length > 0,
       fileGroups: groups2,
       reason: `all files under ${threshold} line threshold`
     };
@@ -104888,6 +104905,7 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
     });
   }
   attachLockFiles(lockFiles, groups);
+  attachStandaloneGenerated(standaloneGenerated, groups);
   return {
     usePerFile: true,
     fileGroups: groups,
@@ -104907,6 +104925,14 @@ function attachLockFiles(lockStats, groups) {
     }
     targetGroup.files.push(lockStat.file);
     targetGroup.totalLines += lockStat.added + lockStat.deleted;
+  }
+}
+function attachStandaloneGenerated(generatedStats, groups) {
+  for (const stat of generatedStats) {
+    groups.push({
+      files: [stat.file],
+      totalLines: stat.added + stat.deleted
+    });
   }
 }
 
@@ -105544,7 +105570,7 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
   const perFileMode = currentConfig.OCO_PER_FILE_COMMIT_MODE || "auto";
   let usePerFileMode = false;
   let fileGroups = [];
-  let stats = await getStagedFilesStats().catch(() => []);
+  const stats = await getStagedFilesStats().catch(() => []);
   if (perFileMode !== "never") {
     try {
       const routing = routeDiff(stats, currentConfig);
@@ -106674,7 +106700,15 @@ async function runFullSetup() {
   });
   if (!pD2(temperature) && temperature !== void 0) {
     const t2 = Number(temperature);
-    if (!isNaN(t2) && t2 >= 0 && t2 <= 2) updates.OCO_TEMPERATURE = t2;
+    if (!isNaN(t2) && t2 >= 0 && t2 <= 2) {
+      updates.OCO_TEMPERATURE = t2;
+    } else if (String(temperature).trim() !== "") {
+      console.log(
+        source_default.yellow(
+          `  \u26A0  Invalid temperature "${temperature}" \u2014 must be a number 0.0\u20132.0. Keeping current value.`
+        )
+      );
+    }
   }
   const genTimeout = await he({
     message: `Generation timeout in seconds (current: ${currentConfig["OCO_GENERATION_TIMEOUT_SECONDS" /* OCO_GENERATION_TIMEOUT_SECONDS */] ?? 90}):`,
@@ -106684,12 +106718,15 @@ async function runFullSetup() {
     )
   });
   if (!pD2(genTimeout) && genTimeout) {
-    try {
-      updates.OCO_GENERATION_TIMEOUT_SECONDS = toPositiveNumber(
-        genTimeout,
-        "OCO_GENERATION_TIMEOUT_SECONDS"
+    const n2 = Number(genTimeout);
+    if (Number.isInteger(n2) && n2 >= 10) {
+      updates.OCO_GENERATION_TIMEOUT_SECONDS = n2;
+    } else {
+      console.log(
+        source_default.yellow(
+          `  \u26A0  Invalid timeout "${genTimeout}" \u2014 must be an integer >= 10 seconds. Keeping current value.`
+        )
       );
-    } catch {
     }
   }
   console.log(source_default.bold("\n\u2500\u2500 Fallback Model (optional) \u2500\u2500"));
@@ -111079,8 +111116,8 @@ Grade each candidate on the following criteria and return a JSON object matching
   ]
 }
 
-Return ONLY valid JSON. No markdown fences, no preamble.
-Do NOT omit the <think> tag if you use one \u2014 include all reasoning in the response.`;
+Return valid JSON matching the schema above. Do not wrap it in markdown fences.
+If you want to show reasoning, place a <think>...</think> block BEFORE the JSON object \u2014 the parser will extract the JSON. Do not embed JSON inside the think block.`;
   const userPrompt = `## Git Diff
 \`\`\`diff
 ${diff}
@@ -111463,11 +111500,12 @@ async function runBenchmark() {
     return;
   }
   const diffLines = diff.split("\n").length;
-  const estimatedInputTokens = Math.ceil(diffLines * 4 * cfg.candidates.length);
+  const perCandidateTokens = Math.ceil(diffLines * 4);
+  const totalCandidateTokens = perCandidateTokens * cfg.candidates.length;
   const evalEstimate = Math.ceil(diffLines * 4 + cfg.candidates.length * 200);
   Me(
     `Diff: ~${diffLines} lines
-Candidates: ${cfg.candidates.length} models \xD7 ~${Math.ceil(diffLines * 4)} tokens each
+Candidates: ${cfg.candidates.length} models \xD7 ~${perCandidateTokens} tokens each (\u2248${totalCandidateTokens} total input)
 Evaluator call: ~${evalEstimate} input tokens
 This will use real API tokens and incur costs.`,
     source_default.yellow("\u26A0  Token usage estimate")

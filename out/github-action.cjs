@@ -131354,7 +131354,7 @@ function splitDiff(diff, maxChangeLength) {
 }
 
 // src/utils/diffChunking.ts
-function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, buildMessages) {
+function getMessagesPromisesByChangesInFile(fileDiff, maxChangeLength, buildMessages) {
   const hunkHeaderSeparator = "@@ ";
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
   const mergedChanges = mergeDiffs(
@@ -131373,7 +131373,7 @@ function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength
   }
   const engine = getEngine();
   return lineDiffsWithHeader.map(async (lineDiff) => {
-    const messages = await buildMessages(separator + lineDiff);
+    const messages = await buildMessages(lineDiff);
     return engine.generateCommitMessage(messages);
   });
 }
@@ -131386,7 +131386,6 @@ async function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, buildMess
     if (tokenCount(fileDiff) > maxDiffLength) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
-        separator,
         maxDiffLength,
         buildMessages
       );
