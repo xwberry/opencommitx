@@ -4,7 +4,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface MLXConfig extends AiEngineConfig {}
+type MLXConfig = AiEngineConfig;
 
 export class MLXEngine implements AiEngine {
   config: MLXConfig;
