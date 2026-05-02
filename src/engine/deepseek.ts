@@ -5,7 +5,7 @@ import { removeContentTags } from '../utils/removeContentTags';
 import { tokenCount } from '../utils/tokenCount';
 import { OpenAiEngine, OpenAiConfig } from './openAi';
 
-export interface DeepseekConfig extends OpenAiConfig {}
+export type DeepseekConfig = OpenAiConfig;
 
 export class DeepseekEngine extends OpenAiEngine {
   constructor(config: DeepseekConfig) {
@@ -23,7 +23,7 @@ export class DeepseekEngine extends OpenAiEngine {
     const params = {
       model: this.config.model,
       messages,
-      temperature: 0,
+      temperature: this.config.temperature ?? 0,
       top_p: 0.1,
       max_tokens: this.config.maxTokensOutput
     };

@@ -2,7 +2,10 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 
-const CUSTOM_MODELS_FILE = pathJoin(homedir(), '.opencommitx-custom-models.json');
+const CUSTOM_MODELS_FILE = pathJoin(
+  homedir(),
+  '.opencommitx-custom-models.json'
+);
 
 type CustomModelStore = Record<string, string[]>;
 
@@ -64,7 +67,9 @@ export function mergeWithCustomModels(
   const merged = { ...builtIn };
   for (const [provider, models] of Object.entries(custom)) {
     if (!merged[provider]) merged[provider] = [];
-    const toPrepend = models.filter((model) => !merged[provider].includes(model));
+    const toPrepend = models.filter(
+      (model) => !merged[provider].includes(model)
+    );
     merged[provider] = [...toPrepend, ...merged[provider]];
   }
   return merged;

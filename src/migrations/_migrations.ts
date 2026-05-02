@@ -2,6 +2,7 @@ import migration00 from './00_use_single_api_key_and_url';
 import migration01 from './01_remove_obsolete_config_keys_from_global_file';
 import migration02 from './02_set_missing_default_values';
 import migration03 from './03_per_provider_api_keys';
+import migration04 from './04_migrate_config_location';
 
 export const migrations = [
   {
@@ -19,5 +20,9 @@ export const migrations = [
   {
     name: '03_per_provider_api_keys',
     run: migration03
+  },
+  {
+    name: '04_migrate_config_location',
+    run: migration04
   }
 ];

@@ -10,13 +10,13 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface GeminiConfig extends AiEngineConfig {}
+type GeminiConfig = AiEngineConfig;
 
 export class GeminiEngine implements AiEngine {
   config: GeminiConfig;
   client: GoogleGenerativeAI;
 
-  constructor(config) {
+  constructor(config: GeminiConfig) {
     this.client = new GoogleGenerativeAI(config.apiKey);
     this.config = config;
   }
@@ -41,9 +41,10 @@ export class GeminiEngine implements AiEngine {
           ({
             parts: [{ text: m.content } as Part],
             role: m.role === 'user' ? m.role : 'model'
-          } as Content)
+          }) as Content
       );
 
+    const temperature = this.config.temperature ?? 0;
     try {
       const result = await gemini.generateContent({
         contents,
@@ -67,8 +68,8 @@ export class GeminiEngine implements AiEngine {
         ],
         generationConfig: {
           maxOutputTokens: this.config.maxTokensOutput,
-          temperature: 0,
-          topP: 0.1
+          temperature,
+          topP: temperature === 0 ? 0.1 : undefined
         }
       });
 

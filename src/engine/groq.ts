@@ -1,6 +1,6 @@
 import { OpenAiConfig, OpenAiEngine } from './openAi';
 
-interface GroqConfig extends OpenAiConfig {}
+type GroqConfig = OpenAiConfig;
 
 export class GroqEngine extends OpenAiEngine {
   constructor(config: GroqConfig) {

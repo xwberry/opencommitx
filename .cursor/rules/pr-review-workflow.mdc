@@ -1,0 +1,64 @@
+---
+description: "Use when working with PR reviews, CodeRabbit comments, review feedback, resolving review threads, or addressing reviewer suggestions. Triggers on: PR review, code review, review comments, CodeRabbit, unresolved comments, address feedback, fix review, resolve threads."
+alwaysApply: false
+---
+# PR Review Workflow
+
+## Available Tool: gh-pr-review
+
+The `gh pr-review` CLI extension provides full access to PR review comments, threads, and resolutions.
+If it is not installed, tell the user: `gh extension install agynio/gh-pr-review`
+
+This is also exposed as a skill in ~/.agents/skills/gh-pr-review
+
+## Fetching Review Comments
+
+**Always redirect output to a file and read it with the Read tool — never rely on terminal output capture, which truncates large payloads and causes missed comments.**
+
+```bash
+# Linux/macOS
+gh pr-review review view -R owner/repo --pr pr_number --reviewer coderabbitai --unresolved --not_outdated --tail 2 > /tmp/pr-review.json
+
+# Windows (PowerShell)
+gh pr-review review view -R owner/repo --pr pr_number --reviewer coderabbitai --unresolved --not_outdated --tail 2 > "$env:TEMP/pr-review.json"
+```
+
+Then read the full output with the Read tool on the output file (`/tmp/pr-review.json` or `$env:TEMP/pr-review.json`). This guarantees no truncation regardless of payload size.
+
+Key flags:
+- `--reviewer <login>` — filter by reviewer (e.g., `coderabbitai`, or a human reviewer)
+- `--unresolved` — only unresolved threads
+- `--not_outdated` — skip comments on stale diff hunks
+- `--tail N` — keep last N replies per thread (reduces size; use `--tail 1` for large PRs)
+- `--states CHANGES_REQUESTED,COMMENTED` — filter by review state
+- `-R owner/repo` — specify repo (auto-detected from git remote if omitted)
+- `--pr N` — specify PR number (auto-detected from current branch if omitted)
+
+## Responding to Comments
+
+Reply to a specific thread:
+```bash
+gh pr-review comments reply <pr_number> -R owner/repo --thread-id <thread_id> --body "Fixed in <commit_sha>"
+```
+
+Resolve a thread after addressing it:
+```bash
+gh pr-review threads resolve <pr_number> -R owner/repo --thread-id <thread_id>
+```
+
+## Workflow
+
+1. Fetch unresolved comments using the command above, redirecting to the OS temp file (`/tmp/pr-review.json` on Linux/macOS, `$env:TEMP/pr-review.json` on Windows)
+2. Read the output file with the Read tool — parse every thread; do not rely on terminal output
+3. Do NOT ignore nitpick or duplicate comments - these should be considered in the analysis 
+4. Inspect the referenced source via MCP tools first; fall back to the Read tool for non-source files or when MCP is unavailable, and understand the suggestion
+5. Make the code change if the suggestion is valid
+6. After addressing, summarize what was changed and what was skipped (with reasoning)
+7. Do NOT auto-resolve threads — after the user reviews and approves the changes, they can resolve threads manually using the `gh pr-review threads resolve` command documented above
+
+## Output Format
+
+`gh pr-review` returns compact JSON with:
+- `reviews[]` — review objects with state, author, body
+- `reviews[].threads[]` — inline comment threads with file, line, comments
+- Thread IDs use the `PRRT_` prefix (e.g., `PRRT_kwDOABC123`)

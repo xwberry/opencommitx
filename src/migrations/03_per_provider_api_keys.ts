@@ -1,4 +1,8 @@
-import { getConfig, getGlobalConfig, setGlobalConfig } from '../commands/config';
+import {
+  getConfig,
+  getGlobalConfig,
+  setGlobalConfig
+} from '../commands/config';
 
 /**
  * Migration 03: Copy OCO_API_KEY to the provider-specific key if the

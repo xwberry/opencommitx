@@ -1,0 +1,25 @@
+# CodeRabbit configuration
+# Docs: https://docs.coderabbit.ai/reference/configuration
+
+language: en-US
+early_access: true
+tone_instructions: "Be direct and concise. Focus on actionable feedback. Post all findings as inline comments on specific lines. Do not place findings in walkthrough body sections. Exception: comments that cannot be inline due to platform limits."
+
+reviews:
+  # Disable the "Prompt for AI Agents" blocks in review comments.
+  # These waste tokens when feeding reviews to Cursor/Claude Code.
+  enable_prompt_for_ai_agents: false
+
+  profile: chill
+  auto_review:
+    enabled: true
+  high_level_summary: true
+
+  # Skip non-substantive scratchpad / planning docs.
+  path_filters:
+    - "!TODO.md"
+    - "!todo.md"
+    - "!xdocs/**"
+
+chat:
+  auto_reply: true

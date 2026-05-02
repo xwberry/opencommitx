@@ -4,7 +4,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface OllamaConfig extends AiEngineConfig {}
+type OllamaConfig = AiEngineConfig;
 
 export class OllamaEngine implements AiEngine {
   config: OllamaConfig;
@@ -33,7 +33,7 @@ export class OllamaEngine implements AiEngine {
     const params = {
       model: this.config.model ?? 'mistral',
       messages,
-      options: { temperature: 0, top_p: 0.1 },
+      options: { temperature: this.config.temperature ?? 0, top_p: 0.1 },
       stream: false
     };
     try {

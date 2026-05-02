@@ -31,6 +31,7 @@
 - [x] Fixed `commitStrategy.test.ts` env var tests — removed incorrect `JSON.parse` on bare strings; plain `process.env` read matches `parseConfigVarValue` fallback behaviour
 - [x] Changed `defaultConfigPath` from `~/.opencommit` to `~/.opencommitx` to avoid config file collision when both packages are installed
 - [x] Added `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` config key (default 0.9): `shouldUseDocstringMode` now checks `changedLines / fileLines >= ratio` in auto mode, preventing docstring extraction on partial refactors — updated tests with temp-file ratio scenarios
+- [x] For the long python files, if the diff length is the same as the length of the file (maybe have a buffer for empty or skipped lines) then use the docstring script. otherwise this will just read docstrings on comprehensive refactors. — Implemented via `OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO` (default 0.9): docstring extraction only activates when `changedLines / totalFileLines >= ratio`.
 
 ## PR Review Fixes (PR #1 CodeRabbit recommendations)
 
@@ -54,6 +55,13 @@
 - [x] `test/unit/commitCache.test.ts`: Fixed `CACHE_FILE` path from `.opencommit-cache.json` → `.opencommitx-cache.json`
 - [x] `xdocs/todo.md`: Fixed typo `many` → `may`
 
+## Beginning Phase 2
+- [x] Fix incorrect version check warning (was querying `opencommit` npm package instead of `opencommitx`).
+- [x] Fix hang during multi-commit generation: switched `Promise.all` to sequential `for...of` in `generatePerFileCommits` to avoid concurrent `@clack/prompts` spinner + git subprocess + WASM conflicts.
+- [x] Fix Ctrl+C not working during generation: added `SIGINT` handler around spinner that stops the spinner and exits cleanly.
+- [x] Add 60s timeout to OpenRouter engine as a defensive measure against silent API hangs.
+- [x] Bump version to 1.0.1.
+
 ## Backlog
 
 - [ ] Context window sharing strategy for multi-chunk requests (configurable: shared vs separate contexts)
@@ -61,6 +69,6 @@
 - [ ] i18n for new CLI messages added in this fork
 - [ ] OpenRouter free model auto-discovery (`:free` suffix models highlighted in `ocox models list openrouter`)
 - [ ] Sync `ENUMS.ts` `COMMANDS` to add any new subcommands formally
-- [ ] Investigate upstream's "new version available" notification — update to check npm for `opencommitx` package
+- [x] Investigate upstream's "new version available" notification — update to check npm for `opencommitx` package
 - [ ] Reduce bundle size (esbuild tree-shaking improvements)
 - [ ] Investigate `OCO_API_CUSTOM_HEADERS` behavior with OpenRouter SDK approach

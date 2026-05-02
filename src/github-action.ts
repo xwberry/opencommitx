@@ -69,7 +69,7 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
 
     try {
       const chunkOfImprovedMessages = await Promise.all(chunkOfPromises);
-      
+
       const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map(
         (improvedMsg, i) => {
           const sha = diffsAndSHAs![step + i].sha;
@@ -105,7 +105,9 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
       // if sleeping in try block still fails with 429,
       // openAI wants at least 1 minute before next request
       const sleepFor = 60000 + 1000 * randomIntFromInterval(1, 5);
-      outro(`Retrying (attempt ${currentRetries + 1}/${MAX_RETRIES_PER_CHUNK}) after sleeping for ${sleepFor}`);
+      outro(
+        `Retrying (attempt ${currentRetries + 1}/${MAX_RETRIES_PER_CHUNK}) after sleeping for ${sleepFor}`
+      );
       await sleep(sleepFor);
 
       // go to previous step

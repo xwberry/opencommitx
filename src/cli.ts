@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+// Raise the default limit before any @clack/prompts spinners or selects are
+// created. Sequential multi-commit mode creates one spinner+select per group;
+// without this guard Node emits MaxListenersExceededWarning at >10 groups.
+process.stdin.setMaxListeners(process.stdin.getMaxListeners() + 20);
+
 import { cli } from 'cleye';
 
 import packageJSON from '../package.json';
@@ -15,6 +20,7 @@ import {
   promptForMissingApiKey
 } from './commands/setup';
 import { modelsCommand } from './commands/models';
+import { benchmarkCommand } from './commands/benchmark';
 import { checkIsLatestVersion } from './utils/checkIsLatestVersion';
 import { runMigrations } from './migrations/_run.js';
 
@@ -24,7 +30,14 @@ cli(
   {
     version: packageJSON.version,
     name: 'opencommitx',
-    commands: [configCommand, hookCommand, commitlintConfigCommand, setupCommand, modelsCommand],
+    commands: [
+      configCommand,
+      hookCommand,
+      commitlintConfigCommand,
+      setupCommand,
+      modelsCommand,
+      benchmarkCommand
+    ],
     flags: {
       fgm: {
         type: Boolean,
@@ -46,7 +59,8 @@ cli(
       dryRun: {
         type: Boolean,
         alias: 'd',
-        description: 'Dry run: generate and display commit message without committing',
+        description:
+          'Dry run: generate and display commit message without committing',
         default: false
       }
     },
@@ -82,7 +96,13 @@ cli(
         }
       }
 
-      commit(extraArgs, flags.context, false, flags.fgm, flags.yes || flags.dryRun);
+      commit(
+        extraArgs,
+        flags.context,
+        false,
+        flags.fgm,
+        flags.yes || flags.dryRun
+      );
     }
   },
   extraArgs

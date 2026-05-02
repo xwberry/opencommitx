@@ -3,5 +3,6 @@ export enum COMMANDS {
   hook = 'hook',
   commitlint = 'commitlint',
   setup = 'setup',
-  models = 'models'
+  models = 'models',
+  benchmark = 'benchmark'
 }

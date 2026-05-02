@@ -1,9 +1,10 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
 import { MODEL_LIST, OCO_AI_PROVIDER_ENUM } from '../commands/config';
 
-const MODEL_CACHE_PATH = pathJoin(homedir(), '.opencommit-models.json');
+const MODEL_CACHE_DIR = pathJoin(homedir(), '.opencommitx-data');
+const MODEL_CACHE_PATH = pathJoin(MODEL_CACHE_DIR, 'models.json');
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 interface ModelCache {
@@ -25,6 +26,7 @@ function readCache(): ModelCache | null {
 
 function writeCache(models: Record<string, string[]>): void {
   try {
+    mkdirSync(MODEL_CACHE_DIR, { recursive: true });
     const cache: ModelCache = {
       timestamp: Date.now(),
       models
@@ -125,9 +127,7 @@ export async function fetchMistralModels(apiKey: string): Promise<string[]> {
     }
 
     const data = await response.json();
-    const models = data.data
-      ?.map((m: { id: string }) => m.id)
-      .sort();
+    const models = data.data?.map((m: { id: string }) => m.id).sort();
 
     return models && models.length > 0 ? models : MODEL_LIST.mistral;
   } catch {
@@ -148,9 +148,7 @@ export async function fetchGroqModels(apiKey: string): Promise<string[]> {
     }
 
     const data = await response.json();
-    const models = data.data
-      ?.map((m: { id: string }) => m.id)
-      .sort();
+    const models = data.data?.map((m: { id: string }) => m.id).sort();
 
     return models && models.length > 0 ? models : MODEL_LIST.groq;
   } catch {
@@ -173,8 +171,9 @@ export async function fetchOpenRouterModels(apiKey: string): Promise<string[]> {
     const data = await response.json();
     // Filter to text-capable models only (exclude image/audio models)
     const models = data.data
-      ?.filter((m: { id: string; context_length?: number }) =>
-        m.context_length && m.context_length > 0
+      ?.filter(
+        (m: { id: string; context_length?: number }) =>
+          m.context_length && m.context_length > 0
       )
       .map((m: { id: string }) => m.id)
       .sort();
@@ -198,9 +197,7 @@ export async function fetchDeepSeekModels(apiKey: string): Promise<string[]> {
     }
 
     const data = await response.json();
-    const models = data.data
-      ?.map((m: { id: string }) => m.id)
-      .sort();
+    const models = data.data?.map((m: { id: string }) => m.id).sort();
 
     return models && models.length > 0 ? models : MODEL_LIST.deepseek;
   } catch {
@@ -312,7 +309,10 @@ export function clearModelCache(): void {
   }
 }
 
-export function getCacheInfo(): { timestamp: number | null; providers: string[] } {
+export function getCacheInfo(): {
+  timestamp: number | null;
+  providers: string[];
+} {
   const cache = readCache();
   if (!cache) {
     return { timestamp: null, providers: [] };

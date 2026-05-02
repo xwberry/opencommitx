@@ -3,15 +3,18 @@ import { MODEL_LIST, OCO_AI_PROVIDER_ENUM } from '../commands/config';
 
 // Provider billing/help URLs for common errors
 export const PROVIDER_BILLING_URLS: Record<string, string | null> = {
-  [OCO_AI_PROVIDER_ENUM.ANTHROPIC]: 'https://console.anthropic.com/settings/billing',
-  [OCO_AI_PROVIDER_ENUM.OPENAI]: 'https://platform.openai.com/settings/organization/billing',
+  [OCO_AI_PROVIDER_ENUM.ANTHROPIC]:
+    'https://console.anthropic.com/settings/billing',
+  [OCO_AI_PROVIDER_ENUM.OPENAI]:
+    'https://platform.openai.com/settings/organization/billing',
   [OCO_AI_PROVIDER_ENUM.GEMINI]: 'https://aistudio.google.com/app/plan',
   [OCO_AI_PROVIDER_ENUM.GROQ]: 'https://console.groq.com/settings/billing',
   [OCO_AI_PROVIDER_ENUM.MISTRAL]: 'https://console.mistral.ai/billing/',
   [OCO_AI_PROVIDER_ENUM.DEEPSEEK]: 'https://platform.deepseek.com/usage',
   [OCO_AI_PROVIDER_ENUM.OPENROUTER]: 'https://openrouter.ai/credits',
   [OCO_AI_PROVIDER_ENUM.AIMLAPI]: 'https://aimlapi.com/app/billing',
-  [OCO_AI_PROVIDER_ENUM.AZURE]: 'https://portal.azure.com/#view/Microsoft_Azure_CostManagement',
+  [OCO_AI_PROVIDER_ENUM.AZURE]:
+    'https://portal.azure.com/#view/Microsoft_Azure_CostManagement',
   [OCO_AI_PROVIDER_ENUM.OLLAMA]: null,
   [OCO_AI_PROVIDER_ENUM.MLX]: null,
   [OCO_AI_PROVIDER_ENUM.FLOWISE]: null,
@@ -23,7 +26,9 @@ export class InsufficientCreditsError extends Error {
   public readonly provider: string;
 
   constructor(provider: string, message?: string) {
-    super(message || `Insufficient credits or quota for provider '${provider}'`);
+    super(
+      message || `Insufficient credits or quota for provider '${provider}'`
+    );
     this.name = 'InsufficientCreditsError';
     this.provider = provider;
   }
@@ -225,8 +230,8 @@ export function formatErrorWithRecovery(
     });
   }
 
-  message += '\nTo fix this, run: oco config set OCO_MODEL=<model-name>\n';
-  message += 'Or run: oco setup\n';
+  message += '\nTo fix this, run: ocox config set OCO_MODEL=<model-name>\n';
+  message += 'Or run: ocox setup\n';
 
   return message;
 }
@@ -345,7 +350,10 @@ export interface FormattedError {
 }
 
 // Format an error into a user-friendly structure
-export function formatUserFriendlyError(error: unknown, provider: string): FormattedError {
+export function formatUserFriendlyError(
+  error: unknown,
+  provider: string
+): FormattedError {
   const billingUrl = PROVIDER_BILLING_URLS[provider] || null;
 
   // Handle our custom error types first
@@ -384,7 +392,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Authentication Failed',
       message: `Your ${provider} API key is invalid or expired.`,
       helpUrl: billingUrl,
-      suggestion: 'Run `oco setup` to configure a valid API key.'
+      suggestion: 'Run `ocox setup` to configure a valid API key.'
     };
   }
 
@@ -393,7 +401,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Model Not Found',
       message: `The model '${error.modelName}' is not available for ${provider}.`,
       helpUrl: null,
-      suggestion: 'Run `oco setup` to select a valid model.'
+      suggestion: 'Run `ocox setup` to select a valid model.'
     };
   }
 
@@ -430,7 +438,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Authentication Failed',
       message: `Your ${provider} API key is invalid or expired.`,
       helpUrl: billingUrl,
-      suggestion: 'Run `oco setup` to configure a valid API key.'
+      suggestion: 'Run `ocox setup` to configure a valid API key.'
     };
   }
 
@@ -440,7 +448,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
       title: 'Model Not Found',
       message: `The model '${model}' is not available for ${provider}.`,
       helpUrl: null,
-      suggestion: 'Run `oco setup` to select a valid model.'
+      suggestion: 'Run `ocox setup` to select a valid model.'
     };
   }
 
@@ -450,7 +458,7 @@ export function formatUserFriendlyError(error: unknown, provider: string): Forma
     title: 'Error',
     message: errorMessage,
     helpUrl: null,
-    suggestion: 'Run `oco setup` to reconfigure or check your settings.'
+    suggestion: 'Run `ocox setup` to reconfigure or check your settings.'
   };
 }
 
