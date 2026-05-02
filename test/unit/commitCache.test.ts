@@ -1,6 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { homedir } from 'os';
-import { join as pathJoin } from 'path';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 
 import {
   archiveCacheEntry,
