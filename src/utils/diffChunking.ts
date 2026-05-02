@@ -16,10 +16,12 @@ type ChatMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
  * Build per-hunk message promises for a single file's diff.
  * Splits the file diff by @@ hunk headers, merges hunks to fill token budget,
  * then creates one LLM promise per merged chunk.
+ *
+ * `fileDiff` is expected to already include the `diff --git ` prefix from the
+ * caller — do not re-prepend it here, or chunks become `diff --git diff --git ...`.
  */
 export function getMessagesPromisesByChangesInFile(
   fileDiff: string,
-  separator: string,
   maxChangeLength: number,
   buildMessages: (diff: string) => Promise<ChatMessage[]>
 ): Promise<string | null | undefined>[] {
@@ -44,7 +46,7 @@ export function getMessagesPromisesByChangesInFile(
 
   const engine = getEngine();
   return lineDiffsWithHeader.map(async (lineDiff) => {
-    const messages = await buildMessages(separator + lineDiff);
+    const messages = await buildMessages(lineDiff);
     return engine.generateCommitMessage(messages);
   });
 }
@@ -71,7 +73,6 @@ export async function getCommitMsgsPromisesFromFileDiffs(
     if (tokenCount(fileDiff) > maxDiffLength) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
-        separator,
         maxDiffLength,
         buildMessages
       );
