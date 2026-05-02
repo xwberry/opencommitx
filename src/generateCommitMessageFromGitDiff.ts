@@ -8,7 +8,6 @@ import {
   getConfig,
   setGlobalConfig,
   getGlobalConfig,
-  MODEL_LIST,
   RECOMMENDED_MODELS
 } from './commands/config';
 import { getProviderApiKey } from './utils/providerKeys';
