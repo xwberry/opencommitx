@@ -4,7 +4,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface FlowiseAiConfig extends AiEngineConfig {}
+type FlowiseAiConfig = AiEngineConfig;
 
 export class FlowiseEngine implements AiEngine {
   config: FlowiseAiConfig;
