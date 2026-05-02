@@ -6,7 +6,7 @@ import { tokenCount } from '../utils/tokenCount';
 import { AiEngine, AiEngineConfig } from './Engine';
 
 // Using any for Mistral types to avoid type declaration issues
-export interface MistralAiConfig extends AiEngineConfig {}
+export type MistralAiConfig = AiEngineConfig;
 export type MistralCompletionMessageParam = Array<any>;
 
 import { Mistral } from '@mistralai/mistralai';
