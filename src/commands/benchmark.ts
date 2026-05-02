@@ -14,13 +14,9 @@ import { writeFileSync } from 'fs';
 import { join as pathJoin } from 'path';
 import { COMMANDS } from './ENUMS';
 import {
-  CONFIG_KEYS,
   OCO_AI_PROVIDER_ENUM,
-  PROVIDER_API_KEY_URLS,
-  getConfig,
   setGlobalConfig,
-  getGlobalConfig,
-  setConfig
+  getGlobalConfig
 } from './config';
 import {
   BenchmarkCandidate,
@@ -34,7 +30,6 @@ import {
   writeBenchmarkConfig
 } from '../utils/benchmarkRunner';
 import { getDiff, getStagedFiles, assertGitRepo } from '../utils/git';
-import { getProviderApiKey } from '../utils/providerKeys';
 
 const parseNumberOrDefault = (value: unknown, fallback: number): number => {
   const parsed = Number(value);
@@ -228,12 +223,13 @@ async function runBenchmark(): Promise<void> {
 
   // Token count estimate
   const diffLines = diff.split('\n').length;
-  const estimatedInputTokens = Math.ceil(diffLines * 4 * cfg.candidates.length);
+  const perCandidateTokens = Math.ceil(diffLines * 4);
+  const totalCandidateTokens = perCandidateTokens * cfg.candidates.length;
   const evalEstimate = Math.ceil(diffLines * 4 + cfg.candidates.length * 200);
 
   note(
     `Diff: ~${diffLines} lines\n` +
-      `Candidates: ${cfg.candidates.length} models × ~${Math.ceil(diffLines * 4)} tokens each\n` +
+      `Candidates: ${cfg.candidates.length} models × ~${perCandidateTokens} tokens each (≈${totalCandidateTokens} total input)\n` +
       `Evaluator call: ~${evalEstimate} input tokens\n` +
       `This will use real API tokens and incur costs.`,
     chalk.yellow('⚠  Token usage estimate')
