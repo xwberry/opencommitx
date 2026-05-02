@@ -5,7 +5,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface OpenRouterConfig extends AiEngineConfig {}
+type OpenRouterConfig = AiEngineConfig;
 
 interface OpenRouterErrorMeta {
   status?: number;
