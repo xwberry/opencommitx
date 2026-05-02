@@ -4,7 +4,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface OllamaConfig extends AiEngineConfig {}
+type OllamaConfig = AiEngineConfig;
 
 export class OllamaEngine implements AiEngine {
   config: OllamaConfig;
