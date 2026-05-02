@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
-import { dirname, join as pathJoin } from 'path';
+import { join as pathJoin } from 'path';
 
 const OLD_CONFIG_PATH = pathJoin(homedir(), '.opencommitx');
 const NEW_CONFIG_DIR = pathJoin(homedir(), '.opencommitx-data');
