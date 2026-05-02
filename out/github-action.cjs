@@ -107352,6 +107352,8 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
   CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
   CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
+  CONFIG_KEYS2["OCO_ROUTING_THEME_MIN_TOKENS"] = "OCO_ROUTING_THEME_MIN_TOKENS";
+  CONFIG_KEYS2["OCO_ROUTING_REBALANCE_THRESHOLD"] = "OCO_ROUTING_REBALANCE_THRESHOLD";
   CONFIG_KEYS2["OCO_TEMPERATURE"] = "OCO_TEMPERATURE";
   CONFIG_KEYS2["OCO_COMMIT_DETAIL"] = "OCO_COMMIT_DETAIL";
   CONFIG_KEYS2["OCO_GENERATION_TIMEOUT_SECONDS"] = "OCO_GENERATION_TIMEOUT_SECONDS";
@@ -108146,8 +108148,8 @@ var configValidators = {
   ["OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */](value) {
     validateConfig(
       "OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */,
-      ["auto", "always", "never"].includes(value),
-      "Must be 'auto', 'always', or 'never'"
+      ["auto", "always", "never", "smart"].includes(value),
+      "Must be 'auto', 'always', 'never', or 'smart'"
     );
     return value;
   },
@@ -108284,6 +108286,24 @@ var configValidators = {
     );
     return n2;
   },
+  ["OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */,
+      Number.isInteger(n2) && n2 >= 1,
+      "Must be a positive integer (minimum 1)"
+    );
+    return n2;
+  },
+  ["OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */,
+      !isNaN(n2) && n2 >= 0 && n2 <= 1,
+      "Must be a number between 0 and 1"
+    );
+    return n2;
+  },
   ["OCO_TEMPERATURE" /* OCO_TEMPERATURE */](value) {
     const n2 = Number(value);
     validateConfig(
@@ -108413,6 +108433,11 @@ var DEFAULT_CONFIG = {
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
+  // Smart routing (Phase 1) — min shared theme tokens to merge two clusters,
+  // and re-balance threshold (fraction of caps below which adjacent groups
+  // can merge if their themes overlap).
+  OCO_ROUTING_THEME_MIN_TOKENS: 1,
+  OCO_ROUTING_REBALANCE_THRESHOLD: 0.3,
   // LLM generation
   OCO_TEMPERATURE: 0,
   OCO_COMMIT_DETAIL: "normal",
@@ -108492,6 +108517,13 @@ var getEnvConfig = (envPath) => {
     ),
     OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(
       process.env.OCO_MAX_LINES_PER_GROUP
+    ),
+    // Smart routing
+    OCO_ROUTING_THEME_MIN_TOKENS: parseConfigVarValue(
+      process.env.OCO_ROUTING_THEME_MIN_TOKENS
+    ),
+    OCO_ROUTING_REBALANCE_THRESHOLD: parseConfigVarValue(
+      process.env.OCO_ROUTING_REBALANCE_THRESHOLD
     ),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
@@ -108706,7 +108738,8 @@ function getConfigKeyDetails(key) {
       return {
         description: "Controls whether files are committed individually or aggregated",
         values: [
-          "auto (smart routing)",
+          "auto (line-threshold based; large files own group, small files packed by directory)",
+          "smart (file-pair aware + theme clustering across directories; recommended for multi-file changes)",
           "always (always per-file)",
           "never (always aggregate)"
         ]
@@ -108809,6 +108842,16 @@ function getConfigKeyDetails(key) {
         description: "Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.",
         values: ["Positive integer (default: 1500)"]
       };
+    case "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */:
+      return {
+        description: "Smart routing only: minimum number of shared non-generic theme tokens (path basename / dir tokens, after filtering generics like src/utils/test) required to merge two file-pair clusters into a single thematic group.",
+        values: ["Positive integer (default: 1)"]
+      };
+    case "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */:
+      return {
+        description: "Smart routing only: fraction of OCO_MAX_FILES_PER_GROUP / OCO_MAX_LINES_PER_GROUP below which adjacent groups will merge if they share at least one theme token. Lower = stricter merging.",
+        values: ["Number between 0 and 1 (default: 0.3)"]
+      };
     case "OCO_FALLBACK_MODEL" /* OCO_FALLBACK_MODEL */:
       return {
         description: "Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.",
@@ -108910,6 +108953,8 @@ var THEMATIC_KEY_ORDER = [
   "OCO_PER_FILE_THRESHOLD_LINES" /* OCO_PER_FILE_THRESHOLD_LINES */,
   "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */,
   "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */,
+  "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */,
+  "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */,
   // Multi-commit
   "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */,
   // Python docstrings

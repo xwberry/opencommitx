@@ -79630,6 +79630,8 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
   CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
   CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
+  CONFIG_KEYS2["OCO_ROUTING_THEME_MIN_TOKENS"] = "OCO_ROUTING_THEME_MIN_TOKENS";
+  CONFIG_KEYS2["OCO_ROUTING_REBALANCE_THRESHOLD"] = "OCO_ROUTING_REBALANCE_THRESHOLD";
   CONFIG_KEYS2["OCO_TEMPERATURE"] = "OCO_TEMPERATURE";
   CONFIG_KEYS2["OCO_COMMIT_DETAIL"] = "OCO_COMMIT_DETAIL";
   CONFIG_KEYS2["OCO_GENERATION_TIMEOUT_SECONDS"] = "OCO_GENERATION_TIMEOUT_SECONDS";
@@ -80424,8 +80426,8 @@ var configValidators = {
   ["OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */](value) {
     validateConfig(
       "OCO_PER_FILE_COMMIT_MODE" /* OCO_PER_FILE_COMMIT_MODE */,
-      ["auto", "always", "never"].includes(value),
-      "Must be 'auto', 'always', or 'never'"
+      ["auto", "always", "never", "smart"].includes(value),
+      "Must be 'auto', 'always', 'never', or 'smart'"
     );
     return value;
   },
@@ -80562,6 +80564,24 @@ var configValidators = {
     );
     return n2;
   },
+  ["OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */,
+      Number.isInteger(n2) && n2 >= 1,
+      "Must be a positive integer (minimum 1)"
+    );
+    return n2;
+  },
+  ["OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */](value) {
+    const n2 = Number(value);
+    validateConfig(
+      "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */,
+      !isNaN(n2) && n2 >= 0 && n2 <= 1,
+      "Must be a number between 0 and 1"
+    );
+    return n2;
+  },
   ["OCO_TEMPERATURE" /* OCO_TEMPERATURE */](value) {
     const n2 = Number(value);
     validateConfig(
@@ -80691,6 +80711,11 @@ var DEFAULT_CONFIG = {
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
+  // Smart routing (Phase 1) — min shared theme tokens to merge two clusters,
+  // and re-balance threshold (fraction of caps below which adjacent groups
+  // can merge if their themes overlap).
+  OCO_ROUTING_THEME_MIN_TOKENS: 1,
+  OCO_ROUTING_REBALANCE_THRESHOLD: 0.3,
   // LLM generation
   OCO_TEMPERATURE: 0,
   OCO_COMMIT_DETAIL: "normal",
@@ -80770,6 +80795,13 @@ var getEnvConfig = (envPath) => {
     ),
     OCO_MAX_LINES_PER_GROUP: parseConfigVarValue(
       process.env.OCO_MAX_LINES_PER_GROUP
+    ),
+    // Smart routing
+    OCO_ROUTING_THEME_MIN_TOKENS: parseConfigVarValue(
+      process.env.OCO_ROUTING_THEME_MIN_TOKENS
+    ),
+    OCO_ROUTING_REBALANCE_THRESHOLD: parseConfigVarValue(
+      process.env.OCO_ROUTING_REBALANCE_THRESHOLD
     ),
     // LLM generation
     OCO_TEMPERATURE: parseConfigVarValue(process.env.OCO_TEMPERATURE),
@@ -80989,7 +81021,8 @@ function getConfigKeyDetails(key) {
       return {
         description: "Controls whether files are committed individually or aggregated",
         values: [
-          "auto (smart routing)",
+          "auto (line-threshold based; large files own group, small files packed by directory)",
+          "smart (file-pair aware + theme clustering across directories; recommended for multi-file changes)",
           "always (always per-file)",
           "never (always aggregate)"
         ]
@@ -81092,6 +81125,16 @@ function getConfigKeyDetails(key) {
         description: "Maximum total changed lines (added+deleted) in a single commit group (auto mode). Prevents oversized groups when many small files are staged.",
         values: ["Positive integer (default: 1500)"]
       };
+    case "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */:
+      return {
+        description: "Smart routing only: minimum number of shared non-generic theme tokens (path basename / dir tokens, after filtering generics like src/utils/test) required to merge two file-pair clusters into a single thematic group.",
+        values: ["Positive integer (default: 1)"]
+      };
+    case "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */:
+      return {
+        description: "Smart routing only: fraction of OCO_MAX_FILES_PER_GROUP / OCO_MAX_LINES_PER_GROUP below which adjacent groups will merge if they share at least one theme token. Lower = stricter merging.",
+        values: ["Number between 0 and 1 (default: 0.3)"]
+      };
     case "OCO_FALLBACK_MODEL" /* OCO_FALLBACK_MODEL */:
       return {
         description: "Model to retry with on rate-limit or unavailability errors. Leave empty to disable fallback.",
@@ -81193,6 +81236,8 @@ var THEMATIC_KEY_ORDER = [
   "OCO_PER_FILE_THRESHOLD_LINES" /* OCO_PER_FILE_THRESHOLD_LINES */,
   "OCO_MAX_FILES_PER_GROUP" /* OCO_MAX_FILES_PER_GROUP */,
   "OCO_MAX_LINES_PER_GROUP" /* OCO_MAX_LINES_PER_GROUP */,
+  "OCO_ROUTING_THEME_MIN_TOKENS" /* OCO_ROUTING_THEME_MIN_TOKENS */,
+  "OCO_ROUTING_REBALANCE_THRESHOLD" /* OCO_ROUTING_REBALANCE_THRESHOLD */,
   // Multi-commit
   "OCO_MULTI_COMMIT_STRATEGY" /* OCO_MULTI_COMMIT_STRATEGY */,
   // Python docstrings
@@ -104697,6 +104742,571 @@ function formatCacheAge(timestamp) {
   return `${seconds} second${seconds === 1 ? "" : "s"} ago`;
 }
 
+// src/utils/filePairs.ts
+var TS_JS_EXTS = ["ts", "tsx", "js", "jsx", "mjs", "cjs"];
+var TS_JS_TEST_SUFFIXES = ["test", "spec"];
+var JS_TEST_ROOTS = ["test", "tests", "__tests__"];
+var JS_TEST_SUBDIRS = ["", "unit/", "integration/", "e2e/"];
+var PY_TEST_ROOTS = ["test", "tests"];
+var PY_TEST_SUBDIRS = ["", "unit/", "integration/", "e2e/"];
+var REACT_SIBLING_SUFFIXES = [
+  ".module.css",
+  ".module.scss",
+  ".module.sass",
+  ".styles.ts",
+  ".styles.tsx",
+  ".types.ts",
+  ".types.tsx",
+  ".stories.tsx",
+  ".stories.ts",
+  ".story.tsx",
+  ".story.ts"
+];
+function splitPath(file) {
+  const idx = file.lastIndexOf("/");
+  if (idx < 0) return ["", file];
+  return [file.substring(0, idx + 1), file.substring(idx + 1)];
+}
+function stripLeadingDir(file, dir) {
+  const prefix = dir.endsWith("/") ? dir : `${dir}/`;
+  return file.startsWith(prefix) ? file.substring(prefix.length) : null;
+}
+var RULES = [
+  // ─── TypeScript / JavaScript ───────────────────────────────────────────────
+  // Same-dir test → source: foo.test.ts → foo.ts
+  {
+    name: "ts-test-to-source-same-dir",
+    candidates: (file) => {
+      for (const ext of TS_JS_EXTS) {
+        for (const suf of TS_JS_TEST_SUFFIXES) {
+          const needle = `.${suf}.${ext}`;
+          if (file.endsWith(needle)) {
+            return [file.slice(0, -needle.length) + `.${ext}`];
+          }
+        }
+      }
+      return [];
+    }
+  },
+  // Same-dir source → test: foo.ts → foo.test.ts / foo.spec.ts
+  {
+    name: "ts-source-to-test-same-dir",
+    candidates: (file) => {
+      for (const ext of TS_JS_EXTS) {
+        if (!file.endsWith(`.${ext}`)) continue;
+        if (TS_JS_TEST_SUFFIXES.some((suf) => file.endsWith(`.${suf}.${ext}`))) {
+          return [];
+        }
+        const base = file.slice(0, -`.${ext}`.length);
+        return TS_JS_TEST_SUFFIXES.map((suf) => `${base}.${suf}.${ext}`);
+      }
+      return [];
+    }
+  },
+  // Cross-tree source → test: src/.../foo.ts → test{,s,/__tests__}/.../foo.test.ts
+  // Also basename-only candidates for forks like ours where test/unit flattens structure.
+  {
+    name: "ts-source-to-test-cross-tree",
+    candidates: (file) => {
+      const rel = stripLeadingDir(file, "src");
+      if (!rel) return [];
+      for (const ext of TS_JS_EXTS) {
+        if (!rel.endsWith(`.${ext}`)) continue;
+        if (TS_JS_TEST_SUFFIXES.some((suf) => rel.endsWith(`.${suf}.${ext}`))) {
+          return [];
+        }
+        const relNoExt = rel.slice(0, -`.${ext}`.length);
+        const basenameNoExt = relNoExt.split("/").pop() ?? relNoExt;
+        const out = [];
+        for (const root of JS_TEST_ROOTS) {
+          for (const sub of JS_TEST_SUBDIRS) {
+            for (const suf of TS_JS_TEST_SUFFIXES) {
+              out.push(`${root}/${sub}${relNoExt}.${suf}.${ext}`);
+              out.push(`${root}/${sub}${basenameNoExt}.${suf}.${ext}`);
+            }
+          }
+        }
+        return out;
+      }
+      return [];
+    }
+  },
+  // Cross-tree test → source: test{,s,/__tests__}/.../foo.test.ts → src/.../foo.ts
+  {
+    name: "ts-test-to-source-cross-tree",
+    candidates: (file) => {
+      for (const root of JS_TEST_ROOTS) {
+        const rel = stripLeadingDir(file, root);
+        if (!rel) continue;
+        let inner = rel;
+        for (const sub of JS_TEST_SUBDIRS) {
+          if (sub && rel.startsWith(sub)) {
+            inner = rel.substring(sub.length);
+            break;
+          }
+        }
+        for (const ext of TS_JS_EXTS) {
+          for (const suf of TS_JS_TEST_SUFFIXES) {
+            const needle = `.${suf}.${ext}`;
+            if (!inner.endsWith(needle)) continue;
+            const innerNoSuf = inner.slice(0, -needle.length);
+            const basenameNoSuf = innerNoSuf.split("/").pop() ?? innerNoSuf;
+            return [
+              `src/${innerNoSuf}.${ext}`,
+              // Common case: source file at src/<deeper-than-test-tree>/<basename>
+              `src/${basenameNoSuf}.${ext}`,
+              // Also try src/utils/, src/commands/ etc. via basename-only (fork convention).
+              `src/utils/${basenameNoSuf}.${ext}`,
+              `src/commands/${basenameNoSuf}.${ext}`,
+              `src/engine/${basenameNoSuf}.${ext}`,
+              // No-src-prefix project layouts:
+              `${innerNoSuf}.${ext}`
+            ];
+          }
+        }
+      }
+      return [];
+    }
+  },
+  // ─── React component sibling files ─────────────────────────────────────────
+  // Component.tsx → Component.module.css / .styles.ts / .types.ts / .stories.tsx
+  {
+    name: "react-component-to-siblings",
+    candidates: (file) => {
+      for (const ext of ["tsx", "jsx"]) {
+        if (!file.endsWith(`.${ext}`)) continue;
+        if (TS_JS_TEST_SUFFIXES.some((suf) => file.endsWith(`.${suf}.${ext}`))) {
+          return [];
+        }
+        const base = file.slice(0, -`.${ext}`.length);
+        return REACT_SIBLING_SUFFIXES.map((sufx) => `${base}${sufx}`);
+      }
+      return [];
+    }
+  },
+  // Component.module.css → Component.tsx (and other reverse directions)
+  {
+    name: "react-sibling-to-component",
+    candidates: (file) => {
+      for (const sufx of REACT_SIBLING_SUFFIXES) {
+        if (!file.endsWith(sufx)) continue;
+        const base = file.slice(0, -sufx.length);
+        return ["tsx", "jsx", "ts", "js"].map((ext) => `${base}.${ext}`);
+      }
+      return [];
+    }
+  },
+  // ─── Python ────────────────────────────────────────────────────────────────
+  // Same-dir test → source (test_foo.py → foo.py)
+  {
+    name: "py-test-prefix-to-source-same-dir",
+    candidates: (file) => {
+      const [dir, basename3] = splitPath(file);
+      const m5 = basename3.match(/^test_(.+)\.py$/);
+      if (!m5) return [];
+      return [`${dir}${m5[1]}.py`];
+    }
+  },
+  // Same-dir source → test (foo.py → test_foo.py / foo_test.py)
+  {
+    name: "py-source-to-test-same-dir",
+    candidates: (file) => {
+      const [dir, basename3] = splitPath(file);
+      if (!basename3.endsWith(".py")) return [];
+      if (basename3.startsWith("test_") || basename3.endsWith("_test.py")) {
+        return [];
+      }
+      const stem = basename3.slice(0, -".py".length);
+      return [`${dir}test_${stem}.py`, `${dir}${stem}_test.py`];
+    }
+  },
+  // Same-dir foo_test.py → foo.py (Go-style Python convention)
+  {
+    name: "py-test-suffix-to-source-same-dir",
+    candidates: (file) => {
+      const [dir, basename3] = splitPath(file);
+      const m5 = basename3.match(/^(.+)_test\.py$/);
+      if (!m5) return [];
+      return [`${dir}${m5[1]}.py`];
+    }
+  },
+  // Cross-tree source → test (src/.../foo.py → tests/.../test_foo.py)
+  {
+    name: "py-source-to-test-cross-tree",
+    candidates: (file) => {
+      const sourceRoots = ["src", ""];
+      for (const srcRoot of sourceRoots) {
+        const rel = srcRoot ? stripLeadingDir(file, srcRoot) : file;
+        if (rel === null) continue;
+        if (!rel.endsWith(".py")) continue;
+        const basename3 = rel.split("/").pop() ?? rel;
+        if (basename3.startsWith("test_") || basename3.endsWith("_test.py")) {
+          continue;
+        }
+        const relNoExt = rel.slice(0, -".py".length);
+        const basenameNoExt = relNoExt.split("/").pop() ?? relNoExt;
+        const dirOfRel = relNoExt.includes("/") ? relNoExt.substring(0, relNoExt.lastIndexOf("/") + 1) : "";
+        const out = [];
+        for (const root of PY_TEST_ROOTS) {
+          for (const sub of PY_TEST_SUBDIRS) {
+            out.push(`${root}/${sub}${dirOfRel}test_${basenameNoExt}.py`);
+            out.push(`${root}/${sub}${dirOfRel}${basenameNoExt}_test.py`);
+            out.push(`${root}/${sub}test_${basenameNoExt}.py`);
+            out.push(`${root}/${sub}${basenameNoExt}_test.py`);
+          }
+        }
+        return out;
+      }
+      return [];
+    }
+  },
+  // Cross-tree test → source (tests/.../test_foo.py → src/.../foo.py)
+  {
+    name: "py-test-to-source-cross-tree",
+    candidates: (file) => {
+      for (const root of PY_TEST_ROOTS) {
+        const rel = stripLeadingDir(file, root);
+        if (!rel) continue;
+        let inner = rel;
+        for (const sub of PY_TEST_SUBDIRS) {
+          if (sub && rel.startsWith(sub)) {
+            inner = rel.substring(sub.length);
+            break;
+          }
+        }
+        const basename3 = inner.split("/").pop() ?? inner;
+        let stem = null;
+        if (basename3.startsWith("test_") && basename3.endsWith(".py")) {
+          stem = basename3.slice("test_".length, -".py".length);
+        } else if (basename3.endsWith("_test.py")) {
+          stem = basename3.slice(0, -"_test.py".length);
+        }
+        if (!stem) continue;
+        const dirOfInner = inner.includes("/") ? inner.substring(0, inner.lastIndexOf("/") + 1) : "";
+        return [
+          `src/${dirOfInner}${stem}.py`,
+          `src/${stem}.py`,
+          `${dirOfInner}${stem}.py`,
+          `${stem}.py`
+        ];
+      }
+      return [];
+    }
+  },
+  // ─── Schema / migration cluster ────────────────────────────────────────────
+  // Migrations: numbered files in a migrations/ directory cluster together.
+  // Pair each numbered migration with the registry/index file in the same dir.
+  {
+    name: "migration-to-registry",
+    candidates: (file) => {
+      const m5 = file.match(
+        /^(.*\/)?migrations?\/(\d+_[^/]+|_migrations|index)\.(ts|tsx|js|jsx|mjs|cjs|py)$/
+      );
+      if (!m5) return [];
+      const [, dir, , ext] = m5;
+      const migrationsDir = `${dir ?? ""}migrations/`;
+      return [
+        `${migrationsDir}_migrations.${ext}`,
+        `${migrationsDir}index.${ext}`,
+        `${migrationsDir}__init__.py`
+      ];
+    }
+  },
+  // ─── Go ────────────────────────────────────────────────────────────────────
+  // foo.go ↔ foo_test.go (same dir)
+  {
+    name: "go-test-suffix",
+    candidates: (file) => {
+      const m5 = file.match(/^(.+)_test\.go$/);
+      if (m5) return [`${m5[1]}.go`];
+      const m22 = file.match(/^(.+)\.go$/);
+      if (m22 && !file.endsWith("_test.go")) {
+        return [`${m22[1]}_test.go`];
+      }
+      return [];
+    }
+  }
+];
+function findFileClusters(files) {
+  const parent = /* @__PURE__ */ new Map();
+  for (const f2 of files) parent.set(f2, f2);
+  const find = (x6) => {
+    let cur = x6;
+    while (parent.get(cur) !== cur) cur = parent.get(cur);
+    let node = x6;
+    while (parent.get(node) !== cur) {
+      const next = parent.get(node);
+      parent.set(node, cur);
+      node = next;
+    }
+    return cur;
+  };
+  const union = (a2, b7) => {
+    const ra = find(a2);
+    const rb = find(b7);
+    if (ra !== rb) parent.set(ra, rb);
+  };
+  const fileSet = new Set(files);
+  for (const file of files) {
+    for (const rule of RULES) {
+      const candidates = rule.candidates(file);
+      for (const candidate of candidates) {
+        if (candidate === file) continue;
+        if (fileSet.has(candidate)) {
+          union(file, candidate);
+        }
+      }
+    }
+  }
+  const seen = /* @__PURE__ */ new Set();
+  const clusters = [];
+  for (const file of files) {
+    const rep = find(file);
+    if (seen.has(rep)) continue;
+    seen.add(rep);
+    clusters.push(files.filter((f2) => find(f2) === rep));
+  }
+  return clusters;
+}
+
+// src/utils/themeInference.ts
+var GENERIC_TOKENS = /* @__PURE__ */ new Set([
+  // Source roots
+  "src",
+  "lib",
+  "libs",
+  "app",
+  "apps",
+  "pkg",
+  "packages",
+  "internal",
+  // Test roots and standard sub-dirs
+  "test",
+  "tests",
+  "spec",
+  "specs",
+  "__tests__",
+  "unit",
+  "integration",
+  "e2e",
+  "functional",
+  "fixtures",
+  "mocks",
+  "mock",
+  "stubs",
+  "snapshots",
+  "__mocks__",
+  "__snapshots__",
+  // Generic groupings
+  "utils",
+  "util",
+  "helpers",
+  "helper",
+  "common",
+  "shared",
+  "core",
+  "base",
+  "misc",
+  // File-role generics
+  "index",
+  "main",
+  "init",
+  "mod",
+  // Language extensions
+  "js",
+  "jsx",
+  "ts",
+  "tsx",
+  "mjs",
+  "cjs",
+  "py",
+  "pyi",
+  "go",
+  "rs",
+  "java",
+  "kt",
+  "rb",
+  "md",
+  "mdx",
+  "json",
+  "yaml",
+  "yml",
+  "toml",
+  // Common stopwords that creep in
+  "the",
+  "and",
+  "for",
+  "with",
+  "from",
+  "into"
+]);
+var ROLE_SUFFIXES = [
+  ".test",
+  ".spec",
+  ".module",
+  ".styles",
+  ".types",
+  ".stories",
+  ".story",
+  ".d",
+  ".config"
+];
+var ROLE_PREFIXES = ["test_"];
+var BOILERPLATE_BASENAMES = /* @__PURE__ */ new Set([
+  "__init__.py",
+  "__init__.pyi",
+  "index.ts",
+  "index.tsx",
+  "index.js",
+  "index.jsx",
+  "mod.rs",
+  "main.go"
+]);
+function splitIdentifier(s2) {
+  if (!s2) return [];
+  const normalized = s2.replace(/[_\-.]+/g, " ").replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2").replace(/(\d+)/g, " $1 ");
+  return normalized.toLowerCase().split(/\s+/).filter((tok) => tok.length > 0 && !/^\d+$/.test(tok));
+}
+function inferThemeTokens(file) {
+  const segments = file.split("/");
+  const basename3 = segments[segments.length - 1] ?? "";
+  if (BOILERPLATE_BASENAMES.has(basename3)) {
+    if (segments.length >= 2) {
+      const parentTokens = splitIdentifier(segments[segments.length - 2]);
+      return parentTokens.filter((t2) => t2.length > 2 && !GENERIC_TOKENS.has(t2));
+    }
+    return [];
+  }
+  let trimmed = basename3;
+  const firstDot = trimmed.lastIndexOf(".");
+  if (firstDot > 0) trimmed = trimmed.substring(0, firstDot);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const suf of ROLE_SUFFIXES) {
+      if (trimmed.endsWith(suf)) {
+        trimmed = trimmed.substring(0, trimmed.length - suf.length);
+        changed = true;
+      }
+    }
+  }
+  for (const pre of ROLE_PREFIXES) {
+    if (trimmed.startsWith(pre)) {
+      trimmed = trimmed.substring(pre.length);
+    }
+  }
+  trimmed = trimmed.replace(/^\d+_/, "");
+  trimmed = trimmed.replace(/_test$/, "");
+  const basenameTokens = splitIdentifier(trimmed);
+  const dirTokens = [];
+  for (const seg of segments.slice(0, -1)) {
+    for (const tok of splitIdentifier(seg)) {
+      if (!GENERIC_TOKENS.has(tok)) dirTokens.push(tok);
+    }
+  }
+  const combined = /* @__PURE__ */ new Set();
+  for (const tok of [...basenameTokens, ...dirTokens]) {
+    if (tok.length <= 2) continue;
+    if (GENERIC_TOKENS.has(tok)) continue;
+    combined.add(tok);
+  }
+  return [...combined];
+}
+var PATH_BASED_TYPE = [
+  // CI workflows
+  {
+    test: (f2) => f2.startsWith(".github/workflows/") || f2 === ".gitlab-ci.yml" || f2.startsWith(".circleci/") || f2 === "Jenkinsfile" || f2.startsWith(".travis") || f2 === ".azure-pipelines.yml",
+    type: "ci"
+  },
+  // Build / tooling
+  {
+    test: (f2) => {
+      const base = f2.split("/").pop() ?? f2;
+      return /^(webpack|rollup|esbuild|vite|tsup|tsdown|swc)\.config\./.test(base) || base === "tsconfig.json" || base.startsWith("tsconfig.") || base === "Dockerfile" || base.startsWith("Dockerfile.") || base === "Makefile" || base === "Justfile" || base === "pyproject.toml" || base === "setup.py" || base === "setup.cfg" || base === "go.mod" || base === "Cargo.toml";
+    },
+    type: "build"
+  },
+  // Documentation
+  {
+    test: (f2) => /\.(md|mdx|rst|adoc|asciidoc|txt)$/i.test(f2),
+    type: "docs"
+  },
+  // Tests by path
+  {
+    test: (f2) => /(^|\/)(tests?|__tests__|spec|specs)\//.test(f2) || /\.(test|spec)\.[a-zA-Z]+$/.test(f2) || /(^|\/)test_[^/]+\.py$/.test(f2) || /(^|\/)[^/]+_test\.(py|go)$/.test(f2),
+    type: "test"
+  },
+  // Tooling-config / chore
+  {
+    test: (f2) => {
+      const base = f2.split("/").pop() ?? f2;
+      return base === "package.json" || base === "requirements.txt" || base === "Pipfile" || base === ".gitignore" || base === ".gitattributes" || base === ".editorconfig" || base === ".prettierrc" || base === ".prettierignore" || base.startsWith(".eslintrc") || base === ".dockerignore";
+    },
+    type: "chore"
+  }
+];
+function countAddedLines(diff) {
+  let count = 0;
+  for (const line of diff.split("\n")) {
+    if (line.startsWith("+") && !line.startsWith("+++")) count += 1;
+  }
+  return count;
+}
+function countDeletedLines(diff) {
+  let count = 0;
+  for (const line of diff.split("\n")) {
+    if (line.startsWith("-") && !line.startsWith("---")) count += 1;
+  }
+  return count;
+}
+function diffHasAddedLineMatching(diff, pattern) {
+  for (const line of diff.split("\n")) {
+    if (!line.startsWith("+") || line.startsWith("+++")) continue;
+    if (pattern.test(line.substring(1))) return true;
+  }
+  return false;
+}
+function diffIsCommentOnly(diff) {
+  let saw = false;
+  for (const line of diff.split("\n")) {
+    if (line.startsWith("+++") || line.startsWith("---")) continue;
+    if (line.startsWith("+") || line.startsWith("-")) {
+      const content = line.substring(1).trim();
+      if (content.length === 0) continue;
+      saw = true;
+      const isComment = content.startsWith("//") || content.startsWith("#") || content.startsWith("*") || content.startsWith("/*") || content.startsWith('"""') || content.startsWith("'''");
+      if (!isComment) return false;
+    }
+  }
+  return saw;
+}
+function inferType(file, diff) {
+  for (const rule of PATH_BASED_TYPE) {
+    if (rule.test(file)) return rule.type;
+  }
+  if (!diff) return void 0;
+  const added = countAddedLines(diff);
+  const deleted = countDeletedLines(diff);
+  if (added === 0 && deleted === 0) return void 0;
+  if (diffIsCommentOnly(diff)) return "style";
+  const isTestyContent = diffHasAddedLineMatching(diff, /^\s*(describe|it|test)\s*\(/) || diffHasAddedLineMatching(diff, /^\s*expect\s*\(/) || diffHasAddedLineMatching(diff, /^\s*def\s+test_\w+\s*\(/) || diffHasAddedLineMatching(diff, /^\s*@(pytest|unittest)/);
+  if (isTestyContent) return "test";
+  const fixSignal = diffHasAddedLineMatching(diff, /^\s*throw\s+/) || diffHasAddedLineMatching(diff, /^\s*raise\s+\w+/) || diffHasAddedLineMatching(diff, /^\s*}\s*catch\s*\(/) || diffHasAddedLineMatching(diff, /^\s*except\s+\w+/);
+  const featSignal = diffHasAddedLineMatching(
+    diff,
+    /^\s*export\s+(async\s+)?(function|class|const|interface|type|enum)\s+\w+/
+  ) || diffHasAddedLineMatching(diff, /^\s*public\s+\w+\s+\w+\s*\(/) || diffHasAddedLineMatching(diff, /^\s*(async\s+)?def\s+\w+\s*\(/) || diffHasAddedLineMatching(diff, /^\s*class\s+\w+\s*[\(:]/);
+  const total = added + deleted;
+  const isRefactor = !featSignal && !fixSignal && total >= 20 && added / total > 0.3 && deleted / total > 0.3;
+  if (fixSignal && !featSignal) return "fix";
+  if (featSignal && !fixSignal) return "feat";
+  if (featSignal && fixSignal) {
+    return "feat";
+  }
+  if (isRefactor) return "refactor";
+  return void 0;
+}
+
 // src/utils/diffRouter.ts
 var BINARY_OR_GENERATED_EXTENSIONS = /* @__PURE__ */ new Set([
   ".lock",
@@ -104715,7 +105325,7 @@ function isBinaryOrGenerated(file) {
   const ext = `.${lower.split(".").pop() || ""}`;
   return BINARY_OR_GENERATED_EXTENSIONS.has(ext) || lower.endsWith(".min.js") || lower.endsWith(".min.css") || lower.endsWith("-lock.json") || lower.endsWith(".lock");
 }
-var BOILERPLATE_BASENAMES = /* @__PURE__ */ new Set([
+var BOILERPLATE_BASENAMES2 = /* @__PURE__ */ new Set([
   "__init__.py",
   "__init__.pyi",
   "index.ts",
@@ -104730,7 +105340,7 @@ var BOILERPLATE_BASENAMES = /* @__PURE__ */ new Set([
 ]);
 function isBoilerplateFile(file) {
   const basename3 = file.split("/").pop() ?? file;
-  return BOILERPLATE_BASENAMES.has(basename3);
+  return BOILERPLATE_BASENAMES2.has(basename3);
 }
 var LOCK_TO_MANIFEST = {
   "pixi.lock": "pixi.toml",
@@ -104782,11 +105392,7 @@ function groupByDirectory(stats, maxFiles, maxLines) {
   }
   return groups;
 }
-function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract = extractPythonDocstrings) {
-  const mode = config5.OCO_PER_FILE_COMMIT_MODE || "auto";
-  const threshold = config5.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
-  const maxFilesPerGroup = config5.OCO_MAX_FILES_PER_GROUP ?? 10;
-  const maxLinesPerGroup = config5.OCO_MAX_LINES_PER_GROUP ?? 1500;
+function classifyFiles(stats) {
   const lockFiles = stats.filter(
     (s2) => isBinaryOrGenerated(s2.file) && getLockManifestPath(s2.file) !== null
   );
@@ -104794,64 +105400,111 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
     (s2) => isBinaryOrGenerated(s2.file) && getLockManifestPath(s2.file) === null
   );
   const relevantStats = stats.filter((s2) => !isBinaryOrGenerated(s2.file));
+  return { lockFiles, standaloneGenerated, relevantStats };
+}
+function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract = extractPythonDocstrings) {
+  const mode = config5.OCO_PER_FILE_COMMIT_MODE || "auto";
+  const { lockFiles, standaloneGenerated, relevantStats } = classifyFiles(stats);
   if (mode === "never") {
-    const allFiles = [
-      ...relevantStats,
-      ...lockFiles,
-      ...standaloneGenerated
-    ].map((s2) => s2.file);
-    return {
-      usePerFile: false,
-      fileGroups: allFiles.length ? [{ files: allFiles, totalLines: 0 }] : [],
-      reason: "per-file mode disabled"
-    };
+    return routeDiffNever({ lockFiles, standaloneGenerated, relevantStats });
   }
   if (relevantStats.length === 0) {
-    const groups2 = [];
-    if (lockFiles.length) {
-      groups2.push({
-        files: lockFiles.map((s2) => s2.file),
-        totalLines: lockFiles.reduce((a2, s2) => a2 + s2.added + s2.deleted, 0)
-      });
-    }
-    for (const gen of standaloneGenerated) {
-      groups2.push({
-        files: [gen.file],
-        totalLines: gen.added + gen.deleted
-      });
-    }
-    return {
-      usePerFile: mode === "always" || standaloneGenerated.length > 0,
-      fileGroups: groups2,
-      reason: "no relevant files"
-    };
+    return routeDiffEmptyRelevant({ mode, lockFiles, standaloneGenerated });
   }
   if (mode === "always") {
-    const boilerplateFiles = relevantStats.filter(
-      (s2) => isBoilerplateFile(s2.file)
-    );
-    const normalFiles = relevantStats.filter((s2) => !isBoilerplateFile(s2.file));
-    const groups2 = normalFiles.map((s2) => ({
-      files: [s2.file],
-      totalLines: s2.added + s2.deleted
-    }));
-    if (boilerplateFiles.length > 0) {
-      groups2.push({
-        files: boilerplateFiles.map((s2) => s2.file),
-        totalLines: boilerplateFiles.reduce(
-          (acc, s2) => acc + s2.added + s2.deleted,
-          0
-        )
-      });
-    }
-    attachLockFiles(lockFiles, groups2);
-    attachStandaloneGenerated(standaloneGenerated, groups2);
-    return {
-      usePerFile: true,
-      fileGroups: groups2,
-      reason: "per-file mode forced (always)"
-    };
+    return routeDiffAlways({ lockFiles, standaloneGenerated, relevantStats });
   }
+  if (mode === "smart") {
+    return routeDiffSmart({
+      config: config5,
+      lockFiles,
+      standaloneGenerated,
+      relevantStats,
+      _shouldUse,
+      _extract
+    });
+  }
+  return routeDiffAuto({
+    config: config5,
+    lockFiles,
+    standaloneGenerated,
+    relevantStats,
+    _shouldUse,
+    _extract
+  });
+}
+function routeDiffNever(ctx) {
+  const allFiles = [
+    ...ctx.relevantStats,
+    ...ctx.lockFiles,
+    ...ctx.standaloneGenerated
+  ].map((s2) => s2.file);
+  return {
+    usePerFile: false,
+    fileGroups: allFiles.length ? [{ files: allFiles, totalLines: 0 }] : [],
+    reason: "per-file mode disabled"
+  };
+}
+function routeDiffEmptyRelevant(args) {
+  const { mode, lockFiles, standaloneGenerated } = args;
+  const groups = [];
+  if (lockFiles.length) {
+    groups.push({
+      files: lockFiles.map((s2) => s2.file),
+      totalLines: lockFiles.reduce((a2, s2) => a2 + s2.added + s2.deleted, 0)
+    });
+  }
+  for (const gen of standaloneGenerated) {
+    groups.push({
+      files: [gen.file],
+      totalLines: gen.added + gen.deleted
+    });
+  }
+  return {
+    usePerFile: mode === "always" || standaloneGenerated.length > 0,
+    fileGroups: groups,
+    reason: "no relevant files"
+  };
+}
+function routeDiffAlways(ctx) {
+  const { lockFiles, standaloneGenerated, relevantStats } = ctx;
+  const boilerplateFiles = relevantStats.filter(
+    (s2) => isBoilerplateFile(s2.file)
+  );
+  const normalFiles = relevantStats.filter((s2) => !isBoilerplateFile(s2.file));
+  const groups = normalFiles.map((s2) => ({
+    files: [s2.file],
+    totalLines: s2.added + s2.deleted
+  }));
+  if (boilerplateFiles.length > 0) {
+    groups.push({
+      files: boilerplateFiles.map((s2) => s2.file),
+      totalLines: boilerplateFiles.reduce(
+        (acc, s2) => acc + s2.added + s2.deleted,
+        0
+      )
+    });
+  }
+  attachLockFiles(lockFiles, groups);
+  attachStandaloneGenerated(standaloneGenerated, groups);
+  return {
+    usePerFile: true,
+    fileGroups: groups,
+    reason: "per-file mode forced (always)"
+  };
+}
+function routeDiffAuto(args) {
+  const {
+    config: config5,
+    lockFiles,
+    standaloneGenerated,
+    relevantStats,
+    _shouldUse,
+    _extract
+  } = args;
+  const threshold = config5.OCO_PER_FILE_THRESHOLD_LINES ?? 300;
+  const maxFilesPerGroup = config5.OCO_MAX_FILES_PER_GROUP ?? 10;
+  const maxLinesPerGroup = config5.OCO_MAX_LINES_PER_GROUP ?? 1500;
   const largeFiles = relevantStats.filter(
     (s2) => s2.added + s2.deleted > threshold
   );
@@ -104911,6 +105564,208 @@ function routeDiff(stats, config5, _shouldUse = shouldUseDocstringMode, _extract
     fileGroups: groups,
     reason: `${largeFiles.length} file(s) exceeded ${threshold} line threshold`
   };
+}
+function routeDiffSmart(args) {
+  const {
+    config: config5,
+    lockFiles,
+    standaloneGenerated,
+    relevantStats,
+    _shouldUse,
+    _extract
+  } = args;
+  const maxFilesPerGroup = config5.OCO_MAX_FILES_PER_GROUP ?? 10;
+  const maxLinesPerGroup = config5.OCO_MAX_LINES_PER_GROUP ?? 1500;
+  const minSharedTokens = config5.OCO_ROUTING_THEME_MIN_TOKENS ?? 1;
+  const rebalanceThreshold = config5.OCO_ROUTING_REBALANCE_THRESHOLD ?? 0.3;
+  if (relevantStats.length === 0) {
+    return {
+      usePerFile: standaloneGenerated.length > 0,
+      fileGroups: [],
+      reason: "smart routing \u2014 no relevant files"
+    };
+  }
+  const statsByFile = new Map(
+    relevantStats.map((s2) => [s2.file, s2])
+  );
+  const filePaths = relevantStats.map((s2) => s2.file);
+  const pairClusters = findFileClusters(filePaths);
+  const themeClusters = mergeByThemeTokens(pairClusters, minSharedTokens);
+  const groups = [];
+  for (const cluster of themeClusters) {
+    const containedPairs = pairClusters.filter(
+      (pc) => pc.length > 1 && pc.every((f2) => cluster.includes(f2))
+    );
+    let reason;
+    if (cluster.length === 1) {
+      reason = "singleton";
+    } else if (containedPairs.length === 1 && containedPairs[0].length === cluster.length) {
+      reason = "file-pair";
+    } else {
+      reason = "theme-cluster";
+    }
+    const packed = packCluster(
+      cluster,
+      statsByFile,
+      maxFilesPerGroup,
+      maxLinesPerGroup,
+      reason
+    );
+    groups.push(...packed);
+  }
+  const rebalanced = rebalanceUndersized(
+    groups,
+    maxFilesPerGroup,
+    maxLinesPerGroup,
+    rebalanceThreshold
+  );
+  for (const group of rebalanced) {
+    if (group.files.length === 1) {
+      const stat = statsByFile.get(group.files[0]);
+      if (stat && _shouldUse(stat.file, stat.added)) {
+        group.docstringOverride = _extract(stat.file) ?? void 0;
+      }
+    }
+  }
+  for (const group of rebalanced) {
+    const types = group.files.map((f2) => inferType(f2));
+    if (types.length > 0 && types.every(
+      (t2) => t2 !== void 0 && t2 === types[0]
+    )) {
+      group.type = types[0];
+    }
+  }
+  attachLockFiles(lockFiles, rebalanced);
+  attachStandaloneGenerated(standaloneGenerated, rebalanced);
+  const usePerFile = rebalanced.length > 1;
+  return {
+    usePerFile,
+    fileGroups: rebalanced,
+    reason: `smart routing \u2014 ${rebalanced.length} group(s)`
+  };
+}
+function mergeByThemeTokens(clusters, minOverlap) {
+  if (clusters.length <= 1) return clusters;
+  const signatures = clusters.map(
+    (c3) => new Set(c3.flatMap((f2) => inferThemeTokens(f2)))
+  );
+  const parent = clusters.map((_7, i3) => i3);
+  const find = (i3) => {
+    let cur = i3;
+    while (parent[cur] !== cur) cur = parent[cur];
+    let node = i3;
+    while (parent[node] !== cur) {
+      const next = parent[node];
+      parent[node] = cur;
+      node = next;
+    }
+    return cur;
+  };
+  const union = (a2, b7) => {
+    const ra = find(a2);
+    const rb = find(b7);
+    if (ra !== rb) parent[ra] = rb;
+  };
+  for (let i3 = 0; i3 < clusters.length; i3++) {
+    if (signatures[i3].size === 0) continue;
+    for (let j4 = i3 + 1; j4 < clusters.length; j4++) {
+      if (signatures[j4].size === 0) continue;
+      let shared = 0;
+      for (const tok of signatures[i3]) {
+        if (signatures[j4].has(tok)) shared += 1;
+        if (shared >= minOverlap) break;
+      }
+      if (shared >= minOverlap) union(i3, j4);
+    }
+  }
+  const seen = /* @__PURE__ */ new Set();
+  const merged = [];
+  for (let i3 = 0; i3 < clusters.length; i3++) {
+    const root = find(i3);
+    if (seen.has(root)) continue;
+    seen.add(root);
+    const memberIdxs = [];
+    for (let j4 = 0; j4 < clusters.length; j4++) {
+      if (find(j4) === root) memberIdxs.push(j4);
+    }
+    merged.push(memberIdxs.flatMap((k7) => clusters[k7]));
+  }
+  return merged;
+}
+function packCluster(cluster, statsByFile, maxFiles, maxLines, reason) {
+  const groups = [];
+  let currentFiles = [];
+  let currentLines = 0;
+  for (const file of cluster) {
+    const stat = statsByFile.get(file);
+    const lines = stat ? stat.added + stat.deleted : 0;
+    const wouldExceedFiles = currentFiles.length >= maxFiles;
+    const wouldExceedLines = currentLines + lines > maxLines && currentFiles.length > 0;
+    if (wouldExceedFiles || wouldExceedLines) {
+      groups.push({
+        files: currentFiles,
+        totalLines: currentLines,
+        reason: cluster.length > currentFiles.length ? `${reason} (split)` : reason
+      });
+      currentFiles = [];
+      currentLines = 0;
+    }
+    currentFiles.push(file);
+    currentLines += lines;
+  }
+  if (currentFiles.length > 0) {
+    groups.push({
+      files: currentFiles,
+      totalLines: currentLines,
+      reason: groups.length > 0 ? `${reason} (split)` : reason
+    });
+  }
+  return groups;
+}
+function rebalanceUndersized(groups, maxFiles, maxLines, threshold) {
+  if (groups.length < 2) return groups;
+  const fileLimit = Math.max(1, Math.floor(maxFiles * threshold));
+  const lineLimit = Math.max(1, Math.floor(maxLines * threshold));
+  const merged = [];
+  let i3 = 0;
+  while (i3 < groups.length) {
+    const cur = groups[i3];
+    const next = i3 < groups.length - 1 ? groups[i3 + 1] : null;
+    if (next) {
+      const curUnder = cur.files.length <= fileLimit && cur.totalLines <= lineLimit;
+      const nextUnder = next.files.length <= fileLimit && next.totalLines <= lineLimit;
+      if (curUnder && nextUnder) {
+        const curTokens = new Set(
+          cur.files.flatMap((f2) => inferThemeTokens(f2))
+        );
+        const nextTokens = new Set(
+          next.files.flatMap((f2) => inferThemeTokens(f2))
+        );
+        let overlap = 0;
+        for (const t2 of curTokens) {
+          if (nextTokens.has(t2)) {
+            overlap += 1;
+            break;
+          }
+        }
+        const combinedFiles = cur.files.length + next.files.length;
+        const combinedLines = cur.totalLines + next.totalLines;
+        const fitsCaps = combinedFiles <= maxFiles && combinedLines <= maxLines;
+        if (overlap > 0 && fitsCaps) {
+          merged.push({
+            files: [...cur.files, ...next.files],
+            totalLines: combinedLines,
+            reason: "merged-undersized"
+          });
+          i3 += 2;
+          continue;
+        }
+      }
+    }
+    merged.push(cur);
+    i3 += 1;
+  }
+  return merged;
 }
 function attachLockFiles(lockStats, groups) {
   if (lockStats.length === 0 || groups.length === 0) return;
@@ -105606,9 +106461,26 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
         docstringFiles.add(f2);
       }
     }
-    const colWidths = { file: 40, lines: 10, status: 4, ds: 3, grp: 4 };
+    const showThemeCol = perFileMode === "smart" && fileGroups.length > 0;
+    const groupMetaByFile = /* @__PURE__ */ new Map();
+    if (showThemeCol) {
+      for (const g4 of fileGroups) {
+        for (const f2 of g4.files) {
+          groupMetaByFile.set(f2, { reason: g4.reason, type: g4.type });
+        }
+      }
+    }
+    const colWidths = {
+      file: 40,
+      lines: 10,
+      status: 4,
+      ds: 3,
+      grp: 4,
+      theme: 24
+    };
     const pad = (s2, n2) => s2.slice(0, n2).padEnd(n2);
-    const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp`;
+    const themeHeader = showThemeCol ? `  ${pad("Theme", colWidths.theme)}` : "";
+    const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp${themeHeader}`;
     const divider = "\u2500".repeat(header.length);
     const rows = stagedFiles.map((f2) => {
       const s2 = statsMap.get(f2);
@@ -105616,7 +106488,16 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
       const isNew = (statusMap.get(f2) ?? "M") === "A" ? "Y" : " ";
       const isDs = docstringFiles.has(f2) ? "Y" : " ";
       const grp = String(groupIndexMap.get(f2) ?? 1);
-      return `${pad(f2, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}`;
+      let themeCell = "";
+      if (showThemeCol) {
+        const meta = groupMetaByFile.get(f2);
+        const parts = [];
+        if (meta?.type) parts.push(meta.type);
+        if (meta?.reason && meta.reason !== "singleton")
+          parts.push(meta.reason);
+        themeCell = `  ${pad(parts.join(":") || "\u2014", colWidths.theme)}`;
+      }
+      return `${pad(f2, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
     });
     Me(`${header}
 ${divider}
