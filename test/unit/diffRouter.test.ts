@@ -235,6 +235,224 @@ describe('diffRouter', () => {
       expect(manifestGroup!.totalLines).toBe(505);
     });
 
+    it('smart mode pairs cross-tree test/source for TS', () => {
+      const stats: FileStats[] = [
+        { added: 50, deleted: 10, file: 'src/utils/cache.ts' },
+        { added: 80, deleted: 5, file: 'test/unit/cache.test.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // The source/test pair should be in the same group regardless of dir.
+      const cacheGroup = result.fileGroups.find((g) =>
+        g.files.includes('src/utils/cache.ts')
+      );
+      expect(cacheGroup).toBeDefined();
+      expect(cacheGroup!.files).toContain('test/unit/cache.test.ts');
+    });
+
+    it('smart mode pairs cross-tree test/source for Python', () => {
+      const stats: FileStats[] = [
+        { added: 60, deleted: 0, file: 'src/parser.py' },
+        { added: 30, deleted: 0, file: 'tests/test_parser.py' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      const grp = result.fileGroups.find((g) =>
+        g.files.includes('src/parser.py')
+      );
+      expect(grp).toBeDefined();
+      expect(grp!.files).toContain('tests/test_parser.py');
+    });
+
+    it('smart mode clusters files sharing a non-generic theme token across directories', () => {
+      // commands/cache.ts and utils/cacheManager.ts both contain "cache".
+      const stats: FileStats[] = [
+        { added: 20, deleted: 2, file: 'src/commands/cache.ts' },
+        { added: 30, deleted: 5, file: 'src/utils/cacheManager.ts' },
+        { added: 10, deleted: 1, file: 'src/utils/unrelated.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      const cacheGroup = result.fileGroups.find((g) =>
+        g.files.includes('src/commands/cache.ts')
+      );
+      expect(cacheGroup).toBeDefined();
+      expect(cacheGroup!.files).toContain('src/utils/cacheManager.ts');
+      const unrelated = result.fileGroups.find((g) =>
+        g.files.includes('src/utils/unrelated.ts')
+      );
+      expect(unrelated).toBeDefined();
+      expect(unrelated!.files).not.toContain('src/commands/cache.ts');
+    });
+
+    it('smart mode does not cluster unrelated files in the same dir', () => {
+      const stats: FileStats[] = [
+        { added: 10, deleted: 0, file: 'src/utils/foo.ts' },
+        { added: 10, deleted: 0, file: 'src/utils/bar.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // No theme overlap (foo and bar share no specific tokens) — they should
+      // remain in separate groups even though they're in the same dir.
+      expect(result.fileGroups).toHaveLength(2);
+    });
+
+    it('smart mode merges undersized adjacent groups when themes overlap', () => {
+      // Three files, all "auth" themed, each tiny on its own.
+      const stats: FileStats[] = [
+        { added: 4, deleted: 1, file: 'src/auth/login.ts' },
+        { added: 3, deleted: 0, file: 'src/auth/logout.ts' },
+        { added: 5, deleted: 2, file: 'src/auth/session.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // All share "auth" → should cluster into a single group.
+      expect(result.fileGroups).toHaveLength(1);
+      expect(result.fileGroups[0].files.sort()).toEqual([
+        'src/auth/login.ts',
+        'src/auth/logout.ts',
+        'src/auth/session.ts'
+      ]);
+    });
+
+    it('smart mode tags single-type groups with the inferred type', () => {
+      const stats: FileStats[] = [
+        { added: 30, deleted: 0, file: 'README.md' },
+        { added: 40, deleted: 0, file: 'docs/usage.md' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // Both are docs; whichever group contains a md file should be tagged.
+      const docsGroup = result.fileGroups.find((g) =>
+        g.files.some((f) => f.endsWith('.md'))
+      );
+      expect(docsGroup).toBeDefined();
+      expect(docsGroup!.type).toBe('docs');
+    });
+
+    it('smart mode respects file/line caps when splitting large clusters', () => {
+      // 12 files all sharing "auth" theme, each 50 lines.
+      const stats: FileStats[] = Array.from({ length: 12 }, (_, i) => ({
+        added: 50,
+        deleted: 0,
+        file: `src/auth/handler${i}.ts`
+      }));
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart',
+        OCO_MAX_FILES_PER_GROUP: 5
+      });
+      // 12 files / cap of 5 → at least 3 groups.
+      expect(result.fileGroups.length).toBeGreaterThanOrEqual(3);
+      for (const g of result.fileGroups) {
+        expect(g.files.length).toBeLessThanOrEqual(5);
+      }
+    });
+
+    it('smart mode preserves docstring override for large Python files', () => {
+      const stats: FileStats[] = [
+        { added: 600, deleted: 50, file: 'big_module.py' }
+      ];
+      const result = routeDiff(
+        stats,
+        { ...baseConfig, OCO_PER_FILE_COMMIT_MODE: 'smart' },
+        alwaysUse,
+        () => 'docstring summary here'
+      );
+      expect(result.fileGroups[0].docstringOverride).toContain(
+        'docstring summary here'
+      );
+    });
+
+    it("smart mode does not false-merge unrelated test/source pairs via 'unit' subdir", () => {
+      // Regression: 'unit', 'integration', 'e2e' were being treated as theme
+      // tokens, causing every test file under test/unit/ to share that token
+      // and merging all unrelated test/source pairs into one giant cluster.
+      const stats: FileStats[] = [
+        { added: 100, deleted: 10, file: 'src/utils/diffRouter.ts' },
+        { added: 100, deleted: 10, file: 'src/utils/filePairs.ts' },
+        { added: 100, deleted: 10, file: 'src/utils/themeInference.ts' },
+        { added: 50, deleted: 0, file: 'test/unit/diffRouter.test.ts' },
+        { added: 50, deleted: 0, file: 'test/unit/filePairs.test.ts' },
+        { added: 50, deleted: 0, file: 'test/unit/themeInference.test.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // Should produce 3 separate file-pair groups, NOT one big cluster.
+      expect(result.fileGroups).toHaveLength(3);
+      // Each group should be a single source/test pair.
+      for (const g of result.fileGroups) {
+        expect(g.files).toHaveLength(2);
+        expect(g.reason).toBe('file-pair');
+      }
+    });
+
+    it('smart mode does not tag mixed test/source groups as type=test', () => {
+      // Regression: type was being set to 'test' on a [source, test] group
+      // because the test file's inferType returned 'test' and the source's
+      // returned undefined, leaving 'test' as the only "concrete" type.
+      const stats: FileStats[] = [
+        { added: 50, deleted: 5, file: 'src/utils/foo.ts' },
+        { added: 30, deleted: 0, file: 'test/unit/foo.test.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      const grp = result.fileGroups.find((g) =>
+        g.files.includes('src/utils/foo.ts')
+      );
+      expect(grp).toBeDefined();
+      expect(grp!.type).toBeUndefined();
+    });
+
+    it('smart mode tags pure-test groups as type=test', () => {
+      // Two test files that pair with no staged source — should still tag as test.
+      const stats: FileStats[] = [
+        { added: 30, deleted: 0, file: 'test/unit/foo.test.ts' },
+        { added: 40, deleted: 0, file: 'test/unit/bar.test.ts' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      // foo and bar tests don't share a basename theme token (and 'unit' is
+      // now generic), so they end up as two separate singletons each tagged 'test'.
+      for (const g of result.fileGroups) {
+        expect(g.type).toBe('test');
+      }
+    });
+
+    it('smart mode lock-file attachment to manifest still works', () => {
+      const stats: FileStats[] = [
+        { added: 5, deleted: 0, file: 'package.json' },
+        { added: 500, deleted: 0, file: 'package-lock.json' }
+      ];
+      const result = routeDiff(stats, {
+        ...baseConfig,
+        OCO_PER_FILE_COMMIT_MODE: 'smart'
+      });
+      const manifestGroup = result.fileGroups.find((g) =>
+        g.files.includes('package.json')
+      );
+      expect(manifestGroup).toBeDefined();
+      expect(manifestGroup!.files).toContain('package-lock.json');
+    });
+
     it('puts standalone generated assets in their own group, not bundled with source', () => {
       const stats: FileStats[] = [
         { added: 50, deleted: 10, file: 'src/index.ts' },
