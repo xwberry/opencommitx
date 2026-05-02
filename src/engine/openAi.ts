@@ -6,7 +6,7 @@ import { removeContentTags } from '../utils/removeContentTags';
 import { tokenCount } from '../utils/tokenCount';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-export interface OpenAiConfig extends AiEngineConfig {}
+export type OpenAiConfig = AiEngineConfig;
 
 export class OpenAiEngine implements AiEngine {
   config: OpenAiConfig;
