@@ -54,8 +54,8 @@ Grade each candidate on the following criteria and return a JSON object matching
   ]
 }
 
-Return ONLY valid JSON. No markdown fences, no preamble.
-Do NOT omit the <think> tag if you use one — include all reasoning in the response.`;
+Return valid JSON matching the schema above. Do not wrap it in markdown fences.
+If you want to show reasoning, place a <think>...</think> block BEFORE the JSON object — the parser will extract the JSON. Do not embed JSON inside the think block.`;
 
   const userPrompt = `## Git Diff\n\`\`\`diff\n${diff}\n\`\`\`\n\n## Candidate Commit Messages\n\n${candidateList}\n\nEvaluate all ${candidates.length} candidates and return the JSON results array.`;
 
