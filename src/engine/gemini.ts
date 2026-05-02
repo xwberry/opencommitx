@@ -10,7 +10,7 @@ import { normalizeEngineError } from '../utils/engineErrorHandler';
 import { removeContentTags } from '../utils/removeContentTags';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface GeminiConfig extends AiEngineConfig {}
+type GeminiConfig = AiEngineConfig;
 
 export class GeminiEngine implements AiEngine {
   config: GeminiConfig;
