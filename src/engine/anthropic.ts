@@ -10,7 +10,7 @@ import { removeContentTags } from '../utils/removeContentTags';
 import { tokenCount } from '../utils/tokenCount';
 import { AiEngine, AiEngineConfig } from './Engine';
 
-interface AnthropicConfig extends AiEngineConfig {}
+type AnthropicConfig = AiEngineConfig;
 
 export class AnthropicEngine implements AiEngine {
   config: AnthropicConfig;
