@@ -107350,6 +107350,7 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
   CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
+  CONFIG_KEYS2["OCO_DEBUG_ROUTING"] = "OCO_DEBUG_ROUTING";
   CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
   CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
   CONFIG_KEYS2["OCO_ROUTING_THEME_MIN_TOKENS"] = "OCO_ROUTING_THEME_MIN_TOKENS";
@@ -108196,6 +108197,16 @@ var configValidators = {
     );
     return ["true", "1", "yes", "on"].includes(str2);
   },
+  ["OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */](value) {
+    if (typeof value === "boolean") return value;
+    const str2 = String(value).toLowerCase().trim();
+    validateConfig(
+      "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */,
+      ["true", "false", "1", "0", "yes", "no", "on", "off"].includes(str2),
+      "Must be a boolean (true/false/1/0/yes/no)"
+    );
+    return ["true", "1", "yes", "on"].includes(str2);
+  },
   ["OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */](value) {
     validateConfig(
       "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */,
@@ -108430,6 +108441,7 @@ var DEFAULT_CONFIG = {
   OCO_MULTI_COMMIT_STRATEGY: "single",
   // Debug mode (off by default)
   OCO_DEBUG: false,
+  OCO_DEBUG_ROUTING: false,
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
@@ -108501,6 +108513,7 @@ var getEnvConfig = (envPath) => {
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Debug
     OCO_DEBUG: parseConfigVarValue(process.env.OCO_DEBUG),
+    OCO_DEBUG_ROUTING: parseConfigVarValue(process.env.OCO_DEBUG_ROUTING),
     // Per-provider keys
     OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
     OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
@@ -108772,6 +108785,11 @@ function getConfigKeyDetails(key) {
         description: "Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting",
         values: ["true", "false (default)"]
       };
+    case "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */:
+      return {
+        description: "Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson \u2014 staged-files summary table, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths",
+        values: ["true", "false (default)"]
+      };
     case "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */:
       return {
         description: "API key for OpenAI (overrides OCO_API_KEY when provider is openai)",
@@ -108966,6 +108984,7 @@ var THEMATIC_KEY_ORDER = [
   "OCO_CACHE_TTL_SECONDS" /* OCO_CACHE_TTL_SECONDS */,
   // Debug & Advanced
   "OCO_DEBUG" /* OCO_DEBUG */,
+  "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */,
   "OCO_HOOK_AUTO_UNCOMMENT" /* OCO_HOOK_AUTO_UNCOMMENT */,
   "OCO_GITPUSH" /* OCO_GITPUSH */,
   "OCO_TEST_MOCK_TYPE" /* OCO_TEST_MOCK_TYPE */

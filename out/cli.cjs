@@ -77557,7 +77557,7 @@ function G3(t2, e3) {
 // package.json
 var package_default = {
   name: "opencommitx",
-  version: "1.0.4",
+  version: "1.0.5",
   description: "AI-powered commit message generator with smart diff routing, caching, and per-provider API keys. Fork of opencommit.",
   keywords: [
     "git",
@@ -79318,6 +79318,10 @@ function create$(options) {
 }
 var $4 = create$();
 
+// src/commands/commit.ts
+var import_fs8 = require("fs");
+var import_path17 = require("path");
+
 // src/generateCommitMessageFromGitDiff.ts
 init_dist2();
 
@@ -79628,6 +79632,7 @@ var CONFIG_KEYS = /* @__PURE__ */ ((CONFIG_KEYS2) => {
   CONFIG_KEYS2["OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO"] = "OCO_PYTHON_DOCSTRING_WHOLE_FILE_RATIO";
   CONFIG_KEYS2["OCO_MULTI_COMMIT_STRATEGY"] = "OCO_MULTI_COMMIT_STRATEGY";
   CONFIG_KEYS2["OCO_DEBUG"] = "OCO_DEBUG";
+  CONFIG_KEYS2["OCO_DEBUG_ROUTING"] = "OCO_DEBUG_ROUTING";
   CONFIG_KEYS2["OCO_MAX_FILES_PER_GROUP"] = "OCO_MAX_FILES_PER_GROUP";
   CONFIG_KEYS2["OCO_MAX_LINES_PER_GROUP"] = "OCO_MAX_LINES_PER_GROUP";
   CONFIG_KEYS2["OCO_ROUTING_THEME_MIN_TOKENS"] = "OCO_ROUTING_THEME_MIN_TOKENS";
@@ -80474,6 +80479,16 @@ var configValidators = {
     );
     return ["true", "1", "yes", "on"].includes(str2);
   },
+  ["OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */](value) {
+    if (typeof value === "boolean") return value;
+    const str2 = String(value).toLowerCase().trim();
+    validateConfig(
+      "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */,
+      ["true", "false", "1", "0", "yes", "no", "on", "off"].includes(str2),
+      "Must be a boolean (true/false/1/0/yes/no)"
+    );
+    return ["true", "1", "yes", "on"].includes(str2);
+  },
   ["OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */](value) {
     validateConfig(
       "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */,
@@ -80708,6 +80723,7 @@ var DEFAULT_CONFIG = {
   OCO_MULTI_COMMIT_STRATEGY: "single",
   // Debug mode (off by default)
   OCO_DEBUG: false,
+  OCO_DEBUG_ROUTING: false,
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
@@ -80779,6 +80795,7 @@ var getEnvConfig = (envPath) => {
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Debug
     OCO_DEBUG: parseConfigVarValue(process.env.OCO_DEBUG),
+    OCO_DEBUG_ROUTING: parseConfigVarValue(process.env.OCO_DEBUG_ROUTING),
     // Per-provider keys
     OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
     OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
@@ -81055,6 +81072,11 @@ function getConfigKeyDetails(key) {
         description: "Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting",
         values: ["true", "false (default)"]
       };
+    case "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */:
+      return {
+        description: "Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson \u2014 staged-files summary table, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths",
+        values: ["true", "false (default)"]
+      };
     case "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */:
       return {
         description: "API key for OpenAI (overrides OCO_API_KEY when provider is openai)",
@@ -81249,6 +81271,7 @@ var THEMATIC_KEY_ORDER = [
   "OCO_CACHE_TTL_SECONDS" /* OCO_CACHE_TTL_SECONDS */,
   // Debug & Advanced
   "OCO_DEBUG" /* OCO_DEBUG */,
+  "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */,
   "OCO_HOOK_AUTO_UNCOMMENT" /* OCO_HOOK_AUTO_UNCOMMENT */,
   "OCO_GITPUSH" /* OCO_GITPUSH */,
   "OCO_TEST_MOCK_TYPE" /* OCO_TEST_MOCK_TYPE */
@@ -103138,20 +103161,20 @@ var import_fs3 = require("fs");
 var import_os2 = require("os");
 var import_path11 = require("path");
 function writeDebugLog(entry) {
-  const debugDir = (0, import_path11.join)((0, import_os2.homedir)(), ".opencommitx-data", "debug");
+  const debugDir2 = (0, import_path11.join)((0, import_os2.homedir)(), ".opencommitx-data", "debug");
   try {
-    (0, import_fs3.mkdirSync)(debugDir, { recursive: true });
+    (0, import_fs3.mkdirSync)(debugDir2, { recursive: true });
     const ts = (/* @__PURE__ */ new Date()).toISOString();
     const slug = ts.replace(/[:.]/g, "-");
     const safeEvent = entry.event.replace(/[^a-zA-Z0-9_-]/g, "_");
-    const filepath = (0, import_path11.join)(debugDir, `${slug}-${safeEvent}.json`);
+    const filepath = (0, import_path11.join)(debugDir2, `${slug}-${safeEvent}.json`);
     const payload = { timestamp: ts, ...entry };
     (0, import_fs3.writeFileSync)(filepath, JSON.stringify(payload, null, 2), {
       encoding: "utf-8"
     });
   } catch (err) {
     process.stderr.write(
-      `[ocox debug] Failed to write debug log to ${debugDir}: ${err}
+      `[ocox debug] Failed to write debug log to ${debugDir2}: ${err}
 `
     );
   }
@@ -104448,164 +104471,13 @@ Set OCO_FALLBACK_PROVIDER to route this model to the correct provider.`,
   }
 };
 
-// src/utils/commitStrategy.ts
-function buildCommitPlan(fileGroups, messages) {
-  if (fileGroups.length !== messages.length) {
-    throw new RangeError(
-      `buildCommitPlan: fileGroups.length (${fileGroups.length}) !== messages.length (${messages.length})`
-    );
-  }
-  return fileGroups.map((group, i3) => ({
-    files: group.files,
-    message: messages[i3]
-  }));
-}
-function combineCommitMessages(messages) {
-  return messages.join("\n\n");
-}
-
-// src/commands/commit.ts
-var import_fs7 = require("fs");
-var import_path16 = require("path");
-
-// src/utils/git.ts
-var import_fs5 = require("fs");
-var import_ignore = __toESM(require_ignore(), 1);
-var import_path14 = require("path");
-init_dist2();
-var assertGitRepo = async () => {
-  try {
-    await execa("git", ["rev-parse"]);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-var getOpenCommitIgnore = async () => {
-  const gitDir = await getGitDir();
-  const ig = (0, import_ignore.default)();
-  try {
-    ig.add(
-      (0, import_fs5.readFileSync)((0, import_path14.join)(gitDir, ".opencommitignore")).toString().split("\n")
-    );
-  } catch (e3) {
-  }
-  return ig;
-};
-var getCoreHooksPath = async () => {
-  const gitDir = await getGitDir();
-  const { stdout } = await execa("git", ["config", "core.hooksPath"], {
-    cwd: gitDir
-  });
-  return stdout;
-};
-var getStagedFiles = async () => {
-  const gitDir = await getGitDir();
-  const { stdout: files } = await execa(
-    "git",
-    ["diff", "--name-only", "--cached", "--relative"],
-    { cwd: gitDir }
-  );
-  if (!files) return [];
-  const filesList = files.split("\n");
-  const ig = await getOpenCommitIgnore();
-  const allowedFiles = filesList.filter((file) => !ig.ignores(file));
-  if (!allowedFiles) return [];
-  return allowedFiles.sort();
-};
-var getChangedFiles = async () => {
-  const gitDir = await getGitDir();
-  const { stdout: modified } = await execa("git", ["ls-files", "--modified"], {
-    cwd: gitDir
-  });
-  const { stdout: others } = await execa(
-    "git",
-    ["ls-files", "--others", "--exclude-standard"],
-    { cwd: gitDir }
-  );
-  const files = [...modified.split("\n"), ...others.split("\n")].filter(
-    (file) => !!file
-  );
-  return files.sort();
-};
-var gitAdd = async ({ files }) => {
-  const gitDir = await getGitDir();
-  const gitAddSpinner = Y3();
-  gitAddSpinner.start("Adding files to commit");
-  await execa("git", ["add", ...files], { cwd: gitDir });
-  gitAddSpinner.stop(`Staged ${files.length} files`);
-};
-var getDiff = async ({ files }) => {
-  const gitDir = await getGitDir();
-  const lockFiles = files.filter(
-    (file) => file.includes(".lock") || file.includes("-lock.") || file.includes(".svg") || file.includes(".png") || file.includes(".jpg") || file.includes(".jpeg") || file.includes(".webp") || file.includes(".gif")
-  );
-  if (lockFiles.length) {
-    Se(
-      `Some files are excluded by default from 'git diff'. No commit messages are generated for this files:
-${lockFiles.join(
-        "\n"
-      )}`
-    );
-  }
-  const filesWithoutLocks = files.filter(
-    (file) => !file.includes(".lock") && !file.includes("-lock.")
-  );
-  const { stdout: diff } = await execa(
-    "git",
-    ["diff", "--staged", "--", ...filesWithoutLocks],
-    { cwd: gitDir }
-  );
-  return diff;
-};
-var getGitDir = async () => {
-  const { stdout: gitDir } = await execa("git", [
-    "rev-parse",
-    "--show-toplevel"
-  ]);
-  return gitDir;
-};
-var getStagedFilesStats = async () => {
-  const gitDir = await getGitDir();
-  const { stdout } = await execa("git", ["diff", "--staged", "--numstat"], {
-    cwd: gitDir
-  });
-  if (!stdout.trim()) return [];
-  const ig = await getOpenCommitIgnore();
-  return stdout.split("\n").filter((line) => line.trim()).map((line) => {
-    const parts = line.split("	");
-    return {
-      added: parts[0] === "-" ? 0 : parseInt(parts[0], 10) || 0,
-      deleted: parts[1] === "-" ? 0 : parseInt(parts[1], 10) || 0,
-      file: parts[2] || ""
-    };
-  }).filter((stat) => stat.file && !ig.ignores(stat.file));
-};
-var getDiffForFiles = async (files) => {
-  return getDiff({ files });
-};
-var getStagedFilesStatus = async () => {
-  const gitDir = await getGitDir();
-  const { stdout } = await execa("git", ["diff", "--staged", "--name-status"], {
-    cwd: gitDir
-  });
-  if (!stdout.trim()) return [];
-  const ig = await getOpenCommitIgnore();
-  return stdout.split("\n").filter((line) => line.trim()).map((line) => {
-    const parts = line.split("	");
-    const raw = parts[0]?.trim()[0] ?? "M";
-    const status = raw === "A" || raw === "M" || raw === "D" || raw === "R" || raw === "C" || raw === "U" ? raw : "M";
-    const file = parts[parts.length - 1]?.trim() ?? "";
-    return { file, status };
-  }).filter((e3) => e3.file && !ig.ignores(e3.file));
-};
-
 // src/utils/commitCache.ts
 var import_crypto4 = require("crypto");
 var import_child_process2 = require("child_process");
-var import_fs6 = require("fs");
+var import_fs5 = require("fs");
 var import_os3 = require("os");
-var import_path15 = require("path");
-var CACHE_BASE_DIR = (0, import_path15.join)((0, import_os3.homedir)(), ".opencommitx-data");
+var import_path14 = require("path");
+var CACHE_BASE_DIR = (0, import_path14.join)((0, import_os3.homedir)(), ".opencommitx-data");
 function filesFromDiff(diff) {
   const matches = diff.matchAll(/^diff --git a\/.+ b\/(.+)$/gm);
   return [...matches].map((m5) => m5[1]);
@@ -104621,26 +104493,26 @@ function getRepoRootSync() {
   }
 }
 function getRepoCacheDir() {
-  (0, import_fs6.mkdirSync)(CACHE_BASE_DIR, { recursive: true });
+  (0, import_fs5.mkdirSync)(CACHE_BASE_DIR, { recursive: true });
   const repoRoot = getRepoRootSync();
   if (!repoRoot) {
-    const dir2 = (0, import_path15.join)(CACHE_BASE_DIR, "global");
-    (0, import_fs6.mkdirSync)(dir2, { recursive: true });
+    const dir2 = (0, import_path14.join)(CACHE_BASE_DIR, "global");
+    (0, import_fs5.mkdirSync)(dir2, { recursive: true });
     return dir2;
   }
-  const repoName = (0, import_path15.basename)(repoRoot);
+  const repoName = (0, import_path14.basename)(repoRoot);
   const repoHash = (0, import_crypto4.createHash)("sha256").update(repoRoot).digest("hex").slice(0, 8);
-  const dir = (0, import_path15.join)(CACHE_BASE_DIR, `${repoName}-${repoHash}`);
-  (0, import_fs6.mkdirSync)(dir, { recursive: true });
+  const dir = (0, import_path14.join)(CACHE_BASE_DIR, `${repoName}-${repoHash}`);
+  (0, import_fs5.mkdirSync)(dir, { recursive: true });
   return dir;
 }
 function getArchiveDir() {
-  const dir = (0, import_path15.join)(getRepoCacheDir(), "archived");
-  (0, import_fs6.mkdirSync)(dir, { recursive: true });
+  const dir = (0, import_path14.join)(getRepoCacheDir(), "archived");
+  (0, import_fs5.mkdirSync)(dir, { recursive: true });
   return dir;
 }
 function getCacheFilePath(diffHash) {
-  return (0, import_path15.join)(getRepoCacheDir(), `${diffHash}.json`);
+  return (0, import_path14.join)(getRepoCacheDir(), `${diffHash}.json`);
 }
 function normalizeForHashing(diff) {
   return diff.split("\n").map((line) => {
@@ -104655,16 +104527,16 @@ function hashDiff(diff) {
 }
 function readEntry(diffHash) {
   const file = getCacheFilePath(diffHash);
-  if (!(0, import_fs6.existsSync)(file)) return null;
+  if (!(0, import_fs5.existsSync)(file)) return null;
   try {
-    return JSON.parse((0, import_fs6.readFileSync)(file, "utf-8"));
+    return JSON.parse((0, import_fs5.readFileSync)(file, "utf-8"));
   } catch {
     return null;
   }
 }
 function writeEntry(diffHash, entry) {
   try {
-    (0, import_fs6.writeFileSync)(getCacheFilePath(diffHash), JSON.stringify(entry, null, 2), {
+    (0, import_fs5.writeFileSync)(getCacheFilePath(diffHash), JSON.stringify(entry, null, 2), {
       encoding: "utf-8",
       mode: 384
     });
@@ -104682,9 +104554,9 @@ function getCachedCommitMessage(diff) {
   if (ageSeconds > ttlSeconds) {
     try {
       const file = getCacheFilePath(key);
-      if ((0, import_fs6.existsSync)(file)) {
-        const archiveFile = (0, import_path15.join)(getArchiveDir(), `${key}.json`);
-        (0, import_fs6.renameSync)(file, archiveFile);
+      if ((0, import_fs5.existsSync)(file)) {
+        const archiveFile = (0, import_path14.join)(getArchiveDir(), `${key}.json`);
+        (0, import_fs5.renameSync)(file, archiveFile);
       }
     } catch {
     }
@@ -104708,9 +104580,9 @@ function archiveCacheEntry(diff) {
   const key = hashDiff(diff);
   try {
     const file = getCacheFilePath(key);
-    if (!(0, import_fs6.existsSync)(file)) return;
-    const archiveFile = (0, import_path15.join)(getArchiveDir(), `${key}.json`);
-    (0, import_fs6.renameSync)(file, archiveFile);
+    if (!(0, import_fs5.existsSync)(file)) return;
+    const archiveFile = (0, import_path14.join)(getArchiveDir(), `${key}.json`);
+    (0, import_fs5.renameSync)(file, archiveFile);
   } catch {
   }
 }
@@ -104718,13 +104590,13 @@ function pruneArchivedCache(retentionDays = 7) {
   try {
     const archiveDir = getArchiveDir();
     const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1e3;
-    for (const file of (0, import_fs6.readdirSync)(archiveDir)) {
+    for (const file of (0, import_fs5.readdirSync)(archiveDir)) {
       if (!file.endsWith(".json")) continue;
-      const filePath = (0, import_path15.join)(archiveDir, file);
+      const filePath = (0, import_path14.join)(archiveDir, file);
       try {
-        const entry = JSON.parse((0, import_fs6.readFileSync)(filePath, "utf-8"));
+        const entry = JSON.parse((0, import_fs5.readFileSync)(filePath, "utf-8"));
         if (entry.timestamp < cutoff) {
-          (0, import_fs6.unlinkSync)(filePath);
+          (0, import_fs5.unlinkSync)(filePath);
         }
       } catch {
       }
@@ -104740,6 +104612,22 @@ function formatCacheAge(timestamp) {
   if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   if (minutes > 0) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
   return `${seconds} second${seconds === 1 ? "" : "s"} ago`;
+}
+
+// src/utils/commitStrategy.ts
+function buildCommitPlan(fileGroups, messages) {
+  if (fileGroups.length !== messages.length) {
+    throw new RangeError(
+      `buildCommitPlan: fileGroups.length (${fileGroups.length}) !== messages.length (${messages.length})`
+    );
+  }
+  return fileGroups.map((group, i3) => ({
+    files: group.files,
+    message: messages[i3]
+  }));
+}
+function combineCommitMessages(messages) {
+  return messages.join("\n\n");
 }
 
 // src/utils/filePairs.ts
@@ -105791,6 +105679,281 @@ function attachStandaloneGenerated(generatedStats, groups) {
   }
 }
 
+// src/utils/git.ts
+var import_fs6 = require("fs");
+var import_ignore = __toESM(require_ignore(), 1);
+var import_path15 = require("path");
+init_dist2();
+var assertGitRepo = async () => {
+  try {
+    await execa("git", ["rev-parse"]);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+var getOpenCommitIgnore = async () => {
+  const gitDir = await getGitDir();
+  const ig = (0, import_ignore.default)();
+  try {
+    ig.add(
+      (0, import_fs6.readFileSync)((0, import_path15.join)(gitDir, ".opencommitignore")).toString().split("\n")
+    );
+  } catch (e3) {
+  }
+  return ig;
+};
+var getCoreHooksPath = async () => {
+  const gitDir = await getGitDir();
+  const { stdout } = await execa("git", ["config", "core.hooksPath"], {
+    cwd: gitDir
+  });
+  return stdout;
+};
+var getStagedFiles = async () => {
+  const gitDir = await getGitDir();
+  const { stdout: files } = await execa(
+    "git",
+    ["diff", "--name-only", "--cached", "--relative"],
+    { cwd: gitDir }
+  );
+  if (!files) return [];
+  const filesList = files.split("\n");
+  const ig = await getOpenCommitIgnore();
+  const allowedFiles = filesList.filter((file) => !ig.ignores(file));
+  if (!allowedFiles) return [];
+  return allowedFiles.sort();
+};
+var getStagedFilesIgnoreAudit = async () => {
+  const gitDir = await getGitDir();
+  const { stdout: files } = await execa(
+    "git",
+    ["diff", "--name-only", "--cached", "--relative"],
+    { cwd: gitDir }
+  );
+  if (!files) {
+    return { included: [], filteredByOpencommitignore: [] };
+  }
+  const filesList = files.split("\n").filter(Boolean);
+  const ig = await getOpenCommitIgnore();
+  const filteredByOpencommitignore = [];
+  const included = [];
+  for (const file of filesList) {
+    if (ig.ignores(file)) filteredByOpencommitignore.push(file);
+    else included.push(file);
+  }
+  filteredByOpencommitignore.sort();
+  included.sort();
+  return { included, filteredByOpencommitignore };
+};
+var getChangedFiles = async () => {
+  const gitDir = await getGitDir();
+  const { stdout: modified } = await execa("git", ["ls-files", "--modified"], {
+    cwd: gitDir
+  });
+  const { stdout: others } = await execa(
+    "git",
+    ["ls-files", "--others", "--exclude-standard"],
+    { cwd: gitDir }
+  );
+  const files = [...modified.split("\n"), ...others.split("\n")].filter(
+    (file) => !!file
+  );
+  return files.sort();
+};
+var gitAdd = async ({ files }) => {
+  const gitDir = await getGitDir();
+  const gitAddSpinner = Y3();
+  gitAddSpinner.start("Adding files to commit");
+  await execa("git", ["add", ...files], { cwd: gitDir });
+  gitAddSpinner.stop(`Staged ${files.length} files`);
+};
+var getDiff = async ({ files }) => {
+  const gitDir = await getGitDir();
+  const lockFiles = files.filter(
+    (file) => file.includes(".lock") || file.includes("-lock.") || file.includes(".svg") || file.includes(".png") || file.includes(".jpg") || file.includes(".jpeg") || file.includes(".webp") || file.includes(".gif")
+  );
+  if (lockFiles.length) {
+    Se(
+      `Some files are excluded by default from 'git diff'. No commit messages are generated for this files:
+${lockFiles.join(
+        "\n"
+      )}`
+    );
+  }
+  const filesWithoutLocks = files.filter(
+    (file) => !file.includes(".lock") && !file.includes("-lock.")
+  );
+  const { stdout: diff } = await execa(
+    "git",
+    ["diff", "--staged", "--", ...filesWithoutLocks],
+    { cwd: gitDir }
+  );
+  return diff;
+};
+var getGitDir = async () => {
+  const { stdout: gitDir } = await execa("git", [
+    "rev-parse",
+    "--show-toplevel"
+  ]);
+  return gitDir;
+};
+var getStagedFilesStats = async () => {
+  const gitDir = await getGitDir();
+  const { stdout } = await execa("git", ["diff", "--staged", "--numstat"], {
+    cwd: gitDir
+  });
+  if (!stdout.trim()) return [];
+  const ig = await getOpenCommitIgnore();
+  return stdout.split("\n").filter((line) => line.trim()).map((line) => {
+    const parts = line.split("	");
+    return {
+      added: parts[0] === "-" ? 0 : parseInt(parts[0], 10) || 0,
+      deleted: parts[1] === "-" ? 0 : parseInt(parts[1], 10) || 0,
+      file: parts[2] || ""
+    };
+  }).filter((stat) => stat.file && !ig.ignores(stat.file));
+};
+var getDiffForFiles = async (files) => {
+  return getDiff({ files });
+};
+var getStagedFilesStatus = async () => {
+  const gitDir = await getGitDir();
+  const { stdout } = await execa("git", ["diff", "--staged", "--name-status"], {
+    cwd: gitDir
+  });
+  if (!stdout.trim()) return [];
+  const ig = await getOpenCommitIgnore();
+  return stdout.split("\n").filter((line) => line.trim()).map((line) => {
+    const parts = line.split("	");
+    const raw = parts[0]?.trim()[0] ?? "M";
+    const status = raw === "A" || raw === "M" || raw === "D" || raw === "R" || raw === "C" || raw === "U" ? raw : "M";
+    const file = parts[parts.length - 1]?.trim() ?? "";
+    return { file, status };
+  }).filter((e3) => e3.file && !ig.ignores(e3.file));
+};
+
+// src/utils/routingDebugLog.ts
+var import_fs7 = require("fs");
+var import_os4 = require("os");
+var import_path16 = require("path");
+var debugDir = () => (0, import_path16.join)((0, import_os4.homedir)(), ".opencommitx-data", "debug");
+var ndjsonPath = () => (0, import_path16.join)(debugDir(), "routing-debug.ndjson");
+var seqPath = () => (0, import_path16.join)(debugDir(), "routing-debug.seq");
+function ensurePrivateFile(path6) {
+  if (!(0, import_fs7.existsSync)(path6)) {
+    (0, import_fs7.writeFileSync)(path6, "", { encoding: "utf-8", mode: 384 });
+  }
+}
+function nextRoutingRunId() {
+  try {
+    (0, import_fs7.mkdirSync)(debugDir(), { recursive: true });
+    const sp = seqPath();
+    let n2 = 0;
+    if ((0, import_fs7.existsSync)(sp)) {
+      const raw = (0, import_fs7.readFileSync)(sp, "utf-8").trim();
+      const parsed = parseInt(raw, 10);
+      if (!Number.isNaN(parsed)) n2 = parsed;
+    } else {
+      (0, import_fs7.writeFileSync)(sp, "", { encoding: "utf-8", mode: 384 });
+    }
+    n2 += 1;
+    (0, import_fs7.writeFileSync)(sp, String(n2), { encoding: "utf-8", mode: 384 });
+    return n2;
+  } catch {
+    return 0;
+  }
+}
+function appendRoutingDebugRecord(record) {
+  try {
+    (0, import_fs7.mkdirSync)(debugDir(), { recursive: true });
+    const np = ndjsonPath();
+    ensurePrivateFile(np);
+    (0, import_fs7.appendFileSync)(np, JSON.stringify(record) + "\n", { encoding: "utf-8" });
+  } catch (err) {
+    process.stderr.write(
+      `[ocox routing debug] Failed to write ${ndjsonPath()}: ${err}
+`
+    );
+  }
+}
+
+// src/utils/stagedFilesSummaryTable.ts
+function buildStagedFilesSummaryTable(args) {
+  const {
+    stagedFiles,
+    stats,
+    statusEntries,
+    fileGroups,
+    usePerFileMode,
+    perFileMode,
+    shouldUseDocstringMode: shouldUseDocstringMode2
+  } = args;
+  const statusMap = new Map(
+    statusEntries.map((e3) => [e3.file, e3.status])
+  );
+  const statsMap = new Map(
+    stats.map((s2) => [s2.file, s2])
+  );
+  const groupIndexMap = /* @__PURE__ */ new Map();
+  if (usePerFileMode && fileGroups.length > 0) {
+    fileGroups.forEach((g4, i3) => {
+      g4.files.forEach((f2) => {
+        groupIndexMap.set(f2, i3 + 1);
+      });
+    });
+  } else {
+    stagedFiles.forEach((f2) => {
+      groupIndexMap.set(f2, 1);
+    });
+  }
+  const docstringFiles = /* @__PURE__ */ new Set();
+  for (const [f2, s2] of statsMap) {
+    if (shouldUseDocstringMode2(f2, s2.added)) {
+      docstringFiles.add(f2);
+    }
+  }
+  const showThemeCol = perFileMode === "smart" && fileGroups.length > 0;
+  const groupMetaByFile = /* @__PURE__ */ new Map();
+  if (showThemeCol) {
+    for (const g4 of fileGroups) {
+      for (const f2 of g4.files) {
+        groupMetaByFile.set(f2, { reason: g4.reason, type: g4.type });
+      }
+    }
+  }
+  const colWidths = {
+    file: 40,
+    lines: 10,
+    status: 4,
+    ds: 3,
+    grp: 4,
+    theme: 24
+  };
+  const pad = (s2, n2) => s2.slice(0, n2).padEnd(n2);
+  const themeHeader = showThemeCol ? `  ${pad("Theme", colWidths.theme)}` : "";
+  const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp${themeHeader}`;
+  const divider = "\u2500".repeat(header.length);
+  const rows = stagedFiles.map((f2) => {
+    const s2 = statsMap.get(f2);
+    const lineInfo = s2 ? `+${s2.added}/-${s2.deleted}` : "(binary)";
+    const isNew = (statusMap.get(f2) ?? "M") === "A" ? "Y" : " ";
+    const isDs = docstringFiles.has(f2) ? "Y" : " ";
+    const grp = String(groupIndexMap.get(f2) ?? 1);
+    let themeCell = "";
+    if (showThemeCol) {
+      const meta = groupMetaByFile.get(f2);
+      const parts = [];
+      if (meta?.type) parts.push(meta.type);
+      if (meta?.reason && meta.reason !== "singleton") parts.push(meta.reason);
+      themeCell = `  ${pad(parts.join(":") || "\u2014", colWidths.theme)}`;
+    }
+    return `${pad(f2, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
+  });
+  return `${header}
+${divider}
+${rows.join("\n")}`;
+}
+
 // src/utils/trytm.ts
 var trytm = async (promise) => {
   try {
@@ -105951,7 +106114,7 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
     const committingChangesSpinner = Y3();
     try {
       const gitDir = await getGitDir();
-      if ((0, import_fs7.existsSync)((0, import_path16.join)(gitDir, ".pre-commit-config.yaml"))) {
+      if ((0, import_fs8.existsSync)((0, import_path17.join)(gitDir, ".pre-commit-config.yaml"))) {
         Me("Pre-commit hooks are configured and will run now.");
       }
     } catch {
@@ -106128,6 +106291,9 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
   }
 };
 async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, context3, fullGitMojiSpec, skipCommitConfirmation) {
+  if (fileGroups.length === 0) {
+    return void 0;
+  }
   const currentConfig = getConfig();
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || "single";
   const modelName = (currentConfig.OCO_MODEL ?? "").toLowerCase();
@@ -106157,9 +106323,20 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
   );
   let rawMessages;
   const groupPayloads = [];
+  const groupDetails = [];
   try {
     rawMessages = [];
-    for (const group of fileGroups) {
+    for (let groupIndex = 0; groupIndex < fileGroups.length; groupIndex++) {
+      const group = fileGroups[groupIndex];
+      const payloadKind = group.docstringOverride ? "docstring" : "diff";
+      const recordGroup = (llmInvoked) => {
+        groupDetails.push({
+          groupIndex,
+          files: [...group.files],
+          payloadKind,
+          llmInvoked
+        });
+      };
       if (group.docstringOverride) {
         const prefix = "Generating (docstring mode): ";
         genSpinner.message(prefix + truncateFileList(group.files, prefix));
@@ -106192,7 +106369,8 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
           if (pD2(reuseAction)) process.exit(1);
           if (reuseAction === "use") {
             rawMessages.push(cached.message);
-            if (fileGroups.indexOf(group) < fileGroups.length - 1) {
+            recordGroup(false);
+            if (groupIndex < fileGroups.length - 1) {
               genSpinner.start(
                 `Generating commit messages for ${fileGroups.length} file group(s)...`
               );
@@ -106204,6 +106382,7 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
           );
         } else {
           rawMessages.push(cached.message);
+          recordGroup(false);
           continue;
         }
       }
@@ -106229,6 +106408,7 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
         consumeLastUsedModel() ?? void 0
       );
       rawMessages.push(msg);
+      recordGroup(true);
     }
     genSpinner.stop(`\u{1F4DD} Generated ${rawMessages.length} commit message(s)`);
   } catch (error) {
@@ -106241,6 +106421,14 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
     }
   }
   const commitPlan = buildCommitPlan(fileGroups, rawMessages);
+  const routedUnion = new Set(fileGroups.flatMap((g4) => g4.files));
+  const stagedNotInRoutedGroups = stagedFiles.filter(
+    (f2) => !routedUnion.has(f2)
+  );
+  const extrasBase = {
+    groupDetails,
+    stagedNotInRoutedGroups
+  };
   if (strategy === "single") {
     const combinedMessage = combineCommitMessages(
       commitPlan.map((c3) => c3.message)
@@ -106257,17 +106445,20 @@ async function generatePerFileCommits(stagedFiles, fileGroups, extraArgs2, conte
       archiveCacheEntry(fullDiff);
       await handleGitPush();
     }
-    return;
+    return extrasBase;
   }
   const groupedFiles = new Set(commitPlan.flatMap((c3) => c3.files));
   const omittedFiles = stagedFiles.filter((f2) => !groupedFiles.has(f2));
+  let piggyback;
   if (omittedFiles.length > 0) {
     Me(
       `The following staged files are excluded from diff and cannot be individually analysed.
 They will be committed with the last group:
 ` + omittedFiles.map((f2) => `  ${f2}`).join("\n")
     );
-    commitPlan[commitPlan.length - 1].files.push(...omittedFiles);
+    const lastIdx = commitPlan.length - 1;
+    commitPlan[lastIdx].files.push(...omittedFiles);
+    piggyback = { files: [...omittedFiles], appendedToGroupIndex: lastIdx };
   }
   await execa("git", ["reset", "HEAD", "--"]);
   let acceptAll = false;
@@ -106347,6 +106538,7 @@ ${source_default.grey("\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2
   if (accepted.length > 0) {
     await handleGitPush();
   }
+  return piggyback ? { ...extrasBase, piggyback } : extrasBase;
 }
 async function commit(extraArgs2 = [], context3 = "", isStageAllFlag = false, fullGitMojiSpec = false, skipCommitConfirmation = false) {
   const retentionDays = getConfig().OCO_CACHE_TTL_SECONDS ? Math.ceil((getConfig().OCO_CACHE_TTL_SECONDS ?? 3600) / 86400) : 7;
@@ -106425,87 +106617,47 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
   const perFileMode = currentConfig.OCO_PER_FILE_COMMIT_MODE || "auto";
   let usePerFileMode = false;
   let fileGroups = [];
+  let routingReason = "";
+  let routingError = false;
   const stats = await getStagedFilesStats().catch(() => []);
   if (perFileMode !== "never") {
     try {
       const routing = routeDiff(stats, currentConfig);
       usePerFileMode = routing.usePerFile;
       fileGroups = routing.fileGroups;
+      routingReason = routing.reason;
     } catch {
+      routingError = true;
       usePerFileMode = false;
     }
   }
+  const debugRouting = Boolean(currentConfig.OCO_DEBUG_ROUTING);
+  let upfrontSummaryTable = "";
+  const opencommitignoreFiltered = [];
   try {
     const statusEntries = await getStagedFilesStatus();
-    const statusMap = new Map(
-      statusEntries.map((e3) => [e3.file, e3.status])
-    );
-    const statsMap = new Map(
-      stats.map((s2) => [s2.file, s2])
-    );
-    const groupIndexMap = /* @__PURE__ */ new Map();
-    if (usePerFileMode && fileGroups.length > 0) {
-      fileGroups.forEach((g4, i3) => {
-        g4.files.forEach((f2) => {
-          groupIndexMap.set(f2, i3 + 1);
-        });
-      });
-    } else {
-      stagedFiles.forEach((f2) => {
-        groupIndexMap.set(f2, 1);
-      });
-    }
-    const docstringFiles = /* @__PURE__ */ new Set();
-    for (const [f2, s2] of statsMap) {
-      if (shouldUseDocstringMode(f2, s2.added)) {
-        docstringFiles.add(f2);
-      }
-    }
-    const showThemeCol = perFileMode === "smart" && fileGroups.length > 0;
-    const groupMetaByFile = /* @__PURE__ */ new Map();
-    if (showThemeCol) {
-      for (const g4 of fileGroups) {
-        for (const f2 of g4.files) {
-          groupMetaByFile.set(f2, { reason: g4.reason, type: g4.type });
-        }
-      }
-    }
-    const colWidths = {
-      file: 40,
-      lines: 10,
-      status: 4,
-      ds: 3,
-      grp: 4,
-      theme: 24
-    };
-    const pad = (s2, n2) => s2.slice(0, n2).padEnd(n2);
-    const themeHeader = showThemeCol ? `  ${pad("Theme", colWidths.theme)}` : "";
-    const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp${themeHeader}`;
-    const divider = "\u2500".repeat(header.length);
-    const rows = stagedFiles.map((f2) => {
-      const s2 = statsMap.get(f2);
-      const lineInfo = s2 ? `+${s2.added}/-${s2.deleted}` : "(binary)";
-      const isNew = (statusMap.get(f2) ?? "M") === "A" ? "Y" : " ";
-      const isDs = docstringFiles.has(f2) ? "Y" : " ";
-      const grp = String(groupIndexMap.get(f2) ?? 1);
-      let themeCell = "";
-      if (showThemeCol) {
-        const meta = groupMetaByFile.get(f2);
-        const parts = [];
-        if (meta?.type) parts.push(meta.type);
-        if (meta?.reason && meta.reason !== "singleton")
-          parts.push(meta.reason);
-        themeCell = `  ${pad(parts.join(":") || "\u2014", colWidths.theme)}`;
-      }
-      return `${pad(f2, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
+    upfrontSummaryTable = buildStagedFilesSummaryTable({
+      stagedFiles,
+      stats,
+      statusEntries,
+      fileGroups,
+      usePerFileMode,
+      perFileMode,
+      shouldUseDocstringMode
     });
-    Me(`${header}
-${divider}
-${rows.join("\n")}`, "Staged files");
+    Me(upfrontSummaryTable, "Staged files");
   } catch {
   }
+  if (debugRouting) {
+    try {
+      const audit = await getStagedFilesIgnoreAudit();
+      opencommitignoreFiltered.push(...audit.filteredByOpencommitignore);
+    } catch {
+    }
+  }
+  let perFileRoutingMeta;
   if (usePerFileMode && fileGroups.length > 0) {
-    const [, generateCommitError] = await trytm(
+    const [meta, generateCommitError] = await trytm(
       generatePerFileCommits(
         stagedFiles,
         fileGroups,
@@ -106515,6 +106667,7 @@ ${rows.join("\n")}`, "Staged files");
         skipCommitConfirmation
       )
     );
+    perFileRoutingMeta = meta ?? void 0;
     if (generateCommitError) {
       Se(`${source_default.red("\u2716")} ${generateCommitError}`);
       process.exit(1);
@@ -106533,6 +106686,47 @@ ${rows.join("\n")}`, "Staged files");
     if (generateCommitError) {
       Se(`${source_default.red("\u2716")} ${generateCommitError}`);
       process.exit(1);
+    }
+  }
+  if (getConfig().OCO_DEBUG_ROUTING) {
+    try {
+      const gitTop = await getGitDir().catch(() => "");
+      const routedFiles = new Set(fileGroups.flatMap((g4) => g4.files));
+      const stagedNotInRoutedGroupsForAggregate = stagedFiles.filter(
+        (f2) => !routedFiles.has(f2)
+      );
+      appendRoutingDebugRecord({
+        execution_run_id: nextRoutingRunId(),
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        cwd: process.cwd(),
+        git_toplevel: gitTop,
+        upfront_summary_table: upfrontSummaryTable,
+        opencommitignore_filtered: opencommitignoreFiltered,
+        routing: {
+          error: routingError,
+          reason: routingReason,
+          OCO_PER_FILE_COMMIT_MODE: perFileMode,
+          use_per_file_mode: usePerFileMode,
+          file_groups: fileGroups.map((g4) => ({
+            files: g4.files,
+            totalLines: g4.totalLines,
+            reason: g4.reason,
+            type: g4.type,
+            docstring_override: g4.docstringOverride !== void 0
+          }))
+        },
+        generation: usePerFileMode && fileGroups.length > 0 && perFileRoutingMeta ? {
+          mode: "per_file_groups",
+          group_details: perFileRoutingMeta.groupDetails,
+          staged_not_in_routed_groups: perFileRoutingMeta.stagedNotInRoutedGroups,
+          piggyback: perFileRoutingMeta.piggyback
+        } : {
+          mode: "aggregate_diff",
+          staged_not_in_routed_groups: stagedNotInRoutedGroupsForAggregate
+        },
+        notes: "Lock/binary paths may appear in group.files while git diff omits them (see getDiff)."
+      });
+    } catch {
     }
   }
   process.exit(0);
@@ -106570,15 +106764,15 @@ var commitlintConfigCommand = G3(
 
 // src/commands/githook.ts
 init_dist2();
-var import_fs8 = require("fs");
+var import_fs9 = require("fs");
 var import_promises3 = __toESM(require("fs/promises"), 1);
-var import_path17 = __toESM(require("path"), 1);
+var import_path18 = __toESM(require("path"), 1);
 var HOOK_NAME = "prepare-commit-msg";
-var DEFAULT_SYMLINK_URL = import_path17.default.join(".git", "hooks", HOOK_NAME);
+var DEFAULT_SYMLINK_URL = import_path18.default.join(".git", "hooks", HOOK_NAME);
 var getHooksPath = async () => {
   try {
     const hooksPath = await getCoreHooksPath();
-    return import_path17.default.join(hooksPath, HOOK_NAME);
+    return import_path18.default.join(hooksPath, HOOK_NAME);
   } catch (error) {
     return DEFAULT_SYMLINK_URL;
   }
@@ -106589,7 +106783,7 @@ var isHookCalled = async () => {
 };
 var isHookExists = async () => {
   const hooksPath = await getHooksPath();
-  return (0, import_fs8.existsSync)(hooksPath);
+  return (0, import_fs9.existsSync)(hooksPath);
 };
 var hookCommand = G3(
   {
@@ -106618,7 +106812,7 @@ var hookCommand = G3(
             `Different ${HOOK_NAME} is already set. Remove it before setting opencommit as '${HOOK_NAME}' hook.`
           );
         }
-        await import_promises3.default.mkdir(import_path17.default.dirname(SYMLINK_URL), { recursive: true });
+        await import_promises3.default.mkdir(import_path18.default.dirname(SYMLINK_URL), { recursive: true });
         await import_promises3.default.symlink(HOOK_URL, SYMLINK_URL, "file");
         await import_promises3.default.chmod(SYMLINK_URL, 493);
         return Se(`${source_default.green("\u2714")} Hook set`);
@@ -106710,18 +106904,18 @@ ${fileContent.toString()}`;
 init_dist2();
 
 // src/utils/modelCache.ts
-var import_fs9 = require("fs");
-var import_os4 = require("os");
-var import_path18 = require("path");
-var MODEL_CACHE_DIR = (0, import_path18.join)((0, import_os4.homedir)(), ".opencommitx-data");
-var MODEL_CACHE_PATH = (0, import_path18.join)(MODEL_CACHE_DIR, "models.json");
+var import_fs10 = require("fs");
+var import_os5 = require("os");
+var import_path19 = require("path");
+var MODEL_CACHE_DIR = (0, import_path19.join)((0, import_os5.homedir)(), ".opencommitx-data");
+var MODEL_CACHE_PATH = (0, import_path19.join)(MODEL_CACHE_DIR, "models.json");
 var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1e3;
 function readCache() {
   try {
-    if (!(0, import_fs9.existsSync)(MODEL_CACHE_PATH)) {
+    if (!(0, import_fs10.existsSync)(MODEL_CACHE_PATH)) {
       return null;
     }
-    const data = (0, import_fs9.readFileSync)(MODEL_CACHE_PATH, "utf8");
+    const data = (0, import_fs10.readFileSync)(MODEL_CACHE_PATH, "utf8");
     return JSON.parse(data);
   } catch {
     return null;
@@ -106729,12 +106923,12 @@ function readCache() {
 }
 function writeCache(models) {
   try {
-    (0, import_fs9.mkdirSync)(MODEL_CACHE_DIR, { recursive: true });
+    (0, import_fs10.mkdirSync)(MODEL_CACHE_DIR, { recursive: true });
     const cache = {
       timestamp: Date.now(),
       models
     };
-    (0, import_fs9.writeFileSync)(MODEL_CACHE_PATH, JSON.stringify(cache, null, 2), "utf8");
+    (0, import_fs10.writeFileSync)(MODEL_CACHE_PATH, JSON.stringify(cache, null, 2), "utf8");
   } catch {
   }
 }
@@ -106929,8 +107123,8 @@ async function fetchModelsForProvider(provider, apiKey, baseUrl, forceRefresh = 
 }
 function clearModelCache() {
   try {
-    if ((0, import_fs9.existsSync)(MODEL_CACHE_PATH)) {
-      (0, import_fs9.writeFileSync)(MODEL_CACHE_PATH, "{}", "utf8");
+    if ((0, import_fs10.existsSync)(MODEL_CACHE_PATH)) {
+      (0, import_fs10.writeFileSync)(MODEL_CACHE_PATH, "{}", "utf8");
     }
   } catch {
   }
@@ -107673,24 +107867,24 @@ var setupCommand = G3(
 init_dist2();
 
 // src/utils/customModels.ts
-var import_fs10 = require("fs");
-var import_os5 = require("os");
-var import_path19 = require("path");
-var CUSTOM_MODELS_FILE = (0, import_path19.join)(
-  (0, import_os5.homedir)(),
+var import_fs11 = require("fs");
+var import_os6 = require("os");
+var import_path20 = require("path");
+var CUSTOM_MODELS_FILE = (0, import_path20.join)(
+  (0, import_os6.homedir)(),
   ".opencommitx-custom-models.json"
 );
 function readCustomModels() {
-  if (!(0, import_fs10.existsSync)(CUSTOM_MODELS_FILE)) return {};
+  if (!(0, import_fs11.existsSync)(CUSTOM_MODELS_FILE)) return {};
   try {
-    return JSON.parse((0, import_fs10.readFileSync)(CUSTOM_MODELS_FILE, "utf-8"));
+    return JSON.parse((0, import_fs11.readFileSync)(CUSTOM_MODELS_FILE, "utf-8"));
   } catch {
     return {};
   }
 }
 function writeCustomModels(store) {
   try {
-    (0, import_fs10.writeFileSync)(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), {
+    (0, import_fs11.writeFileSync)(CUSTOM_MODELS_FILE, JSON.stringify(store, null, 2), {
       encoding: "utf-8",
       mode: 384
     });
@@ -107917,13 +108111,13 @@ Add custom models: ${source_default.cyan("ocox models add <provider> <model>")}`
 
 // src/commands/benchmark.ts
 init_dist2();
-var import_fs12 = require("fs");
-var import_path21 = require("path");
+var import_fs13 = require("fs");
+var import_path22 = require("path");
 
 // src/utils/benchmarkRunner.ts
-var import_fs11 = require("fs");
-var import_os6 = require("os");
-var import_path20 = require("path");
+var import_fs12 = require("fs");
+var import_os7 = require("os");
+var import_path21 = require("path");
 
 // node_modules/zod/v3/external.js
 var external_exports = {};
@@ -112016,8 +112210,8 @@ Evaluate all ${candidates.length} candidates and return the JSON results array.`
 }
 
 // src/utils/benchmarkRunner.ts
-var BENCHMARK_CONFIG_PATH = (0, import_path20.join)(
-  (0, import_os6.homedir)(),
+var BENCHMARK_CONFIG_PATH = (0, import_path21.join)(
+  (0, import_os7.homedir)(),
   ".opencommitx-data",
   "benchmark.json"
 );
@@ -112051,16 +112245,16 @@ var DEFAULT_BENCHMARK_CONFIG = {
   candidates: []
 };
 function readBenchmarkConfig() {
-  if (!(0, import_fs11.existsSync)(BENCHMARK_CONFIG_PATH)) return null;
+  if (!(0, import_fs12.existsSync)(BENCHMARK_CONFIG_PATH)) return null;
   try {
-    return JSON.parse((0, import_fs11.readFileSync)(BENCHMARK_CONFIG_PATH, "utf-8"));
+    return JSON.parse((0, import_fs12.readFileSync)(BENCHMARK_CONFIG_PATH, "utf-8"));
   } catch {
     return null;
   }
 }
 function writeBenchmarkConfig(cfg) {
-  (0, import_fs11.mkdirSync)((0, import_path20.join)((0, import_os6.homedir)(), ".opencommitx-data"), { recursive: true });
-  (0, import_fs11.writeFileSync)(BENCHMARK_CONFIG_PATH, JSON.stringify(cfg, null, 2), {
+  (0, import_fs12.mkdirSync)((0, import_path21.join)((0, import_os7.homedir)(), ".opencommitx-data"), { recursive: true });
+  (0, import_fs12.writeFileSync)(BENCHMARK_CONFIG_PATH, JSON.stringify(cfg, null, 2), {
     encoding: "utf-8",
     mode: 384
   });
@@ -112456,7 +112650,7 @@ This will use real API tokens and incur costs.`,
     }
   }
   const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
-  const resultsFile = (0, import_path21.join)(
+  const resultsFile = (0, import_path22.join)(
     process.cwd(),
     `benchmark_results_${timestamp}.md`
   );
@@ -112466,7 +112660,7 @@ This will use real API tokens and incur costs.`,
     evalResults,
     (/* @__PURE__ */ new Date()).toISOString()
   );
-  (0, import_fs12.writeFileSync)(resultsFile, markdown, "utf-8");
+  (0, import_fs13.writeFileSync)(resultsFile, markdown, "utf-8");
   console.log("\n" + source_default.dim(`  Results written to: ${resultsFile}`));
   const winnerOptions = [
     ...successful.map((r3, idx) => ({
@@ -112549,9 +112743,9 @@ Current version: ${currentVersion}. Latest version: ${latestVersion}.
 };
 
 // src/migrations/_run.ts
-var import_fs14 = __toESM(require("fs"), 1);
-var import_os8 = require("os");
-var import_path23 = require("path");
+var import_fs15 = __toESM(require("fs"), 1);
+var import_os9 = require("os");
+var import_path24 = require("path");
 
 // src/migrations/00_use_single_api_key_and_url.ts
 function use_single_api_key_and_url_default() {
@@ -112640,19 +112834,19 @@ function migration03() {
 }
 
 // src/migrations/04_migrate_config_location.ts
-var import_fs13 = require("fs");
-var import_os7 = require("os");
-var import_path22 = require("path");
-var OLD_CONFIG_PATH = (0, import_path22.join)((0, import_os7.homedir)(), ".opencommitx");
-var NEW_CONFIG_DIR = (0, import_path22.join)((0, import_os7.homedir)(), ".opencommitx-data");
-var NEW_CONFIG_PATH = (0, import_path22.join)(NEW_CONFIG_DIR, "config.ini");
+var import_fs14 = require("fs");
+var import_os8 = require("os");
+var import_path23 = require("path");
+var OLD_CONFIG_PATH = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommitx");
+var NEW_CONFIG_DIR = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommitx-data");
+var NEW_CONFIG_PATH = (0, import_path23.join)(NEW_CONFIG_DIR, "config.ini");
 function migration04() {
-  if (!(0, import_fs13.existsSync)(OLD_CONFIG_PATH)) return;
-  if ((0, import_fs13.existsSync)(NEW_CONFIG_PATH)) return;
+  if (!(0, import_fs14.existsSync)(OLD_CONFIG_PATH)) return;
+  if ((0, import_fs14.existsSync)(NEW_CONFIG_PATH)) return;
   try {
-    (0, import_fs13.mkdirSync)(NEW_CONFIG_DIR, { recursive: true });
-    const content = (0, import_fs13.readFileSync)(OLD_CONFIG_PATH, "utf8");
-    (0, import_fs13.writeFileSync)(NEW_CONFIG_PATH, content, { encoding: "utf8", mode: 384 });
+    (0, import_fs14.mkdirSync)(NEW_CONFIG_DIR, { recursive: true });
+    const content = (0, import_fs14.readFileSync)(OLD_CONFIG_PATH, "utf8");
+    (0, import_fs14.writeFileSync)(NEW_CONFIG_PATH, content, { encoding: "utf8", mode: 384 });
   } catch (err) {
     console.error(
       `Migration 04 failed: could not migrate config to ${NEW_CONFIG_PATH}`,
@@ -112687,33 +112881,33 @@ var migrations = [
 
 // src/migrations/_run.ts
 init_dist2();
-var migrationsFile = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommitx_migrations");
-var legacyMigrationsFile = (0, import_path23.join)((0, import_os8.homedir)(), ".opencommit_migrations");
+var migrationsFile = (0, import_path24.join)((0, import_os9.homedir)(), ".opencommitx_migrations");
+var legacyMigrationsFile = (0, import_path24.join)((0, import_os9.homedir)(), ".opencommit_migrations");
 var migrateLegacyMigrationsFile = () => {
-  const newExists = import_fs14.default.existsSync(migrationsFile);
-  const oldExists = import_fs14.default.existsSync(legacyMigrationsFile);
+  const newExists = import_fs15.default.existsSync(migrationsFile);
+  const oldExists = import_fs15.default.existsSync(legacyMigrationsFile);
   if (!newExists && oldExists) {
-    const data = import_fs14.default.readFileSync(legacyMigrationsFile, "utf-8");
-    import_fs14.default.writeFileSync(migrationsFile, data);
+    const data = import_fs15.default.readFileSync(legacyMigrationsFile, "utf-8");
+    import_fs15.default.writeFileSync(migrationsFile, data);
   }
   if (oldExists) {
     try {
-      import_fs14.default.unlinkSync(legacyMigrationsFile);
+      import_fs15.default.unlinkSync(legacyMigrationsFile);
     } catch {
     }
   }
 };
 var getCompletedMigrations = () => {
-  if (!import_fs14.default.existsSync(migrationsFile)) {
+  if (!import_fs15.default.existsSync(migrationsFile)) {
     return [];
   }
-  const data = import_fs14.default.readFileSync(migrationsFile, "utf-8");
+  const data = import_fs15.default.readFileSync(migrationsFile, "utf-8");
   return data ? JSON.parse(data) : [];
 };
 var saveCompletedMigration = (migrationName) => {
   const completedMigrations = getCompletedMigrations();
   completedMigrations.push(migrationName);
-  import_fs14.default.writeFileSync(
+  import_fs15.default.writeFileSync(
     migrationsFile,
     JSON.stringify(completedMigrations, null, 2)
   );
