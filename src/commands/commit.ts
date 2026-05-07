@@ -48,7 +48,11 @@ import {
   appendRoutingDebugRecord,
   nextRoutingRunId
 } from '../utils/routingDebugLog';
-import { buildStagedFilesSummaryTable } from '../utils/stagedFilesSummaryTable';
+import {
+  buildStagedFilesSummaryData,
+  formatStagedFilesSummaryTable,
+  type StagedFilesSummaryData
+} from '../utils/stagedFilesSummaryTable';
 import { trytm } from '../utils/trytm';
 import { getConfig } from './config';
 
@@ -964,14 +968,14 @@ export async function commit(
   }
 
   const debugRouting = Boolean(currentConfig.OCO_DEBUG_ROUTING);
-  let upfrontSummaryTable = '';
+  let upfrontSummaryData: StagedFilesSummaryData | undefined;
   const opencommitignoreFiltered: string[] = [];
 
   // Render an upfront summary table so the user can review groupings before
   // waiting for LLM generation.
   try {
     const statusEntries = await getStagedFilesStatus();
-    upfrontSummaryTable = buildStagedFilesSummaryTable({
+    upfrontSummaryData = buildStagedFilesSummaryData({
       stagedFiles,
       stats,
       statusEntries,
@@ -980,7 +984,7 @@ export async function commit(
       perFileMode,
       shouldUseDocstringMode
     });
-    note(upfrontSummaryTable, 'Staged files');
+    note(formatStagedFilesSummaryTable(upfrontSummaryData), 'Staged files');
   } catch {
     // Non-fatal: skip table on any error
   }
@@ -1045,7 +1049,10 @@ export async function commit(
         timestamp: new Date().toISOString(),
         cwd: process.cwd(),
         git_toplevel: gitTop,
-        upfront_summary_table: upfrontSummaryTable,
+        upfront_summary: upfrontSummaryData ?? {
+          show_theme_column: false,
+          rows: []
+        },
         opencommitignore_filtered: opencommitignoreFiltered,
         routing: {
           error: routingError,

@@ -1739,7 +1739,7 @@ function getConfigKeyDetails(key) {
     case CONFIG_KEYS.OCO_DEBUG_ROUTING:
       return {
         description:
-          'Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson — staged-files summary table, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths',
+          'Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson — structured upfront_summary rows, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths',
         values: ['true', 'false (default)']
       };
     case CONFIG_KEYS.OCO_OPENAI_KEY:
