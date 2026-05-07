@@ -2,9 +2,9 @@
 
 ## What this is
 
-`opencommitx` (binaries: `opencommitx`, `ocox`) is a Node.js CLI that generates AI commit messages from staged git diffs. It is a fork of [`di-sukharev/opencommit`](https://github.com/di-sukharev/opencommit) with extensions for caching, smart per-file routing, per-provider API keys, fallback models, Python docstring extraction, multi-commit strategies, and a benchmark harness.
+`opencommitx` (binaries: `opencommitx`, `ocox`) is a Node.js CLI that generates AI commit messages from staged git diffs. It is a fork of `[di-sukharev/opencommit](https://github.com/di-sukharev/opencommit)` with extensions for caching, smart per-file routing, per-provider API keys, fallback models, Python docstring extraction, multi-commit strategies, and a benchmark harness.
 
-For the architecture map, file-by-file index, and the current PR-review burndown, read [`xdocs/REVIEW.md`](xdocs/REVIEW.md). It saves a lot of grep/glob and is the canonical reference — keep it up to date when the architecture changes.
+For the architecture map, file-by-file index, and the current PR-review burndown, read `[xdocs/REVIEW.md](xdocs/REVIEW.md)`. It saves a lot of grep/glob and is the canonical reference — keep it up to date when the architecture changes.
 
 The project's working backlog is `todo.md` at the root. Phase plans live under `xdocs/plans/`.
 
@@ -121,7 +121,7 @@ To add a new config key:
 
 - **Don't** invoke a Python binary via `child_process` for new features without an `isPythonAvailable()`-style guard. Pure-TS solutions are preferred for cross-platform portability.
 - **Don't** add `console.log` calls in user-facing paths — use `outro` / `note` / `intro` from `@clack/prompts` so the UI stays consistent. ESLint's `no-console: error` will catch this.
-- **Don't** rename `OCO_*` config keys without writing a migration in `src/migrations/` and adding it to the ordered list in `_migrations.ts`.
+- **Don't** rename `OCO_`* config keys without writing a migration in `src/migrations/` and adding it to the ordered list in `_migrations.ts`.
 - **Don't** delete `src/CommandsEnum.ts` casually — it's a stale duplicate of `src/commands/ENUMS.ts`, but verify nothing imports it (Grep first) before removing.
 - **Don't** add features, refactor, or introduce abstractions beyond what the task requires. A bug fix doesn't need surrounding cleanup.
 - **Don't** broaden a typed error to `Error` or `unknown` "to avoid the cast" — fix the type instead.
@@ -132,3 +132,4 @@ To add a new config key:
 - PR base branch is `master`.
 - CodeRabbit reviews every PR. Track Major/Critical comments in `xdocs/REVIEW.md` §9 (with current-state verification) when not addressing immediately, so they don't get re-discovered.
 - The `xb-phase-2` branch is the active development branch. Phase plans for upcoming work live under `xdocs/plans/`.
+
