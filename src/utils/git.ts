@@ -61,6 +61,43 @@ export const getStagedFiles = async (): Promise<string[]> => {
   return allowedFiles.sort();
 };
 
+/**
+ * All staged paths vs those excluded by `.opencommitignore` (for debug / soak logs).
+ * Does not filter — callers should use this only when auditing, not for normal flow.
+ */
+export const getStagedFilesIgnoreAudit = async (): Promise<{
+  included: string[];
+  filteredByOpencommitignore: string[];
+}> => {
+  const gitDir = await getGitDir();
+
+  const { stdout: files } = await execa(
+    'git',
+    ['diff', '--name-only', '--cached', '--relative'],
+    { cwd: gitDir }
+  );
+
+  if (!files) {
+    return { included: [], filteredByOpencommitignore: [] };
+  }
+
+  const filesList = files.split('\n').filter(Boolean);
+  const ig = await getOpenCommitIgnore();
+
+  const filteredByOpencommitignore: string[] = [];
+  const included: string[] = [];
+
+  for (const file of filesList) {
+    if (ig.ignores(file)) filteredByOpencommitignore.push(file);
+    else included.push(file);
+  }
+
+  filteredByOpencommitignore.sort();
+  included.sort();
+
+  return { included, filteredByOpencommitignore };
+};
+
 export const getChangedFiles = async (): Promise<string[]> => {
   const gitDir = await getGitDir();
 
