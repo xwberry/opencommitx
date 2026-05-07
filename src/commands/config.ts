@@ -42,6 +42,7 @@ export enum CONFIG_KEYS {
   OCO_MULTI_COMMIT_STRATEGY = 'OCO_MULTI_COMMIT_STRATEGY',
   // Debug mode
   OCO_DEBUG = 'OCO_DEBUG',
+  OCO_DEBUG_ROUTING = 'OCO_DEBUG_ROUTING',
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP = 'OCO_MAX_FILES_PER_GROUP',
   OCO_MAX_LINES_PER_GROUP = 'OCO_MAX_LINES_PER_GROUP',
@@ -950,6 +951,17 @@ export const configValidators = {
     return ['true', '1', 'yes', 'on'].includes(str);
   },
 
+  [CONFIG_KEYS.OCO_DEBUG_ROUTING](value: any) {
+    if (typeof value === 'boolean') return value;
+    const str = String(value).toLowerCase().trim();
+    validateConfig(
+      CONFIG_KEYS.OCO_DEBUG_ROUTING,
+      ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'].includes(str),
+      'Must be a boolean (true/false/1/0/yes/no)'
+    );
+    return ['true', '1', 'yes', 'on'].includes(str);
+  },
+
   [CONFIG_KEYS.OCO_OPENAI_KEY](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_OPENAI_KEY,
@@ -1194,6 +1206,7 @@ export type ConfigType = {
   [CONFIG_KEYS.OCO_MULTI_COMMIT_STRATEGY]: string;
   // Debug
   [CONFIG_KEYS.OCO_DEBUG]: boolean;
+  [CONFIG_KEYS.OCO_DEBUG_ROUTING]: boolean;
   // Diff routing extras
   [CONFIG_KEYS.OCO_MAX_FILES_PER_GROUP]: number;
   [CONFIG_KEYS.OCO_MAX_LINES_PER_GROUP]: number;
@@ -1288,6 +1301,7 @@ export const DEFAULT_CONFIG = {
   OCO_MULTI_COMMIT_STRATEGY: 'single',
   // Debug mode (off by default)
   OCO_DEBUG: false,
+  OCO_DEBUG_ROUTING: false,
   // Diff routing extras
   OCO_MAX_FILES_PER_GROUP: 10,
   OCO_MAX_LINES_PER_GROUP: 1500,
@@ -1366,6 +1380,7 @@ const getEnvConfig = (envPath: string) => {
     OCO_MULTI_COMMIT_STRATEGY: process.env.OCO_MULTI_COMMIT_STRATEGY,
     // Debug
     OCO_DEBUG: parseConfigVarValue(process.env.OCO_DEBUG),
+    OCO_DEBUG_ROUTING: parseConfigVarValue(process.env.OCO_DEBUG_ROUTING),
     // Per-provider keys
     OCO_OPENAI_KEY: process.env.OCO_OPENAI_KEY,
     OCO_ANTHROPIC_KEY: process.env.OCO_ANTHROPIC_KEY,
@@ -1721,6 +1736,12 @@ function getConfigKeyDetails(key) {
           'Write full prompts and LLM responses to ~/.opencommitx-data/debug/ for troubleshooting',
         values: ['true', 'false (default)']
       };
+    case CONFIG_KEYS.OCO_DEBUG_ROUTING:
+      return {
+        description:
+          'Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson — staged-files summary table, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths',
+        values: ['true', 'false (default)']
+      };
     case CONFIG_KEYS.OCO_OPENAI_KEY:
       return {
         description:
@@ -1941,6 +1962,7 @@ const THEMATIC_KEY_ORDER: CONFIG_KEYS[] = [
   CONFIG_KEYS.OCO_CACHE_TTL_SECONDS,
   // Debug & Advanced
   CONFIG_KEYS.OCO_DEBUG,
+  CONFIG_KEYS.OCO_DEBUG_ROUTING,
   CONFIG_KEYS.OCO_HOOK_AUTO_UNCOMMENT,
   CONFIG_KEYS.OCO_GITPUSH,
   CONFIG_KEYS.OCO_TEST_MOCK_TYPE

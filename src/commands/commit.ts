@@ -1,5 +1,4 @@
 import {
-  text,
   confirm,
   intro,
   isCancel,
@@ -7,33 +6,18 @@ import {
   note,
   outro,
   select,
-  spinner
+  spinner,
+  text
 } from '@clack/prompts';
 import chalk from 'chalk';
 import { execa } from 'execa';
-import {
-  generateCommitMessageByDiff,
-  consumeLastUsedModel
-} from '../generateCommitMessageFromGitDiff';
-import {
-  buildCommitPlan,
-  combineCommitMessages
-} from '../utils/commitStrategy';
-import { formatUserFriendlyError, printFormattedError } from '../utils/errors';
 import { existsSync } from 'fs';
 import { join as pathJoin } from 'path';
+
 import {
-  assertGitRepo,
-  getChangedFiles,
-  getDiff,
-  getDiffForFiles,
-  getGitDir,
-  getStagedFiles,
-  getStagedFilesStats,
-  getStagedFilesStatus,
-  gitAdd
-} from '../utils/git';
-import { shouldUseDocstringMode } from '../utils/pythonDocstringExtractor';
+  consumeLastUsedModel,
+  generateCommitMessageByDiff
+} from '../generateCommitMessageFromGitDiff';
 import {
   archiveCacheEntry,
   formatCacheAge,
@@ -41,7 +25,30 @@ import {
   pruneArchivedCache,
   setCachedCommitMessage
 } from '../utils/commitCache';
-import { routeDiff, FileGroupResult } from '../utils/diffRouter';
+import {
+  buildCommitPlan,
+  combineCommitMessages
+} from '../utils/commitStrategy';
+import { FileGroupResult, routeDiff } from '../utils/diffRouter';
+import { formatUserFriendlyError, printFormattedError } from '../utils/errors';
+import {
+  assertGitRepo,
+  getChangedFiles,
+  getDiff,
+  getDiffForFiles,
+  getGitDir,
+  getStagedFiles,
+  getStagedFilesIgnoreAudit,
+  getStagedFilesStats,
+  getStagedFilesStatus,
+  gitAdd
+} from '../utils/git';
+import { shouldUseDocstringMode } from '../utils/pythonDocstringExtractor';
+import {
+  appendRoutingDebugRecord,
+  nextRoutingRunId
+} from '../utils/routingDebugLog';
+import { buildStagedFilesSummaryTable } from '../utils/stagedFilesSummaryTable';
 import { trytm } from '../utils/trytm';
 import { getConfig } from './config';
 
@@ -484,6 +491,21 @@ const generateCommitMessageFromGitDiff = async ({
 };
 
 /**
+ * Metadata for OCO_DEBUG_ROUTING soak logs (per-group generation paths).
+ */
+type PerFileRoutingLogExtras = {
+  groupDetails: Array<{
+    groupIndex: number;
+    files: string[];
+    payloadKind: 'docstring' | 'diff';
+    llmInvoked: boolean;
+  }>;
+  /** Staged paths not in any router file group (e.g. absent from numstat). */
+  stagedNotInRoutedGroups: string[];
+  piggyback?: { files: string[]; appendedToGroupIndex: number };
+};
+
+/**
  * Handle per-file commit messages when diff routing splits files individually.
  */
 async function generatePerFileCommits(
@@ -493,7 +515,11 @@ async function generatePerFileCommits(
   context: string,
   fullGitMojiSpec: boolean,
   skipCommitConfirmation: boolean
-): Promise<void> {
+): Promise<PerFileRoutingLogExtras | undefined> {
+  if (fileGroups.length === 0) {
+    return undefined;
+  }
+
   const currentConfig = getConfig();
   const strategy = currentConfig.OCO_MULTI_COMMIT_STRATEGY || 'single';
 
@@ -543,9 +569,24 @@ async function generatePerFileCommits(
   // Store the payload (diff text) per group so we can archive cache entries
   // after each group commits successfully.
   const groupPayloads: string[] = [];
+  const groupDetails: PerFileRoutingLogExtras['groupDetails'] = [];
   try {
     rawMessages = [];
-    for (const group of fileGroups) {
+    for (let groupIndex = 0; groupIndex < fileGroups.length; groupIndex++) {
+      const group = fileGroups[groupIndex];
+      const payloadKind: 'docstring' | 'diff' = group.docstringOverride
+        ? 'docstring'
+        : 'diff';
+
+      const recordGroup = (llmInvoked: boolean) => {
+        groupDetails.push({
+          groupIndex,
+          files: [...group.files],
+          payloadKind,
+          llmInvoked
+        });
+      };
+
       if (group.docstringOverride) {
         const prefix = 'Generating (docstring mode): ';
         genSpinner.message(prefix + truncateFileList(group.files, prefix));
@@ -582,7 +623,8 @@ async function generatePerFileCommits(
           if (isCancel(reuseAction)) process.exit(1);
           if (reuseAction === 'use') {
             rawMessages.push(cached.message);
-            if (fileGroups.indexOf(group) < fileGroups.length - 1) {
+            recordGroup(false);
+            if (groupIndex < fileGroups.length - 1) {
               genSpinner.start(
                 `Generating commit messages for ${fileGroups.length} file group(s)...`
               );
@@ -594,6 +636,7 @@ async function generatePerFileCommits(
           );
         } else {
           rawMessages.push(cached.message);
+          recordGroup(false);
           continue;
         }
       }
@@ -628,6 +671,7 @@ async function generatePerFileCommits(
         consumeLastUsedModel() ?? undefined
       );
       rawMessages.push(msg);
+      recordGroup(true);
     }
     genSpinner.stop(`📝 Generated ${rawMessages.length} commit message(s)`);
   } catch (error) {
@@ -642,6 +686,16 @@ async function generatePerFileCommits(
 
   // buildCommitPlan enforces the index-aligned file↔message contract
   const commitPlan = buildCommitPlan(fileGroups, rawMessages);
+
+  const routedUnion = new Set(fileGroups.flatMap((g) => g.files));
+  const stagedNotInRoutedGroups = stagedFiles.filter(
+    (f) => !routedUnion.has(f)
+  );
+
+  const extrasBase: PerFileRoutingLogExtras = {
+    groupDetails,
+    stagedNotInRoutedGroups
+  };
 
   if (strategy === 'single') {
     const combinedMessage = combineCommitMessages(
@@ -660,13 +714,14 @@ async function generatePerFileCommits(
       archiveCacheEntry(fullDiff);
       await handleGitPush();
     }
-    return;
+    return extrasBase;
   }
 
   // Sequential strategy: unstage only plan files, then stage and commit per-group.
   // This ensures group[i].files are committed with group[i].message and unrelated staged files are not dropped.
   const groupedFiles = new Set(commitPlan.flatMap((c) => c.files));
   const omittedFiles = stagedFiles.filter((f) => !groupedFiles.has(f));
+  let piggyback: PerFileRoutingLogExtras['piggyback'];
   if (omittedFiles.length > 0) {
     // Files excluded from `git diff` (e.g. pixi.lock, package-lock.json via
     // .gitattributes) never appear in fileGroups but are still staged.
@@ -676,7 +731,9 @@ async function generatePerFileCommits(
         `They will be committed with the last group:\n` +
         omittedFiles.map((f) => `  ${f}`).join('\n')
     );
-    commitPlan[commitPlan.length - 1].files.push(...omittedFiles);
+    const lastIdx = commitPlan.length - 1;
+    commitPlan[lastIdx].files.push(...omittedFiles);
+    piggyback = { files: [...omittedFiles], appendedToGroupIndex: lastIdx };
   }
   await execa('git', ['reset', 'HEAD', '--']);
 
@@ -773,12 +830,14 @@ async function generatePerFileCommits(
   if (accepted.length > 0) {
     await handleGitPush();
   }
+
+  return piggyback ? { ...extrasBase, piggyback } : extrasBase;
 }
 
 export async function commit(
   extraArgs: string[] = [],
   context: string = '',
-  isStageAllFlag: Boolean = false,
+  isStageAllFlag: boolean = false,
   fullGitMojiSpec: boolean = false,
   skipCommitConfirmation: boolean = false
 ) {
@@ -885,6 +944,8 @@ export async function commit(
 
   let usePerFileMode = false;
   let fileGroups: FileGroupResult[] = [];
+  let routingReason = '';
+  let routingError = false;
 
   // Always fetch stats so we can render the upfront table.
   const stats = await getStagedFilesStats().catch(() => []);
@@ -894,105 +955,49 @@ export async function commit(
       const routing = routeDiff(stats, currentConfig);
       usePerFileMode = routing.usePerFile;
       fileGroups = routing.fileGroups;
+      routingReason = routing.reason;
     } catch {
+      routingError = true;
       // Fall back to aggregate mode on error
       usePerFileMode = false;
     }
   }
 
+  const debugRouting = Boolean(currentConfig.OCO_DEBUG_ROUTING);
+  let upfrontSummaryTable = '';
+  const opencommitignoreFiltered: string[] = [];
+
   // Render an upfront summary table so the user can review groupings before
   // waiting for LLM generation.
   try {
     const statusEntries = await getStagedFilesStatus();
-    const statusMap = new Map<string, string>(
-      statusEntries.map((e) => [e.file, e.status] as [string, string])
-    );
-    const statsMap = new Map<string, (typeof stats)[number]>(
-      stats.map((s) => [s.file, s] as [string, (typeof stats)[number]])
-    );
-
-    // Build file → group# lookup (1-indexed for display).
-    const groupIndexMap = new Map<string, number>();
-    if (usePerFileMode && fileGroups.length > 0) {
-      fileGroups.forEach((g, i) => {
-        g.files.forEach((f) => {
-          groupIndexMap.set(f, i + 1);
-        });
-      });
-    } else {
-      stagedFiles.forEach((f) => {
-        groupIndexMap.set(f, 1);
-      });
-    }
-
-    // Build file → docstring mode lookup using the detection function directly
-    // so the DS column shows "Y" whenever a file would trigger docstring mode,
-    // regardless of whether extraction actually found anything.
-    const docstringFiles = new Set<string>();
-    for (const [f, s] of statsMap) {
-      if (shouldUseDocstringMode(f, s.added)) {
-        docstringFiles.add(f);
-      }
-    }
-
-    // In smart mode, show an extra column with each group's reason/type so
-    // the user can sanity-check why files clustered the way they did.
-    const showThemeCol = perFileMode === 'smart' && fileGroups.length > 0;
-
-    // Build file → group metadata lookup for the Theme column.
-    const groupMetaByFile = new Map<
-      string,
-      { reason?: string; type?: string }
-    >();
-    if (showThemeCol) {
-      for (const g of fileGroups) {
-        for (const f of g.files) {
-          groupMetaByFile.set(f, { reason: g.reason, type: g.type });
-        }
-      }
-    }
-
-    const colWidths = {
-      file: 40,
-      lines: 10,
-      status: 4,
-      ds: 3,
-      grp: 4,
-      theme: 24
-    };
-    const pad = (s: string, n: number) => s.slice(0, n).padEnd(n);
-
-    const themeHeader = showThemeCol
-      ? `  ${pad('Theme', colWidths.theme)}`
-      : '';
-    const header = `${pad('File', colWidths.file)}  ${pad('+/-', colWidths.lines)}  New  DS  Grp${themeHeader}`;
-    const divider = '─'.repeat(header.length);
-
-    const rows = stagedFiles.map((f) => {
-      const s = statsMap.get(f);
-      const lineInfo = s ? `+${s.added}/-${s.deleted}` : '(binary)';
-      const isNew = (statusMap.get(f) ?? 'M') === 'A' ? 'Y' : ' ';
-      const isDs = docstringFiles.has(f) ? 'Y' : ' ';
-      const grp = String(groupIndexMap.get(f) ?? 1);
-      let themeCell = '';
-      if (showThemeCol) {
-        const meta = groupMetaByFile.get(f);
-        const parts: string[] = [];
-        if (meta?.type) parts.push(meta.type);
-        if (meta?.reason && meta.reason !== 'singleton')
-          parts.push(meta.reason);
-        themeCell = `  ${pad(parts.join(':') || '—', colWidths.theme)}`;
-      }
-      return `${pad(f, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
+    upfrontSummaryTable = buildStagedFilesSummaryTable({
+      stagedFiles,
+      stats,
+      statusEntries,
+      fileGroups,
+      usePerFileMode,
+      perFileMode,
+      shouldUseDocstringMode
     });
-
-    note(`${header}\n${divider}\n${rows.join('\n')}`, 'Staged files');
+    note(upfrontSummaryTable, 'Staged files');
   } catch {
     // Non-fatal: skip table on any error
   }
 
+  if (debugRouting) {
+    try {
+      const audit = await getStagedFilesIgnoreAudit();
+      opencommitignoreFiltered.push(...audit.filteredByOpencommitignore);
+    } catch {
+      /* non-fatal */
+    }
+  }
+
+  let perFileRoutingMeta: PerFileRoutingLogExtras | undefined;
+
   if (usePerFileMode && fileGroups.length > 0) {
-    const [, generateCommitError] = await trytm(
+    const [meta, generateCommitError] = await trytm(
       generatePerFileCommits(
         stagedFiles,
         fileGroups,
@@ -1002,6 +1007,7 @@ export async function commit(
         skipCommitConfirmation
       )
     );
+    perFileRoutingMeta = meta ?? undefined;
 
     if (generateCommitError) {
       outro(`${chalk.red('✖')} ${generateCommitError}`);
@@ -1023,6 +1029,55 @@ export async function commit(
     if (generateCommitError) {
       outro(`${chalk.red('✖')} ${generateCommitError}`);
       process.exit(1);
+    }
+  }
+
+  if (getConfig().OCO_DEBUG_ROUTING) {
+    try {
+      const gitTop = await getGitDir().catch(() => '');
+      const routedFiles = new Set(fileGroups.flatMap((g) => g.files));
+      const stagedNotInRoutedGroupsForAggregate = stagedFiles.filter(
+        (f) => !routedFiles.has(f)
+      );
+
+      appendRoutingDebugRecord({
+        execution_run_id: nextRoutingRunId(),
+        timestamp: new Date().toISOString(),
+        cwd: process.cwd(),
+        git_toplevel: gitTop,
+        upfront_summary_table: upfrontSummaryTable,
+        opencommitignore_filtered: opencommitignoreFiltered,
+        routing: {
+          error: routingError,
+          reason: routingReason,
+          OCO_PER_FILE_COMMIT_MODE: perFileMode,
+          use_per_file_mode: usePerFileMode,
+          file_groups: fileGroups.map((g) => ({
+            files: g.files,
+            totalLines: g.totalLines,
+            reason: g.reason,
+            type: g.type,
+            docstring_override: g.docstringOverride !== undefined
+          }))
+        },
+        generation:
+          usePerFileMode && fileGroups.length > 0 && perFileRoutingMeta
+            ? {
+                mode: 'per_file_groups',
+                group_details: perFileRoutingMeta.groupDetails,
+                staged_not_in_routed_groups:
+                  perFileRoutingMeta.stagedNotInRoutedGroups,
+                piggyback: perFileRoutingMeta.piggyback
+              }
+            : {
+                mode: 'aggregate_diff',
+                staged_not_in_routed_groups: stagedNotInRoutedGroupsForAggregate
+              },
+        notes:
+          'Lock/binary paths may appear in group.files while git diff omits them (see getDiff).'
+      });
+    } catch {
+      /* non-fatal */
     }
   }
 

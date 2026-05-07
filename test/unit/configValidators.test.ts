@@ -41,6 +41,10 @@ describe('DEFAULT_CONFIG new keys', () => {
     expect(DEFAULT_CONFIG.OCO_FALLBACK_MODEL).toBe('');
   });
 
+  it('defaults OCO_DEBUG_ROUTING to false', () => {
+    expect(DEFAULT_CONFIG.OCO_DEBUG_ROUTING).toBe(false);
+  });
+
   it('does not include OCO_DIFF_INDIVIDUAL_FILES (removed)', () => {
     expect('OCO_DIFF_INDIVIDUAL_FILES' in DEFAULT_CONFIG).toBe(false);
   });
