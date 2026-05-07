@@ -81074,7 +81074,7 @@ function getConfigKeyDetails(key) {
       };
     case "OCO_DEBUG_ROUTING" /* OCO_DEBUG_ROUTING */:
       return {
-        description: "Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson \u2014 staged-files summary table, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths",
+        description: "Append one JSON line per successful commit run to ~/.opencommitx-data/debug/routing-debug.ndjson \u2014 structured upfront_summary rows, routing groups, per-group payload/LLM notes, diff-invisible staged paths, and .opencommitignore-filtered paths",
         values: ["true", "false (default)"]
       };
     case "OCO_OPENAI_KEY" /* OCO_OPENAI_KEY */:
@@ -105878,7 +105878,7 @@ function appendRoutingDebugRecord(record) {
 }
 
 // src/utils/stagedFilesSummaryTable.ts
-function buildStagedFilesSummaryTable(args) {
+function buildStagedFilesSummaryData(args) {
   const {
     stagedFiles,
     stats,
@@ -105921,37 +105921,59 @@ function buildStagedFilesSummaryTable(args) {
       }
     }
   }
-  const colWidths = {
-    file: 40,
-    lines: 10,
-    status: 4,
-    ds: 3,
-    grp: 4,
-    theme: 24
-  };
-  const pad = (s2, n2) => s2.slice(0, n2).padEnd(n2);
-  const themeHeader = showThemeCol ? `  ${pad("Theme", colWidths.theme)}` : "";
-  const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp${themeHeader}`;
-  const divider = "\u2500".repeat(header.length);
   const rows = stagedFiles.map((f2) => {
     const s2 = statsMap.get(f2);
-    const lineInfo = s2 ? `+${s2.added}/-${s2.deleted}` : "(binary)";
-    const isNew = (statusMap.get(f2) ?? "M") === "A" ? "Y" : " ";
-    const isDs = docstringFiles.has(f2) ? "Y" : " ";
-    const grp = String(groupIndexMap.get(f2) ?? 1);
-    let themeCell = "";
+    const isNew = (statusMap.get(f2) ?? "M") === "A";
+    const row = {
+      file: f2,
+      lines_added: s2 !== void 0 ? s2.added : null,
+      lines_deleted: s2 !== void 0 ? s2.deleted : null,
+      is_new: isNew,
+      docstring_mode: docstringFiles.has(f2),
+      group: groupIndexMap.get(f2) ?? 1,
+      inferred_commit_type: null,
+      router_cluster_reason: null,
+      theme_display: null
+    };
     if (showThemeCol) {
       const meta = groupMetaByFile.get(f2);
+      row.inferred_commit_type = meta?.type ?? null;
+      row.router_cluster_reason = meta?.reason ?? null;
       const parts = [];
       if (meta?.type) parts.push(meta.type);
       if (meta?.reason && meta.reason !== "singleton") parts.push(meta.reason);
-      themeCell = `  ${pad(parts.join(":") || "\u2014", colWidths.theme)}`;
+      row.theme_display = parts.length > 0 ? parts.join(":") : "\u2014";
     }
-    return `${pad(f2, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${isNew}   ${isDs}   ${grp}${themeCell}`;
+    return row;
+  });
+  return { show_theme_column: showThemeCol, rows };
+}
+function formatStagedFilesSummaryTable(data) {
+  const { show_theme_column, rows } = data;
+  const colWidths = {
+    file: 40,
+    lines: 10,
+    theme: 24
+  };
+  const pad = (s2, n2) => s2.slice(0, n2).padEnd(n2);
+  const themeHeader = show_theme_column ? `  ${pad("Theme", colWidths.theme)}` : "";
+  const header = `${pad("File", colWidths.file)}  ${pad("+/-", colWidths.lines)}  New  DS  Grp${themeHeader}`;
+  const divider = "\u2500".repeat(header.length);
+  const lines = rows.map((r3) => {
+    const lineInfo = r3.lines_added !== null && r3.lines_deleted !== null ? `+${r3.lines_added}/-${r3.lines_deleted}` : "(binary)";
+    const newCol = r3.is_new ? "Y" : " ";
+    const dsCol = r3.docstring_mode ? "Y" : " ";
+    const grp = String(r3.group);
+    let themeCell = "";
+    if (show_theme_column) {
+      const td = r3.theme_display ?? "\u2014";
+      themeCell = `  ${pad(td, colWidths.theme)}`;
+    }
+    return `${pad(r3.file, colWidths.file)}  ${pad(lineInfo, colWidths.lines)}   ${newCol}   ${dsCol}   ${grp}${themeCell}`;
   });
   return `${header}
 ${divider}
-${rows.join("\n")}`;
+${lines.join("\n")}`;
 }
 
 // src/utils/trytm.ts
@@ -106632,11 +106654,11 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
     }
   }
   const debugRouting = Boolean(currentConfig.OCO_DEBUG_ROUTING);
-  let upfrontSummaryTable = "";
+  let upfrontSummaryData;
   const opencommitignoreFiltered = [];
   try {
     const statusEntries = await getStagedFilesStatus();
-    upfrontSummaryTable = buildStagedFilesSummaryTable({
+    upfrontSummaryData = buildStagedFilesSummaryData({
       stagedFiles,
       stats,
       statusEntries,
@@ -106645,7 +106667,7 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
       perFileMode,
       shouldUseDocstringMode
     });
-    Me(upfrontSummaryTable, "Staged files");
+    Me(formatStagedFilesSummaryTable(upfrontSummaryData), "Staged files");
   } catch {
   }
   if (debugRouting) {
@@ -106700,7 +106722,10 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         cwd: process.cwd(),
         git_toplevel: gitTop,
-        upfront_summary_table: upfrontSummaryTable,
+        upfront_summary: upfrontSummaryData ?? {
+          show_theme_column: false,
+          rows: []
+        },
         opencommitignore_filtered: opencommitignoreFiltered,
         routing: {
           error: routingError,
